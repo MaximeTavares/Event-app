@@ -6,3 +6,8 @@ export class SigninDto {
     @IsString()
     password: string;
 }
+
+export type SignupDto = {
+    email: string;
+    password: string;
+};

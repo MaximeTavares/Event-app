@@ -25,6 +25,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/mapped-types": "*",
+    "@nestjs/microservices": "^11.1.21",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.6",
     "@prisma/adapter-mariadb": "^7.5.0",
@@ -36,6 +37,7 @@
     "class-validator": "^0.14.4",
     "cookie-parser": "^1.4.7",
     "date-fns": "^4.1.0",
+    "nats": "^2.29.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
