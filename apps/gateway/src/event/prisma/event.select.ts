@@ -1,0 +1,35 @@
+export const eventWithAddressAndUser = {
+    id: true,
+    title: true,
+    description: true,
+    program: true,
+    start_date: true,
+    end_date: true,
+    status: true,
+    created_at: true,
+    updated_at: true,
+    Address: {
+        select: {
+            id: true,
+            street_number: true,
+            street_name: true,
+            address_line_2: true,
+            city: true,
+            postal_code: true,
+            country: true,
+            coordinates_lat: true,
+            coordinates_lon: true,
+            created_at: true,
+            updated_at: true,
+        },
+    },
+    User: {
+        select: {
+            id: true,
+            email: true,
+            role: true,
+            created_at: true,
+            updated_at: true,
+        },
+    },
+};
