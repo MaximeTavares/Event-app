@@ -17,10 +17,7 @@ import { UserDTO } from 'src/user/dto/user.dto';
 import { SigninDto } from './dto/signin.dto';
 import type { Request, Response } from 'express';
 import { Public } from 'src/user/decorators/public.decorator';
-import type {
-    JwtPayload,
-    SessionResponse,
-} from './type/auth.type';
+import type { JwtPayload, SessionResponse } from './type/auth.type';
 
 @Controller('auth')
 export class AuthController {
@@ -50,7 +47,7 @@ export class AuthController {
             url: 'auth/signup',
         };
     }
-    
+
     @Post('signout')
     async signout(
         @Req() request: Request,
@@ -59,7 +56,8 @@ export class AuthController {
         const cookies: Record<string, string> = request.cookies;
         const refreshToken = cookies['refresh_token'];
 
-        if (refreshToken) await this.authService.deleteRefreshToken(refreshToken, 'REFRESH');
+        if (refreshToken)
+            await this.authService.deleteRefreshToken(refreshToken, 'REFRESH');
 
         response.clearCookie('refresh_token', {
             secure: false, // TODO : a changer en prod
@@ -128,7 +126,7 @@ export class AuthController {
         //Permet de typer les cookies. Un cookie ayant comme structure : <K , V> de type string.
         const cookies: Record<string, string> = request.cookies;
         const token = cookies['refresh_token'];
-        
+
         let payload: JwtPayload;
         try {
             payload = await this.authService.verifyToken(token);
@@ -136,8 +134,8 @@ export class AuthController {
             throw new UnauthorizedException();
         }
         const { accessToken, refreshToken } =
-        await this.authService.createTokens(payload.sub);
-        
+            await this.authService.createTokens(payload.sub);
+
         this.authService.insertIntoCookies(
             refreshToken,
             'refresh_token',

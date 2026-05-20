@@ -13,9 +13,12 @@ import { SlotModule } from './slot/slot.module';
 import { MissionModule } from './mission/mission.module';
 import { ParticipationModule } from './participation/participation.module';
 import { GeoapifyModule } from './geoapify/geoapify.module';
+import { NatsModule } from './nats/nats.module';
+import { MsAuthController } from './auth/ms-auth/MsAuth.controller';
 
 @Module({
     imports: [
+        NatsModule,
         ConfigModule.forRoot({ isGlobal: true }),
         PrismaModule,
         UserModule,
@@ -28,7 +31,7 @@ import { GeoapifyModule } from './geoapify/geoapify.module';
         ParticipationModule,
         GeoapifyModule,
     ],
-    controllers: [AppController],
+    controllers: [AppController, MsAuthController],
     providers: [AppService],
 })
 export class AppModule {}
