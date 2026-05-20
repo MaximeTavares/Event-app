@@ -1,9 +1,16 @@
 services:
+    # -------------------------
+    # EVENT BUS
+    # -------------------------
     nats:
         image: nats:latest
+        container_name: nats-alt
         ports:
             - "4222:4222"
 
+    # -------------------------
+    # AUTH DB
+    # -------------------------
     mongo-auth:
         image: mongo:latest
         container_name: mongo-auth
@@ -12,34 +19,41 @@ services:
         volumes:
             - mongo_auth_data:/data/db
 
-        mongo-express-auth:
-            image: mongo-express:latest
-            ports:
-                - "8081:8081"
-            environment:
-                ME_CONFIG_MONGODB_SERVER: mongo-auth
-                ME_CONFIG_BASICAUTH: false
-
-    db:
-        image: mysql:8.0
-        volumes:
-            - db_data:/var/lib/mysql
+    mongo-express-auth:
+        image: mongo-express:latest
+        container_name: mongo-express-auth
         restart: always
-        environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: help
         ports:
-            - 3307:3306 # portlocal:portducontainer
-    phpmyadmin:
+            - "8081:8081"
+        environment:
+            ME_CONFIG_MONGODB_SERVER: mongo-auth
+            ME_CONFIG_BASICAUTH: false
         depends_on:
-            - db
-        image: phpmyadmin
+            - mongo-auth
+
+    # -------------------------
+    # USER DB
+    # -------------------------
+    mongo-user:
+        image: mongo:latest
+        container_name: mongo-user
+        ports:
+            - "27018:27017"
+        volumes:
+            - mongo_user_data:/data/db
+
+    mongo-express-user:
+        image: mongo-express:latest
+        container_name: mongo-express-user
         restart: always
         ports:
-            - "8081:80"
+            - "8082:8081"
         environment:
-            PMA_HOST: db
+            ME_CONFIG_MONGODB_SERVER: mongo-user
+            ME_CONFIG_BASICAUTH: false
+        depends_on:
+            - mongo-user
 
 volumes:
-    db_data:
     mongo_auth_data:
+    mongo_user_data:
