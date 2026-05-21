@@ -16,6 +16,7 @@ import { AuthController } from './ms-auth/auth.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { HealthController } from './health.controller';
 import { HealthModule } from './health.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
     imports: [
@@ -31,6 +32,7 @@ import { HealthModule } from './health.module';
         ParticipationModule,
         GeoapifyModule,
         HealthModule,
+        SettingsModule,
     ],
     controllers: [AppController, AuthController, HealthController],
     providers: [AppService],
