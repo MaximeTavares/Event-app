@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { NatsService } from 'src/nats/nats.service';
-import { type SignupDto } from '../dto/signin.dto';
+import { SigninDto } from '../dto/signin.dto';
 import { Public } from 'src/user/decorators/public.decorator';
 
 @Controller('ms/auth')
@@ -9,7 +9,7 @@ export class MsAuthController {
 
     @Public()
     @Post('signup')
-    signup(@Body() dto: SignupDto) {
+    signup(@Body() dto: SigninDto) {
         return this.natsService.send('auth.signup', dto);
     }
 }

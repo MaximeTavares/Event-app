@@ -5,6 +5,7 @@ import { AuthUser } from 'src/authUser.schema';
 import { SignupDto } from 'src/dto/auth.dto';
 import { NatsService } from 'src/nats/nats.service';
 import * as argon2 from 'argon2';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,7 @@ export class AuthService {
     async signup(data: SignupDto) {
         const existing = await this.userModel.findOne({ email: data.email });
 
-        if (existing) throw new Error('User already exist');
+        if (existing) throw new RpcException('User already exist');
 
         const hashedPassword = await argon2.hash(data.password);
 
