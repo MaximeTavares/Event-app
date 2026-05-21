@@ -9,7 +9,6 @@ export class AuthController {
 
     @MessagePattern('auth.signup')
     signup(data: SignupDto) {
-        console.log('Creation de User');
         return this.authService.signup(data);
     }
 }
