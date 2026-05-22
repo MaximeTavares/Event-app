@@ -5,10 +5,12 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './guard/auth.guard';
 import { MsAuthController } from './ms-auth/MsAuth.controller';
 import { NatsModule } from 'src/nats/nats.module';
+import { AuthService } from './auth.service';
 
 @Module({
     controllers: [MsAuthController],
     providers: [
+        AuthService,
         {
             provide: APP_GUARD,
             useClass: AuthGuard,
@@ -21,6 +23,6 @@ import { NatsModule } from 'src/nats/nats.module';
             global: true,
         }),
     ],
-    exports: [],
+    exports: [AuthService],
 })
 export class AuthModule {}
