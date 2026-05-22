@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
-import { useAuthStore } from '../../features/auth/store/auth.store';
 import { Outlet } from 'react-router';
 import type { Role } from '../../features/user/types/user.type';
+import { useMe } from '../../features/auth/hooks/use_auth.service';
 
 type Props = {
     layouts: Record<Role, ComponentType>;
@@ -9,7 +9,9 @@ type Props = {
 };
 
 export default function RoleBasedLayout({ layouts, fallback: Fallback }: Readonly<Props>) {
-    const user = useAuthStore((state) => state.user);
+    const { data: user, isLoading } = useMe();
+
+    if (isLoading) return null;
 
     // Sélection dynamique du layout selon le rôle
     const Layout = user?.role ? layouts[user.role] : undefined;
