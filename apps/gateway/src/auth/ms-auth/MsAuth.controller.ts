@@ -4,11 +4,15 @@ import { SigninDto } from '../dto/signin.dto';
 import { Public } from 'src/user/decorators/public.decorator';
 import type { Request, Response } from 'express';
 import { User } from 'src/user/decorators/user.decorator';
-import { type CurrentUserData } from '../type/auth.type';
+import { SigninResponse, type CurrentUserData } from '../type/auth.type';
+import { AuthService } from '../auth.service';
 
 @Controller('ms/auth')
 export class MsAuthController {
-    constructor(private readonly natsService: NatsService) {}
+    constructor(
+        private readonly natsService: NatsService,
+        private readonly authService: AuthService,
+    ) {}
 
     @Get('users')
     async getUsers() {
@@ -17,8 +21,6 @@ export class MsAuthController {
 
     @Get('me')
     me(@User() user: CurrentUserData) {
-        console.log('🚀 ~ MsAuthController ~ me ~ user:', user);
-
         return user;
     }
 
@@ -34,13 +36,16 @@ export class MsAuthController {
         @Body() dto: SigninDto,
         @Res({ passthrough: true }) response: Response,
     ) {
-        const result = await this.natsService.send('auth.signin', dto);
+        const result = await this.natsService.send<SigninResponse, SigninDto>(
+            'auth.signin',
+            dto,
+        );
 
-        response.cookie('refresh_token', result.refreshToken, {
-            httpOnly: true,
-            secure: false,
-            path: 'auth/refresh',
-        });
+        this.authService.insertIntoCookies(
+            'refresh_token',
+            result.refreshToken,
+            response,
+        );
 
         return {
             accessToken: result.accessToken,
@@ -53,57 +58,43 @@ export class MsAuthController {
         @Req() request: Request,
         @Res({ passthrough: true }) response: Response,
     ) {
-        console.log('Route refresh token appelée');
-
         const cookies: Record<string, string> = request.cookies;
         const refreshToken = cookies['refresh_token'];
 
-        console.log('Appel de Nats');
-
-        const result = await this.natsService.send('auth.refresh', {
+        const result = await this.natsService.send<
+            SigninResponse,
+            { refreshToken: string }
+        >('auth.refresh', {
             refreshToken,
         });
 
-        console.log('reponse de Nats', result);
-
-        response.cookie('refresh_token', result.refreshToken, {
-            httpOnly: true,
-            path: '/ms/auth/refresh_token',
-        });
+        this.authService.insertIntoCookies(
+            'refresh_token',
+            result.refreshToken,
+            response,
+        );
 
         return {
             accessToken: result.accessToken,
         };
     }
 
-    // @Public()
-    // @Post('refresh_token')
-    // async refresh(
-    //     @Req() request: Request,
-    //     @Res({ passthrough: true }) response: Response,
-    // ) {
-    //     console.log('Route refresh token appelée');
+    @Post('signout')
+    async signout(
+        @User() user: CurrentUserData,
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        const result = await this.natsService.send('auth.signout', {
+            userId: user.id,
+        });
 
-    //     //Permet de typer les cookies. Un cookie ayant comme structure : <K , V> de type string.
-    //     const cookies: Record<string, string> = request.cookies;
-    //     const refreshToken = cookies['refresh_token'];
+        response.clearCookie('refresh_token', {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: false,
+            path: '/',
+        });
 
-    //     console.log('Appel de Nats');
-
-    //     const result = await this.natsService.send('auth.refresh', {
-    //         userId: user.id,
-    //         refreshToken,
-    //     });
-
-    //     console.log('reponse de Nats', result);
-
-    //     response.cookie('refresh_token', result.refreshToken, {
-    //         httpOnly: true,
-    //         path: '/auth/refresh',
-    //     });
-
-    //     return {
-    //         accessToken: result.accessToken,
-    //     };
-    // }
+        return result;
+    }
 }
