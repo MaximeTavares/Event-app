@@ -1,5 +1,3 @@
 export default function pages() {
-  return (
-    <div>pages</div>
-  )
+    return <div>pages</div>;
 }

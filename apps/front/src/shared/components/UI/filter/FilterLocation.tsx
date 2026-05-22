@@ -1,11 +1,11 @@
-import type { EventFilters } from "./eventsFilters.interface";
+import type { EventFilters } from './eventsFilters.interface';
 
 type FilterCity = NonNullable<EventFilters['city']>;
 
 type FilterLocationProps = {
     city: FilterCity;
     onChange: (city: FilterCity) => void;
-}
+};
 
 export default function FilterLocation({ city, onChange }: FilterLocationProps) {
     const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {

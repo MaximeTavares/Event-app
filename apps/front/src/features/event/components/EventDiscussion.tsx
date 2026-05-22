@@ -1,3 +1,3 @@
 export function EventDiscussion() {
-	return <p>Message component</p>;
+    return <p>Message component</p>;
 }
