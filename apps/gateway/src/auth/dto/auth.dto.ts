@@ -1,13 +1,13 @@
 import { IsEmail, IsStrongPassword } from 'class-validator';
 
-export class SigninDto {
+export class SignupDto {
     @IsEmail()
     email: string;
     @IsStrongPassword()
     password: string;
 }
 
-export type SignupDto = {
+export type SigninDto = {
     email: string;
     password: string;
 };

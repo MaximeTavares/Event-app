@@ -1,14 +1,14 @@
 import { Body, Controller, Post, Res, Req, Get } from '@nestjs/common';
 import { NatsService } from 'src/nats/nats.service';
-import { SigninDto } from '../dto/signin.dto';
 import { Public } from 'src/user/decorators/public.decorator';
 import type { Request, Response } from 'express';
 import { User } from 'src/user/decorators/user.decorator';
 import { SigninResponse, type CurrentUserData } from '../type/auth.type';
 import { AuthService } from '../auth.service';
+import { type SigninDto, SignupDto } from '../dto/auth.dto';
 
 @Controller('ms/auth')
-export class MsAuthController {
+export class AuthController {
     constructor(
         private readonly natsService: NatsService,
         private readonly authService: AuthService,
@@ -26,7 +26,7 @@ export class MsAuthController {
 
     @Public()
     @Post('signup')
-    async signup(@Body() dto: SigninDto) {
+    async signup(@Body() dto: SignupDto) {
         return this.natsService.send('auth.signup', dto);
     }
 

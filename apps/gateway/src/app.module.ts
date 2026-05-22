@@ -14,7 +14,7 @@ import { MissionModule } from './mission/mission.module';
 import { ParticipationModule } from './participation/participation.module';
 import { GeoapifyModule } from './geoapify/geoapify.module';
 import { NatsModule } from './nats/nats.module';
-import { MsAuthController } from './auth/ms-auth/MsAuth.controller';
+import { AuthController } from './auth/ms-auth/auth.controller';
 
 @Module({
     imports: [
@@ -31,7 +31,7 @@ import { MsAuthController } from './auth/ms-auth/MsAuth.controller';
         ParticipationModule,
         GeoapifyModule,
     ],
-    controllers: [AppController, MsAuthController],
+    controllers: [AppController, AuthController],
     providers: [AppService],
 })
 export class AppModule {}
