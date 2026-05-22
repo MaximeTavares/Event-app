@@ -5,14 +5,17 @@ import { firstValueFrom } from 'rxjs';
 @Injectable()
 export class NatsService {
     constructor(@Inject('nats') private readonly nats: ClientProxy) {}
-    // Fonctions pour communiquer avec le message broker
 
-    // Fonction qui envoi à nats
-    emit(subject: string, data: Record<string, unknown>): void {
+    emit<TPayload>(subject: string, data: TPayload): void {
         this.nats.emit(subject, data);
     }
 
-    async send(subject: string, data: unknown) {
-        return firstValueFrom(this.nats.send(subject, data));
+    async send<TResponse, TPayload = unknown>(
+        subject: string,
+        data: TPayload,
+    ): Promise<TResponse> {
+        return firstValueFrom(
+            this.nats.send<TResponse, TPayload>(subject, data),
+        );
     }
 }
