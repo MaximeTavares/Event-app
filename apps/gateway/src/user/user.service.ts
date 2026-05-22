@@ -105,9 +105,9 @@ export class UserService {
 
         const updatedData = password
             ? {
-                ...rest,
-                password_hash: password,
-            }
+                  ...rest,
+                  password_hash: password,
+              }
             : { ...rest };
 
         const updatedUser = await this.prisma.user.update({
