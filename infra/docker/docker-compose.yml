@@ -54,6 +54,31 @@ services:
         depends_on:
             - mongo-user
 
+    # -------------------------
+    # DB PRISMA
+    # -------------------------
+    db:
+        image: mysql:8.0
+        volumes:
+            - db_data:/var/lib/mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: help
+        ports:
+            - 3307:3306
+              # portlocal:portducontainer
+    phpmyadmin:
+        depends_on:
+            - db
+        image: phpmyadmin
+        restart: always
+        ports:
+            - "8083:80"
+        environment:
+            PMA_HOST: db
+
 volumes:
     mongo_auth_data:
     mongo_user_data:
+    db_data:
