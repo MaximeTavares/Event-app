@@ -1,21 +1,21 @@
-import { Navigate, Outlet } from "react-router";
-import { useAuthStore } from "../../features/auth/store/auth.store";
+import { Navigate, Outlet } from 'react-router';
+import { useAuthStore } from '../../features/auth/store/auth.store';
 
 type Props = {
-	allowedRoles?: string[];
+    allowedRoles?: string[];
 };
 
 export default function PrivateRoute({ allowedRoles }: Readonly<Props>) {
-	const user = useAuthStore((state) => state.user);
+    const user = useAuthStore((state) => state.user);
 
-	// Si pas connécté
-	if (!user) return <Navigate to="/" replace />;
+    // Si pas connécté
+    if (!user) return <Navigate to="/" replace />;
 
-	// Si mauvais rôle
+    // Si mauvais rôle
 
-	if (allowedRoles && !allowedRoles.includes(user.role)) {
-		return <Navigate to="/unauthorized" replace />;
-	}
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+        return <Navigate to="/unauthorized" replace />;
+    }
 
-	return <Outlet />;
+    return <Outlet />;
 }

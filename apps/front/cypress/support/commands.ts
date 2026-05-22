@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import { testUser } from "./testUser";
+import { testUser } from './testUser';
 
 // ***********************************************
 // This example commands.ts shows you how to
@@ -41,34 +41,34 @@ import { testUser } from "./testUser";
 
 // cypress/support/commands.ts
 
-Cypress.Commands.add("login", (email: string, password: string) => {
-	cy.visit("/auth/signin");
+Cypress.Commands.add('login', (email: string, password: string) => {
+    cy.visit('/auth/signin');
 
-	cy.get('input[name="email"]').type(email);
-	cy.get('input[name="password"]').type(password);
+    cy.get('input[name="email"]').type(email);
+    cy.get('input[name="password"]').type(password);
 
-	cy.get('[data-cy="signin-submit"]').click();
+    cy.get('[data-cy="signin-submit"]').click();
 
-	cy.url().should("not.include", "/auth/signin");
+    cy.url().should('not.include', '/auth/signin');
 });
 
-Cypress.Commands.add("checkTestUser", () => {
-	cy.request({
-		method: "POST",
-		url: "http://localhost:3000/auth/signup",
-		body:  testUser ,
-		failOnStatusCode: false,
-	});
+Cypress.Commands.add('checkTestUser', () => {
+    cy.request({
+        method: 'POST',
+        url: 'http://localhost:3000/auth/signup',
+        body: testUser,
+        failOnStatusCode: false,
+    });
 });
 
 declare global {
-	// eslint-disable-next-line @typescript-eslint/no-namespace
-	namespace Cypress {
-		interface Chainable {
-			login(email: string, password: string): Chainable<void>;
-			checkTestUser(): Chainable<void>;
-		}
-	}
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Cypress {
+        interface Chainable {
+            login(email: string, password: string): Chainable<void>;
+            checkTestUser(): Chainable<void>;
+        }
+    }
 }
 
 export {};

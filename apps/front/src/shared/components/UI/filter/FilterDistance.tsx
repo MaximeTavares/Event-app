@@ -1,4 +1,4 @@
-import type { EventFilters } from "./eventsFilters.interface";
+import type { EventFilters } from './eventsFilters.interface';
 
 type FilterCity = NonNullable<EventFilters['city']>;
 type FilterDistanceKm = NonNullable<EventFilters['distanceKm']>;
@@ -7,7 +7,7 @@ type FilterDistanceProps = {
     city: FilterCity;
     distanceKm: FilterDistanceKm;
     onChange: (distanceKm: FilterDistanceKm) => void;
-}
+};
 
 export default function FilterDistance({ city, distanceKm, onChange }: FilterDistanceProps) {
     const handleDistanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,7 +17,14 @@ export default function FilterDistance({ city, distanceKm, onChange }: FilterDis
     return (
         <div>
             <label className="flex flex-col items-start">
-                <span className="label text-xs">Distance {city && <>autour de <b>{city}</b></>}</span>
+                <span className="label text-xs">
+                    Distance{' '}
+                    {city && (
+                        <>
+                            autour de <b>{city}</b>
+                        </>
+                    )}
+                </span>
                 <div className="w-full max-w-xs">
                     <input
                         type="range"

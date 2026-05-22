@@ -1,3 +1,1 @@
-export default function types() {
-
-}
+export default function types() {}

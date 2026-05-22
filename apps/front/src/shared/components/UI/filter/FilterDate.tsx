@@ -18,7 +18,7 @@ export default function FilterDate({ value, onChange, label }: FilterDateProps) 
     };
 
     return (
-        <div className="flex gap-2 items-center">            
+        <div className="flex gap-2 items-center">
             <label className="flex flex-col items-start">
                 <span className="label text-xs">Date de début</span>
                 <input

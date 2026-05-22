@@ -1,38 +1,41 @@
 // Voir src/docs/create-map-geoapify.md, section Donnees minimales nécessaires, pour l'explication detaillee des helpers de mapping carte.
-import type { Coordinates } from "../../../../features/address/types/address.type";
-import type { BaseEvent } from "../../../../features/event/types/event.type";
-import type { UserWithProfileAndAddress } from "../../../../features/user_profile/types/types";
+import type { Coordinates } from '../../../../features/address/types/address.type';
+import type { BaseEvent } from '../../../../features/event/types/event.type';
+import type { UserWithProfileAndAddress } from '../../../../features/user_profile/types/types';
 
 export type UserOrigin = Coordinates;
-export type EventMapPoint = Pick<BaseEvent, "id" | "title"> & Coordinates;
+export type EventMapPoint = Pick<BaseEvent, 'id' | 'title'> & Coordinates;
 
 export function toUserOrigin(userProfile: UserWithProfileAndAddress): UserOrigin | null {
-	const coordinates = userProfile.address?.coordinates;
+    const coordinates = userProfile.address?.coordinates;
 
-	if (!coordinates) return null;
+    if (!coordinates) return null;
 
-	return {
-		lat: coordinates.lat,
-		lon: coordinates.lon,
-	};
+    return {
+        lat: coordinates.lat,
+        lon: coordinates.lon,
+    };
 }
 
 export function toEventMapPoints(events: BaseEvent[]): EventMapPoint[] {
-	return events
-		.filter((event): event is BaseEvent & {
-			address: NonNullable<BaseEvent["address"]> & {
-				coordinates: { lat: number; lon: number };
-			};
-		} =>
-			!!event.address?.coordinates?.lat &&
-			!!event.address?.coordinates?.lon
-		)
-		.map((event): EventMapPoint => ({
-			id: event.id,
-			title: event.title,
-			lat: event.address.coordinates.lat,
-			lon: event.address.coordinates.lon,
-		}));
+    return events
+        .filter(
+            (
+                event,
+            ): event is BaseEvent & {
+                address: NonNullable<BaseEvent['address']> & {
+                    coordinates: { lat: number; lon: number };
+                };
+            } => !!event.address?.coordinates?.lat && !!event.address?.coordinates?.lon,
+        )
+        .map(
+            (event): EventMapPoint => ({
+                id: event.id,
+                title: event.title,
+                lat: event.address.coordinates.lat,
+                lon: event.address.coordinates.lon,
+            }),
+        );
 }
 
 /**
@@ -45,24 +48,24 @@ export function toEventMapPoints(events: BaseEvent[]): EventMapPoint[] {
  * Elle est adaptée pour :
  * - les recherches par rayon (ex: événements autour d’une ville)
  * - les systèmes de géolocalisation (maps, proximité, matching)
- * 
+ *
  * @export
  * @param {Coordinates} origin
  * @param {Coordinates} target
  * @return {*}  {number}
  */
 export function haversineDistance(origin: Coordinates, target: Coordinates): number {
-	const earthRadiusKm = 6371;
-	const deltaLat = toRadians(target.lat - origin.lat);
-	const deltaLon = toRadians(target.lon - origin.lon);
-	const originLat = toRadians(origin.lat);
-	const targetLat = toRadians(target.lat);
-	const a =
-		Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-		Math.cos(originLat) * Math.cos(targetLat) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
-	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const earthRadiusKm = 6371;
+    const deltaLat = toRadians(target.lat - origin.lat);
+    const deltaLon = toRadians(target.lon - origin.lon);
+    const originLat = toRadians(origin.lat);
+    const targetLat = toRadians(target.lat);
+    const a =
+        Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(originLat) * Math.cos(targetLat) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-	return earthRadiusKm * c;
+    return earthRadiusKm * c;
 }
 
 /**
@@ -76,5 +79,5 @@ export function haversineDistance(origin: Coordinates, target: Coordinates): num
  * @return {number} Angle converti en radians
  */
 function toRadians(value: number): number {
-	return (value * Math.PI) / 180;
+    return (value * Math.PI) / 180;
 }

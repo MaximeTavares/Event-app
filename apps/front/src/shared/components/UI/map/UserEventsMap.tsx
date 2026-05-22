@@ -1,25 +1,25 @@
 // Voir src/docs/create-map-geoapify.md, étapes 2 a 7 puis etape 4, pour l'explication detaillee du composant de carte et des marqueurs Geoapify.
-import { useMemo } from "react";
-import { Icon } from "leaflet";
-import { Circle, MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import { getDefaultGeoapifyLeafletConfig } from "../../../utils/map/GeoapifyMap";
-import type { EventMapPoint, UserOrigin } from "./map-data";
+import { useMemo } from 'react';
+import { Icon } from 'leaflet';
+import { Circle, MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { getDefaultGeoapifyLeafletConfig } from '../../../utils/map/GeoapifyMap';
+import type { EventMapPoint, UserOrigin } from './map-data';
 
 type UserEventsMapProps = {
-	searchOrigin: UserOrigin;
-	events: EventMapPoint[];
-	radiusMeters?: number;
+    searchOrigin: UserOrigin;
+    events: EventMapPoint[];
+    radiusMeters?: number;
 };
 
 function buildMarkerIconUrl(apiKey: string, icon: string, color: string): string {
     const searchParams = new URLSearchParams({
         apiKey,
-        type: "material",
+        type: 'material',
         icon,
-        iconType: "material",
-        size: "52",
+        iconType: 'material',
+        size: '52',
         color,
-        contentColor: "#ffffff",
+        contentColor: '#ffffff',
     });
 
     return `https://api.geoapify.com/v2/icon?${searchParams.toString()}`;
@@ -30,12 +30,12 @@ export default function UserEventsMap({
     events,
     radiusMeters = 5_000,
 }: UserEventsMapProps) {
-    const tileLayer = getDefaultGeoapifyLeafletConfig("osm-bright");
+    const tileLayer = getDefaultGeoapifyLeafletConfig('osm-bright');
     const mapKey = `${searchOrigin.lat}-${searchOrigin.lon}`;
     const userMarkerIcon = useMemo(
         () =>
             new Icon({
-                iconUrl: buildMarkerIconUrl(tileLayer.apiKey, "person", "#2563eb"),
+                iconUrl: buildMarkerIconUrl(tileLayer.apiKey, 'person', '#2563eb'),
                 iconSize: [31, 46],
                 iconAnchor: [15, 46],
                 popupAnchor: [0, -40],
@@ -45,7 +45,7 @@ export default function UserEventsMap({
     const eventMarkerIcon = useMemo(
         () =>
             new Icon({
-                iconUrl: buildMarkerIconUrl(tileLayer.apiKey, "event", "#d97706"),
+                iconUrl: buildMarkerIconUrl(tileLayer.apiKey, 'event', '#d97706'),
                 iconSize: [31, 46],
                 iconAnchor: [15, 46],
                 popupAnchor: [0, -40],
@@ -53,7 +53,7 @@ export default function UserEventsMap({
         [tileLayer.apiKey],
     );
 
-	return (
+    return (
         <MapContainer
             key={mapKey}
             center={[searchOrigin.lat, searchOrigin.lon]}
@@ -81,8 +81,8 @@ export default function UserEventsMap({
                 center={[searchOrigin.lat, searchOrigin.lon]}
                 radius={radiusMeters}
                 pathOptions={{
-                    color: "#0ea5e9",
-                    fillColor: "#0ea5e9",
+                    color: '#0ea5e9',
+                    fillColor: '#0ea5e9',
                     fillOpacity: 0.12,
                     weight: 2,
                 }}
