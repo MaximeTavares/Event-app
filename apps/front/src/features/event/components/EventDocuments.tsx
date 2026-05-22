@@ -1,3 +1,3 @@
 export function EventDocuments() {
-	return <p>Document component</p>;
+    return <p>Document component</p>;
 }

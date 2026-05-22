@@ -1,5 +1,3 @@
 export default function components() {
-  return (
-    <div>components</div>
-  )
+    return <div>components</div>;
 }

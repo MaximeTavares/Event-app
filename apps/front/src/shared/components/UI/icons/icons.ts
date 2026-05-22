@@ -1,11 +1,11 @@
-import { MdEmail } from "react-icons/md";
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebook, FaPencilAlt, FaTrash, FaCheck } from "react-icons/fa";
-import { RiInformation2Line } from "react-icons/ri";
-import { IoDocumentsOutline } from "react-icons/io5";
-import { GoCommentDiscussion } from "react-icons/go";
-import { CgDetailsMore } from "react-icons/cg";
-import { CgAdd } from "react-icons/cg";
+import { MdEmail } from 'react-icons/md';
+import { FcGoogle } from 'react-icons/fc';
+import { FaFacebook, FaPencilAlt, FaTrash, FaCheck } from 'react-icons/fa';
+import { RiInformation2Line } from 'react-icons/ri';
+import { IoDocumentsOutline } from 'react-icons/io5';
+import { GoCommentDiscussion } from 'react-icons/go';
+import { CgDetailsMore } from 'react-icons/cg';
+import { CgAdd } from 'react-icons/cg';
 
 export const MailIcon = MdEmail;
 export const GoogleIcon = FcGoogle;

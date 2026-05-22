@@ -1,5 +1,4 @@
-import type { EventStatus } from "../../../../features/event/types/event.type";
-
+import type { EventStatus } from '../../../../features/event/types/event.type';
 
 export type FilterOption = {
     label: string;
@@ -24,14 +23,14 @@ export default function FilterStatus({
     return (
         <div className={className}>
             <label className="flex flex-col items-start">
-                <span className="label text-xs">{label || "Status"}</span>
+                <span className="label text-xs">{label || 'Status'}</span>
                 <select
                     className="select"
-                    value={status ?? ""}
+                    value={status ?? ''}
                     onChange={(e) => onChange((e.target.value as EventStatus) || null)}
                 >
                     <option value="">Tous</option>
-                    {options.map(opt => (
+                    {options.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                             {opt.label}
                         </option>

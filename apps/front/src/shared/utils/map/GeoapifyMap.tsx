@@ -1,37 +1,37 @@
 // Voir src/docs/create-map-geoapify.md, section Preparer la configuration Geoapify pour Leaflet et etape 3, pour l'explication detaillee de la configuration Geoapify/Leaflet.
-export type GeoapifyMapStyle = "osm-bright" | "osm-carto" | "toner-grey" | "klokantech-basic";
+export type GeoapifyMapStyle = 'osm-bright' | 'osm-carto' | 'toner-grey' | 'klokantech-basic';
 
 export interface GeoapifyLeafletTileLayerOptions {
-	attribution: string;
-	apiKey: string;
-	maxZoom: number;
-	id: GeoapifyMapStyle;
-	url: string;
-	baseUrl: string;
-	retinaUrl: string;
-	isRetina: boolean;
+    attribution: string;
+    apiKey: string;
+    maxZoom: number;
+    id: GeoapifyMapStyle;
+    url: string;
+    baseUrl: string;
+    retinaUrl: string;
+    isRetina: boolean;
 }
 
 export interface GeoapifyMarkerIconOptions {
-	type?: "material" | "awesome" | "circle" | "plain";
-	icon?: string;
-	iconType?: "material" | "awesome";
-	text?: string;
-	size?: number;
-	contentSize?: number;
-	color?: string;
-	contentColor?: string;
-	strokeColor?: string;
-	shadowColor?: string;
-	noShadow?: boolean;
-	noWhiteCircle?: boolean;
+    type?: 'material' | 'awesome' | 'circle' | 'plain';
+    icon?: string;
+    iconType?: 'material' | 'awesome';
+    text?: string;
+    size?: number;
+    contentSize?: number;
+    color?: string;
+    contentColor?: string;
+    strokeColor?: string;
+    shadowColor?: string;
+    noShadow?: boolean;
+    noWhiteCircle?: boolean;
 }
 
-const GEOAPIFY_MAPS_HOST = "https://maps.geoapify.com/v1/tile";
-const GEOAPIFY_ICON_HOST = "https://api.geoapify.com/v2/icon";
+const GEOAPIFY_MAPS_HOST = 'https://maps.geoapify.com/v1/tile';
+const GEOAPIFY_ICON_HOST = 'https://api.geoapify.com/v2/icon';
 
 export const GEOAPIFY_LEAFLET_ATTRIBUTION =
-	'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" target="_blank">© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a> contributors';
+    'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" target="_blank">© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a> contributors';
 
 export const GEOAPIFY_LEAFLET_MAX_ZOOM = 20;
 
@@ -46,8 +46,8 @@ export const GEOAPIFY_LEAFLET_MAX_ZOOM = 20;
  * @return {*}  {string}
  */
 function buildTileUrl(style: GeoapifyMapStyle, apiKey: string, retina = false): string {
-	const suffix = retina ? "@2x" : "";
-	return `${GEOAPIFY_MAPS_HOST}/${style}/{z}/{x}/{y}${suffix}.png?apiKey=${apiKey}`;
+    const suffix = retina ? '@2x' : '';
+    return `${GEOAPIFY_MAPS_HOST}/${style}/{z}/{x}/{y}${suffix}.png?apiKey=${apiKey}`;
 }
 
 /**
@@ -63,23 +63,23 @@ function buildTileUrl(style: GeoapifyMapStyle, apiKey: string, retina = false): 
  * @return {*}  {GeoapifyLeafletTileLayerOptions}
  */
 export function createGeoapifyLeafletTileLayerOptions(
-	apiKey: string,
-	style: GeoapifyMapStyle = "osm-bright",
-	isRetina = typeof window !== "undefined" ? window.devicePixelRatio > 1 : false,
+    apiKey: string,
+    style: GeoapifyMapStyle = 'osm-bright',
+    isRetina = typeof window !== 'undefined' ? window.devicePixelRatio > 1 : false,
 ): GeoapifyLeafletTileLayerOptions {
-	const baseUrl = buildTileUrl(style, apiKey, false);
-	const retinaUrl = buildTileUrl(style, apiKey, true);
+    const baseUrl = buildTileUrl(style, apiKey, false);
+    const retinaUrl = buildTileUrl(style, apiKey, true);
 
-	return {
-		attribution: GEOAPIFY_LEAFLET_ATTRIBUTION,
-		apiKey,
-		maxZoom: GEOAPIFY_LEAFLET_MAX_ZOOM,
-		id: style,
-		url: isRetina ? retinaUrl : baseUrl,
-		baseUrl,
-		retinaUrl,
-		isRetina,
-	};
+    return {
+        attribution: GEOAPIFY_LEAFLET_ATTRIBUTION,
+        apiKey,
+        maxZoom: GEOAPIFY_LEAFLET_MAX_ZOOM,
+        id: style,
+        url: isRetina ? retinaUrl : baseUrl,
+        baseUrl,
+        retinaUrl,
+        isRetina,
+    };
 }
 
 /**
@@ -89,16 +89,16 @@ export function createGeoapifyLeafletTileLayerOptions(
  *
  * @export
  * @param {GeoapifyMapStyle} [style="osm-bright"]
- * @return {*} 
+ * @return {*}
  */
-export function getDefaultGeoapifyLeafletConfig(style: GeoapifyMapStyle = "osm-bright") {
-	const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+export function getDefaultGeoapifyLeafletConfig(style: GeoapifyMapStyle = 'osm-bright') {
+    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
-	if (!apiKey) {
-		throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
-	}
+    if (!apiKey) {
+        throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
+    }
 
-	return createGeoapifyLeafletTileLayerOptions(apiKey, style);
+    return createGeoapifyLeafletTileLayerOptions(apiKey, style);
 }
 
 /**
@@ -111,28 +111,28 @@ export function getDefaultGeoapifyLeafletConfig(style: GeoapifyMapStyle = "osm-b
  * @return {*}  {string}
  */
 export function buildGeoapifyMarkerIconUrl(options: GeoapifyMarkerIconOptions): string {
-	const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
-	if (!apiKey) {
-		throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
-	}
+    if (!apiKey) {
+        throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
+    }
 
-	const searchParams = new URLSearchParams({
-		apiKey,
-		type: options.type ?? "material",
-		size: String(options.size ?? 52),
-	});
+    const searchParams = new URLSearchParams({
+        apiKey,
+        type: options.type ?? 'material',
+        size: String(options.size ?? 52),
+    });
 
-	if (options.icon) searchParams.set("icon", options.icon);
-	if (options.iconType) searchParams.set("iconType", options.iconType);
-	if (options.text) searchParams.set("text", options.text);
-	if (options.contentSize) searchParams.set("contentSize", String(options.contentSize));
-	if (options.color) searchParams.set("color", options.color);
-	if (options.contentColor) searchParams.set("contentColor", options.contentColor);
-	if (options.strokeColor) searchParams.set("strokeColor", options.strokeColor);
-	if (options.shadowColor) searchParams.set("shadowColor", options.shadowColor);
-	if (options.noShadow) searchParams.set("noShadow", "");
-	if (options.noWhiteCircle) searchParams.set("noWhiteCircle", "");
+    if (options.icon) searchParams.set('icon', options.icon);
+    if (options.iconType) searchParams.set('iconType', options.iconType);
+    if (options.text) searchParams.set('text', options.text);
+    if (options.contentSize) searchParams.set('contentSize', String(options.contentSize));
+    if (options.color) searchParams.set('color', options.color);
+    if (options.contentColor) searchParams.set('contentColor', options.contentColor);
+    if (options.strokeColor) searchParams.set('strokeColor', options.strokeColor);
+    if (options.shadowColor) searchParams.set('shadowColor', options.shadowColor);
+    if (options.noShadow) searchParams.set('noShadow', '');
+    if (options.noWhiteCircle) searchParams.set('noWhiteCircle', '');
 
-	return `${GEOAPIFY_ICON_HOST}?${searchParams.toString()}`;
+    return `${GEOAPIFY_ICON_HOST}?${searchParams.toString()}`;
 }
