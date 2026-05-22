@@ -1,6 +1,6 @@
 export interface User {
-	id: number;
-	role: Role;
+    id: string;
+    role: Role;
 }
 
-export type Role = "USER";
+export type Role = 'USER';
