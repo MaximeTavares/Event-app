@@ -38,9 +38,6 @@ function axiosClient(): AxiosInstance {
                     .then(async (data) => {
                         useAuthStore.getState().setAccessToken(data.accessToken);
 
-                        const user = await AuthApi.me();
-                        useAuthStore.getState().setUser(user);
-
                         return data.accessToken;
                     })
                     .catch((err) => {

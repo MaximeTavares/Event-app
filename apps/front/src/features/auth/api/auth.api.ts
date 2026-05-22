@@ -10,13 +10,11 @@ export class AuthApi {
 
     static async signup(body: SignupData): Promise<MeResponse> {
         const { data } = await api.post('ms/auth/signup', body);
-
         return data;
     }
 
     static async me(): Promise<MeResponse> {
         const { data } = await api.get<MeResponse>('ms/auth/me');
-        console.log('🚀 ~ AuthApi ~ me ~ data:', data);
         return data;
     }
 
@@ -24,8 +22,6 @@ export class AuthApi {
         const { data } = await api.post(`ms/auth/refresh_token`, {
             withCredentials: true,
         });
-        console.log('🚀 ~ AuthApi ~ refresh ~ data:', data);
-
         return data;
     }
 
