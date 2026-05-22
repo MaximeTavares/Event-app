@@ -7,31 +7,24 @@ export function useSignin() {
     const { setAccessToken } = useAuthStore();
     const queryClient = useQueryClient();
 
-    const meQuery = useMe();
-
     return useMutation<AuthResponse, Error, SigninData>({
         mutationFn: (payload) => AuthApi.signin(payload),
         onSuccess: async (res) => {
             setAccessToken(res.accessToken);
-            queryClient.invalidateQueries({ queryKey: ['session'] });
-
-            await meQuery.refetch();
+            queryClient.setQueryData(['me'], res.user);
+            queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 }
 
 export function useMe() {
-    const { setUser } = useAuthStore();
+    const { accessToken } = useAuthStore();
 
     return useQuery({
         queryKey: ['me'],
-        queryFn: async () => {
-            const data = await AuthApi.me();
-            setUser(data);
-            return data;
-        },
+        queryFn: AuthApi.me,
         retry: false,
-        enabled: false,
+        enabled: !!accessToken,
     });
 }
 
@@ -48,20 +41,28 @@ export function useSignout() {
     return useMutation<void, Error, void>({
         mutationFn: () => AuthApi.signout(),
         onSuccess: () => {
+            // Reset auth store
             clearAuth();
-            queryClient.removeQueries({ queryKey: ['session'] });
+            // Clear all cached data
+            queryClient.clear();
+            // 3. force UX clean state
+            globalThis.location.href = '/auth/signin';
         },
     });
 }
 
 export function useRefreshToken() {
     const { setAccessToken, accessToken } = useAuthStore();
+    const queryClient = useQueryClient();
 
     return useQuery({
         queryKey: ['refresh_token'],
         queryFn: async () => {
             const res = await AuthApi.refresh();
             setAccessToken(res.accessToken);
+            if (res.user) {
+                queryClient.setQueryData(['me'], res.user);
+            }
             return res;
         },
         retry: false,
