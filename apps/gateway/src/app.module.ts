@@ -8,13 +8,13 @@ import { UserProfileModule } from './user-profile/user-profile.module';
 import { AddressModule } from './address/address.module';
 import { EventModule } from './event/event.module';
 
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './ms-auth/auth.module';
 import { SlotModule } from './slot/slot.module';
 import { MissionModule } from './mission/mission.module';
 import { ParticipationModule } from './participation/participation.module';
 import { GeoapifyModule } from './geoapify/geoapify.module';
 import { NatsModule } from './nats/nats.module';
-import { AuthController } from './auth/ms-auth/auth.controller';
+import { AuthController } from './ms-auth/auth.controller';
 
 @Module({
     imports: [
