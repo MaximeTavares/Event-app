@@ -1,5 +1,3 @@
-import { UserDTO } from 'src/user/dto/user.dto';
-
 /**
  * Permet de gérer la structure du token
  */
@@ -23,11 +21,6 @@ export type SigninResponse = {
 export type AuthUser = {
     id: number;
 };
-
-export interface SessionResponse {
-    accessToken: string;
-    user: Pick<UserDTO, 'role'>;
-}
 
 export interface CurrentUserData {
     id: string;
