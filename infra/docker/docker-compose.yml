@@ -24,7 +24,7 @@ services:
         container_name: mongo-express-auth
         restart: always
         ports:
-            - "8081:8081"
+            - "8084:8081"
         environment:
             ME_CONFIG_MONGODB_SERVER: mongo-auth
             ME_CONFIG_BASICAUTH: false
@@ -66,7 +66,7 @@ services:
             MYSQL_ROOT_PASSWORD: root
             MYSQL_DATABASE: help
         ports:
-            - 3307:3306
+            - 3308:3306
               # portlocal:portducontainer
     phpmyadmin:
         depends_on:
