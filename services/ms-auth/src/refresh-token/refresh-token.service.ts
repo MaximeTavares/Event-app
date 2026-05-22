@@ -36,7 +36,10 @@ export class RefreshTokenService {
     }
 
     async revoke(userId: string) {
-        await this.refreshTokenModel.updateMany({ userId }, { revoked: true });
+        await this.refreshTokenModel.updateMany(
+            { userId, revoked: false },
+            { revoked: true },
+        );
     }
 
     async rotate(userId: string, oldToken: string, newToken: string) {

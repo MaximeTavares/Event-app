@@ -30,4 +30,12 @@ export class AuthController {
     getUsers() {
         return this.userService.findAll();
     }
+
+    @MessagePattern('auth.signout')
+    async logout(data: { userId: string }) {
+        await this.authService.signout(data.userId);
+        return {
+            success: true,
+        };
+    }
 }
