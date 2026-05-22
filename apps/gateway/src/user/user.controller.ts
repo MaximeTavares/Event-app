@@ -12,7 +12,7 @@ import {
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDTO } from './dto/user.dto';
-import { AuthService } from 'src/auth/auth.service';
+// import { AuthService } from 'src/auth/auth.service';
 import { UserProfileService } from 'src/user-profile/user-profile.service';
 import { UserWithProfileAndAddressDTO } from 'src/user-profile/dto/user-profile.dto';
 import { OwnershipGuard } from 'src/auth/guard/ownership.guard';
@@ -21,7 +21,7 @@ import { OwnershipGuard } from 'src/auth/guard/ownership.guard';
 export class UserController {
     constructor(
         private readonly userService: UserService,
-        private readonly authService: AuthService,
+        // private readonly authService: AuthService,
         private readonly userProfileService: UserProfileService,
     ) {}
 
@@ -68,10 +68,10 @@ export class UserController {
             //Check if the email is already used
             await this.userService.validateEmail(id, updateUserDto.email);
 
-        if (updateUserDto.password)
-            updateUserDto.password = await this.authService.hash(
-                updateUserDto.password,
-            );
+        // if (updateUserDto.password)
+        //     updateUserDto.password = await this.authService.hash(
+        //         updateUserDto.password,
+        //     );
 
         return this.userService.update(id, updateUserDto);
     }
