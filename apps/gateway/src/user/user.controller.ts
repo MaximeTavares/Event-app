@@ -15,7 +15,7 @@ import { UserDTO } from './dto/user.dto';
 // import { AuthService } from 'src/auth/auth.service';
 import { UserProfileService } from 'src/user-profile/user-profile.service';
 import { UserWithProfileAndAddressDTO } from 'src/user-profile/dto/user-profile.dto';
-import { OwnershipGuard } from 'src/auth/guard/ownership.guard';
+import { OwnershipGuard } from 'src/ms-auth/guard/ownership.guard';
 
 @Controller('users')
 export class UserController {

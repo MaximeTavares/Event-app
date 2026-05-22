@@ -13,7 +13,7 @@ import { UserProfileService } from './user-profile.service';
 import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UserService } from 'src/user/user.service';
-import { OwnershipGuard } from 'src/auth/guard/ownership.guard';
+import { OwnershipGuard } from 'src/ms-auth/guard/ownership.guard';
 
 @Controller('users')
 export class UserProfileController {

@@ -3,9 +3,9 @@ import { NatsService } from 'src/nats/nats.service';
 import { Public } from 'src/user/decorators/public.decorator';
 import type { Request, Response } from 'express';
 import { User } from 'src/user/decorators/user.decorator';
-import { SigninResponse, type CurrentUserData } from '../type/auth.type';
-import { AuthService } from '../auth.service';
-import { type SigninDto, SignupDto } from '../dto/auth.dto';
+import { SigninResponse, type CurrentUserData } from './type/auth.type';
+import { AuthService } from './auth.service';
+import { type SigninDto, SignupDto } from './dto/auth.dto';
 
 @Controller('ms/auth')
 export class AuthController {
