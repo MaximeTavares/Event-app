@@ -11,6 +11,11 @@ export type JwtPayload = {
     exp?: number;
 };
 
+export type SigninResponse = {
+    accessToken: string;
+    refreshToken: string;
+};
+
 /**
  * Structure du payload tel qu'on la retrouve dans la `request.user` après
  * que le `AuthGard` a décodé le token
