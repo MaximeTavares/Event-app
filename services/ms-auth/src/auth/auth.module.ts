@@ -1,17 +1,13 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AuthUser, AuthUserSchema } from 'src/authUser.schema';
 import { NatsModule } from 'src/nats/nats.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { UserModule } from 'src/users/user.module';
+import { JwtTokenModule } from 'src/jwt/jwt.module';
+import { RefreshTokenModule } from 'src/refresh-token/refresh-token.module';
 
 @Module({
-    imports: [
-        NatsModule,
-        MongooseModule.forFeature([
-            { name: AuthUser.name, schema: AuthUserSchema },
-        ]),
-    ],
+    imports: [NatsModule, UserModule, JwtTokenModule, RefreshTokenModule],
     controllers: [AuthController],
     providers: [AuthService],
 })
