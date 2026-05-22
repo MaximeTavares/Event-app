@@ -1,4 +1,4 @@
-import type { Role, User } from '../../user/types/user.type';
+import type { Role } from '../../user/types/user.type';
 
 export interface SignupData {
     email: string;
@@ -18,25 +18,12 @@ export interface SigninData {
 
 export interface AuthResponse {
     accessToken: string;
+    user: {
+        id: string;
+        email: string;
+        role: Role;
+    };
 }
-
-// export interface AuthResponse {
-//     accessToken: string;
-//     user: {
-//         id: string;
-//         email: string;
-//         role: 'USER';
-//     };
-// }
-
-// export interface AuthResponse {
-//     data: {
-//         user: User;
-//         accessToken: string;
-//     };
-//     timeStamp: string;
-//     url: string;
-// }
 
 export interface MeResponse {
     id: string;
