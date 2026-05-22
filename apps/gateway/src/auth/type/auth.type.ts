@@ -5,6 +5,8 @@ import { UserDTO } from 'src/user/dto/user.dto';
  */
 export type JwtPayload = {
     sub: number;
+    email: string;
+    role: string;
     iat?: number;
     exp?: number;
 };
@@ -21,3 +23,11 @@ export interface SessionResponse {
     accessToken: string;
     user: Pick<UserDTO, 'role'>;
 }
+
+export interface CurrentUserData {
+    id: string;
+    email: string;
+    role: Role;
+}
+
+export type Role = 'USER';
