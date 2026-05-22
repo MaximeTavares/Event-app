@@ -14,8 +14,8 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
 
     const signoutMutation = useSignout();
 
-    const handleSignout = () => {
-        signoutMutation.mutate();
+    const handleSignout = async () => {
+        await signoutMutation.mutateAsync();
         navigate('/');
     };
 
