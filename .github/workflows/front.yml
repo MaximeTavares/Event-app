@@ -23,7 +23,8 @@ jobs:
       # 2. Variables
       - name: Set image variables
         run: |
-          echo "IMAGE=ghcr.io/${{ github.repository_owner }}/front" >> $GITHUB_ENV
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=ghcr.io/$OWNER/front" >> $GITHUB_ENV
           echo "SHA_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
       # 3. Login GHCR
