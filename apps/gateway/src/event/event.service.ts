@@ -15,13 +15,12 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { eventWithAddressAndUser } from './prisma/event.select';
 import { mapEvent, toEventDetails } from './dto/event.mapper';
 import { EventFiltersDto } from './dto/event-filters.dto';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Event_status } from '../../prisma/generated/prisma/browser';
 import { CreateAddressDto } from '../address/dto/create-address.dto';
 import { toGeocodeDto } from '../address/mapper/address.mapper';
 import { Coordinates } from '../geoapify/type/geoapify.type';
 import { UserService } from '../user/user.service';
-import { Prisma } from '../../prisma/generated/prisma/client';
+import { PrismaService } from '../../prisma/prisma.service';
+import { Event_status, Prisma } from '@prisma/client';
 
 @Injectable()
 export class EventService {

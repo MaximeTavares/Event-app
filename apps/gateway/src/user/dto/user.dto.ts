@@ -1,4 +1,4 @@
-import { User_role } from 'prisma/generated/prisma/enums';
+import { User_role } from '@prisma/client';
 
 export type UserDTO = {
     id: number;

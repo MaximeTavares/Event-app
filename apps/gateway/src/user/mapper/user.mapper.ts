@@ -1,4 +1,4 @@
-import { User } from 'prisma/generated/prisma/client';
+import { User } from '@prisma/client';
 import { UserDTO } from '../dto/user.dto';
 
 export function mapUser(user: Omit<User, 'password_hash'>): UserDTO {

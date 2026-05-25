@@ -1,4 +1,4 @@
-import { Slot } from 'prisma/generated/prisma/client';
+import { Slot } from '@prisma/client';
 import {
     SlotDTO,
     SlotWithParticipationDto,

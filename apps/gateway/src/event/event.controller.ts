@@ -17,9 +17,9 @@ import {
     EventWithUserAndAddressDTO,
     PaginatedEventsDTO,
 } from './dto/event.dto';
-import { Public } from 'src/user/decorators/public.decorator';
-import { User } from 'src/user/decorators/user.decorator';
 import { EventFiltersDto } from './dto/event-filters.dto';
+import { User } from '../user/decorators/user.decorator';
+import { Public } from '../user/decorators/public.decorator';
 
 @Controller('events')
 export class EventController {

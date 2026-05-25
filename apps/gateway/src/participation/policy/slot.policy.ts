@@ -1,4 +1,4 @@
-import { Slot_status } from 'prisma/generated/prisma/enums';
+import { Slot_status } from '@prisma/client';
 
 type SlotPolicy = {
     canJoin: {

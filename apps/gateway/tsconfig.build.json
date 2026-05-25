@@ -1,12 +1,4 @@
 {
-    "compilerOptions": {
-        "outDir": "./dist",
-        "module": "commonjs",
-        "target": "ES2021",
-        "declaration": false,
-        "sourceMap": false,
-        "removeComments": true
-    },
-    "include": ["src/**/*"],
+    "extends": "./tsconfig.json",
     "exclude": ["node_modules", "dist", "test"]
 }

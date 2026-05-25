@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { SLOT_POLICY } from './slot.policy';
-import { Prisma, Slot } from '../../../prisma/generated/prisma/client';
+import { Prisma, Slot } from '@prisma/client';
 
 @Injectable()
 export class SlotPolicyService {

@@ -1,7 +1,4 @@
-import {
-    Participation_status,
-    Slot_status,
-} from 'prisma/generated/prisma/enums';
+import { Participation_status, Slot_status } from '@prisma/client';
 
 export type SlotDTO = {
     id: number;

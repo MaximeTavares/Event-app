@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
-import { PrismaService } from 'prisma/prisma.service';
 import { UserWithProfileAndAddressDTO } from './dto/user-profile.dto';
 import { mapUserProfileAddress } from './mapper/user-profile.mapper';
 import { GeoapifyService } from 'src/geoapify/geoapify.service';
 import { toGeocodeDto } from 'src/address/mapper/address.mapper';
-import { Prisma } from 'prisma/generated/prisma/client';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * Type Prisma représentant la relation "Address" dans un create/update de UserProfile.

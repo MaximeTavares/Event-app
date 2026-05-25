@@ -1,4 +1,4 @@
-import { Participation_status } from 'prisma/generated/prisma/enums';
+import { Participation_status } from '@prisma/client';
 
 export type ParticipationDTO = {
     id: number;

@@ -1,10 +1,11 @@
-import { Address } from 'prisma/generated/prisma/client';
 import {
+    Address,
     Event_status,
     Mission_status,
     Participation_status,
     Slot_status,
-} from 'prisma/generated/prisma/enums';
+} from '@prisma/client';
+
 import { AddressDTO } from 'src/address/dto/address.dto';
 import { MissionWithSlotDTO } from 'src/mission/dto/mission.dto';
 import { UserDTO } from 'src/user/dto/user.dto';

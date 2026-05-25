@@ -1,5 +1,5 @@
+import { Mission_status } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { Mission_status } from 'prisma/generated/prisma/enums';
 
 export class CreateMissionDto {
     @IsString()

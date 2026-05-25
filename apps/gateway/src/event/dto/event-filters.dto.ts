@@ -1,6 +1,6 @@
+import { Event_status } from '@prisma/client';
 import { Transform, Type } from 'class-transformer';
 import { IsOptional, IsArray, IsString, IsNumber } from 'class-validator';
-import { Event_status } from 'prisma/generated/prisma/enums';
 
 export class EventFiltersDto {
     @IsOptional()

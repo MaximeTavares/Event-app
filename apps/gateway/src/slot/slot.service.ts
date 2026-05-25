@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { CreateSlotDto } from './dto/create-slot.dto';
 import { UpdateSlotDto } from './dto/update-slot.dto';
-import { PrismaService } from 'prisma/prisma.service';
 import { SlotMapper } from './dto/mapper/slot.mapper';
 import { SlotDTO, SlotWithParticipationDto } from './dto/slot.dto';
+import { PrismaService } from '../../prisma/prisma.service';
 
 type OwnerShipEntity = 'Mission' | 'Slot';
 @Injectable()

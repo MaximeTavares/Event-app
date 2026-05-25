@@ -4,10 +4,10 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { CreateMissionDto } from './dto/create-mission.dto';
-import { UpdateMissionDto } from './dto/update-mission.dto';
-import { PrismaService } from 'prisma/prisma.service';
 import { MissionDTO, MissionWithDetails } from './dto/mission.dto';
+import { UpdateMissionDto } from './dto/update-mission.dto';
 import { mapMission, toMissionDetails } from './mapper/mission.mapper';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class MissionService {

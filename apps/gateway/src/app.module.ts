@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
-import { PrismaModule } from 'prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserProfileModule } from './user-profile/user-profile.module';
 import { AddressModule } from './address/address.module';
@@ -15,6 +14,7 @@ import { ParticipationModule } from './participation/participation.module';
 import { GeoapifyModule } from './geoapify/geoapify.module';
 import { NatsModule } from './nats/nats.module';
 import { AuthController } from './ms-auth/auth.controller';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
     imports: [

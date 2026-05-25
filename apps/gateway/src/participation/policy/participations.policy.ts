@@ -1,6 +1,6 @@
 import { ParticipationPolicyService } from './participationPolicy.service.';
 import { ParticipationWithStatusAndOrganizer } from '../type/participation.types';
-import { Participation_status } from '../../../prisma/generated/prisma/client';
+import { Participation_status } from '@prisma/client';
 
 type ParticipationPolicy = {
     CanBeCancelByUser: { allowed: boolean; errorMessage?: string };

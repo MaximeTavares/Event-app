@@ -2,7 +2,7 @@ import {
     Mission_status,
     Participation_status,
     Slot_status,
-} from 'prisma/generated/prisma/enums';
+} from '@prisma/client';
 import { SlotDTO } from 'src/slot/dto/slot.dto';
 
 export type MissionDTO = {

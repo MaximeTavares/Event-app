@@ -1,10 +1,10 @@
 import { differenceInYears } from 'date-fns';
-import { Address, User, User_profile } from 'prisma/generated/prisma/client';
 import { mapUser } from 'src/user/mapper/user.mapper';
 import {
     UserProfileDTO,
     UserWithProfileAndAddressDTO,
 } from '../dto/user-profile.dto';
+import { Address, User, User_profile } from '@prisma/client';
 
 export function mapProfile(profile: User_profile): UserProfileDTO {
     //Calcul full_name

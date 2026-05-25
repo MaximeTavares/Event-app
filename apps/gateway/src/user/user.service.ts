@@ -6,10 +6,10 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'prisma/prisma.service';
 import { UserDTO } from './dto/user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User_role } from 'prisma/generated/prisma/enums';
+import { PrismaService } from '../../prisma/prisma.service';
+import { User_role } from '@prisma/client';
 
 @Injectable()
 export class UserService {

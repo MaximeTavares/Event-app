@@ -1,4 +1,4 @@
-import { Prisma } from 'prisma/generated/prisma/client';
+import { Prisma } from '@prisma/client';
 import { eventWithAddressAndUser } from '../prisma/event.select';
 import { EventDetailsDTO, EventDTO, EventWithRelations } from './event.dto';
 import { mapUser } from 'src/user/mapper/user.mapper';
