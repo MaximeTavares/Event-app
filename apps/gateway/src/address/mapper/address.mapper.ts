@@ -1,4 +1,4 @@
-import { Address } from 'prisma/generated/prisma/client';
+import { Address } from '@prisma/client';
 import { AddressDTO } from '../dto/address.dto';
 import { GeocodeDto } from 'src/geoapify/dto/geocode.dto';
 

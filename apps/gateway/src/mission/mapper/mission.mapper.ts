@@ -1,4 +1,4 @@
-import { Mission } from 'prisma/generated/prisma/client';
+import { Mission } from '@prisma/client';
 import {
     MissionDTO,
     MissionWithDetails,
