@@ -1,317 +1,316 @@
 generator client {
-  provider     = "prisma-client-js"
-  moduleFormat = "cjs"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+    provider = "mysql"
 }
 
 model Address {
-  id              Int            @id @default(autoincrement())
-  street_number   String         @db.VarChar(20)
-  street_name     String         @db.VarChar(100)
-  address_line_2  String?        @db.VarChar(255)
-  city            String         @db.VarChar(100)
-  postal_code     String         @db.VarChar(20)
-  country         String         @db.VarChar(100)
-  coordinates_lat Float?         @db.Float()
-  coordinates_lon Float?         @db.Float()
-  created_at      DateTime       @default(now()) @db.DateTime(0)
-  updated_at      DateTime?      @updatedAt @db.DateTime(0)
-  Event           Event[]
-  User_profile    User_profile[]
+    id              Int            @id @default(autoincrement())
+    street_number   String         @db.VarChar(20)
+    street_name     String         @db.VarChar(100)
+    address_line_2  String?        @db.VarChar(255)
+    city            String         @db.VarChar(100)
+    postal_code     String         @db.VarChar(20)
+    country         String         @db.VarChar(100)
+    coordinates_lat Float?         @db.Float()
+    coordinates_lon Float?         @db.Float()
+    created_at      DateTime       @default(now()) @db.DateTime(0)
+    updated_at      DateTime?      @updatedAt @db.DateTime(0)
+    Event           Event[]
+    User_profile    User_profile[]
 
-  @@unique([street_number, street_name, city, postal_code, country], name: "unique_address")
+    @@unique([street_number, street_name, city, postal_code, country], name: "unique_address")
 }
 
 model Announcement {
-  id         Int       @id @default(autoincrement())
-  author_id  Int
-  event_id   Int
-  title      String    @db.VarChar(150)
-  content    String    @db.MediumText
-  created_at DateTime  @db.DateTime(0)
-  updated_at DateTime? @db.DateTime(0)
-  User       User      @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Event      Event     @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id         Int       @id @default(autoincrement())
+    author_id  Int
+    event_id   Int
+    title      String    @db.VarChar(150)
+    content    String    @db.MediumText
+    created_at DateTime  @db.DateTime(0)
+    updated_at DateTime? @db.DateTime(0)
+    User       User      @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    Event      Event     @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([author_id, event_id])
-  @@index([event_id])
+    @@index([author_id, event_id])
+    @@index([event_id])
 }
 
 model Availability {
-  id         Int       @id @default(autoincrement())
-  user_id    Int
-  start_at   DateTime  @db.DateTime(0)
-  end_at     DateTime  @db.DateTime(0)
-  created_at DateTime  @db.DateTime(0)
-  updated_at DateTime? @db.DateTime(0)
-  User       User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    id         Int       @id @default(autoincrement())
+    user_id    Int
+    start_at   DateTime  @db.DateTime(0)
+    end_at     DateTime  @db.DateTime(0)
+    created_at DateTime  @db.DateTime(0)
+    updated_at DateTime? @db.DateTime(0)
+    User       User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@index([user_id, start_at, end_at])
-  @@index([user_id])
+    @@index([user_id, start_at, end_at])
+    @@index([user_id])
 }
 
 model Document {
-  id          Int       @id @default(autoincrement())
-  uploaded_by Int
-  event_id    Int
-  title       String    @db.VarChar(150)
-  path        String    @db.VarChar(255)
-  size        Int
-  created_at  DateTime  @db.DateTime(0)
-  uploaded_at DateTime? @db.DateTime(0)
-  User        User      @relation(fields: [uploaded_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Event       Event     @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id          Int       @id @default(autoincrement())
+    uploaded_by Int
+    event_id    Int
+    title       String    @db.VarChar(150)
+    path        String    @db.VarChar(255)
+    size        Int
+    created_at  DateTime  @db.DateTime(0)
+    uploaded_at DateTime? @db.DateTime(0)
+    User        User      @relation(fields: [uploaded_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    Event       Event     @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([event_id])
-  @@index([uploaded_by])
+    @@index([event_id])
+    @@index([uploaded_by])
 }
 
 model Event {
-  id           Int            @id @default(autoincrement())
-  user_id      Int
-  title        String         @db.VarChar(150)
-  description  String         @db.MediumText
-  program      String         @db.MediumText
-  start_date   DateTime       @db.DateTime(0)
-  end_date     DateTime       @db.DateTime(0)
-  address_id   Int
-  status       Event_status
-  created_at   DateTime       @default(now()) @db.DateTime(0)
-  updated_at   DateTime?      @updatedAt @db.DateTime(0)
-  Announcement Announcement[]
-  Document     Document[]
-  Address      Address        @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User         User           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Feedback     Feedback[]
-  Message      Message[]
-  Mission      Mission[]
-  Recognition  Recognition[]
+    id           Int            @id @default(autoincrement())
+    user_id      Int
+    title        String         @db.VarChar(150)
+    description  String         @db.MediumText
+    program      String         @db.MediumText
+    start_date   DateTime       @db.DateTime(0)
+    end_date     DateTime       @db.DateTime(0)
+    address_id   Int
+    status       Event_status
+    created_at   DateTime       @default(now()) @db.DateTime(0)
+    updated_at   DateTime?      @updatedAt @db.DateTime(0)
+    Announcement Announcement[]
+    Document     Document[]
+    Address      Address        @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    User         User           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    Feedback     Feedback[]
+    Message      Message[]
+    Mission      Mission[]
+    Recognition  Recognition[]
 
-  @@unique([user_id, address_id, start_date], name: "unique_event")
-  @@index([start_date, end_date, user_id])
-  @@index([address_id])
-  @@index([user_id])
+    @@unique([user_id, address_id, start_date], name: "unique_event")
+    @@index([start_date, end_date, user_id])
+    @@index([address_id])
+    @@index([user_id])
 }
 
 model Feedback {
-  id                               Int       @id @default(autoincrement())
-  event_id                         Int
-  from_user_id                     Int
-  to_user_id                       Int
-  rating                           Int       @db.TinyInt
-  comment                          String    @db.MediumText
-  suggestion                       String    @db.MediumText
-  created_at                       DateTime  @db.DateTime(0)
-  updated_at                       DateTime? @db.DateTime(0)
-  Event                            Event     @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  User_Feedback_from_user_idToUser User      @relation("Feedback_from_user_idToUser", fields: [from_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  User_Feedback_to_user_idToUser   User      @relation("Feedback_to_user_idToUser", fields: [to_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    id                               Int       @id @default(autoincrement())
+    event_id                         Int
+    from_user_id                     Int
+    to_user_id                       Int
+    rating                           Int       @db.TinyInt
+    comment                          String    @db.MediumText
+    suggestion                       String    @db.MediumText
+    created_at                       DateTime  @db.DateTime(0)
+    updated_at                       DateTime? @db.DateTime(0)
+    Event                            Event     @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    User_Feedback_from_user_idToUser User      @relation("Feedback_from_user_idToUser", fields: [from_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    User_Feedback_to_user_idToUser   User      @relation("Feedback_to_user_idToUser", fields: [to_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@index([event_id, from_user_id, to_user_id])
-  @@index([from_user_id])
-  @@index([to_user_id])
+    @@index([event_id, from_user_id, to_user_id])
+    @@index([from_user_id])
+    @@index([to_user_id])
 }
 
 model Message {
-  id         Int       @id @default(autoincrement())
-  event_id   Int
-  content    String    @db.MediumText
-  sender_id  Int
-  created_at DateTime  @db.DateTime(0)
-  updated_at DateTime? @db.DateTime(0)
-  Event      Event     @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  Sender     User      @relation(fields: [sender_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    id         Int       @id @default(autoincrement())
+    event_id   Int
+    content    String    @db.MediumText
+    sender_id  Int
+    created_at DateTime  @db.DateTime(0)
+    updated_at DateTime? @db.DateTime(0)
+    Event      Event     @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    Sender     User      @relation(fields: [sender_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@index([event_id])
-  @@index([sender_id])
+    @@index([event_id])
+    @@index([sender_id])
 }
 
 model Mission {
-  id          Int            @id @default(autoincrement())
-  event_id    Int
-  title       String         @db.VarChar(150)
-  description String         @db.MediumText
-  status      Mission_status
-  created_at  DateTime       @default(now()) @db.DateTime(0)
-  updated_at  DateTime?      @updatedAt @db.DateTime(0)
-  Event       Event          @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  Slot        Slot[]
+    id          Int            @id @default(autoincrement())
+    event_id    Int
+    title       String         @db.VarChar(150)
+    description String         @db.MediumText
+    status      Mission_status
+    created_at  DateTime       @default(now()) @db.DateTime(0)
+    updated_at  DateTime?      @updatedAt @db.DateTime(0)
+    Event       Event          @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    Slot        Slot[]
 
-  @@index([event_id])
+    @@index([event_id])
 }
 
 model Slot {
-  id              Int             @id @default(autoincrement())
-  mission_id      Int
-  start_at        DateTime        @db.DateTime(0)
-  end_at          DateTime        @db.DateTime(0)
-  max_participant Int
-  status          Slot_status
-  created_at      DateTime        @default(now()) @db.DateTime(0)
-  updated_at      DateTime?       @updatedAt @db.DateTime(0)
-  Mission         Mission         @relation(fields: [mission_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  Participation   Participation[]
+    id              Int             @id @default(autoincrement())
+    mission_id      Int
+    start_at        DateTime        @db.DateTime(0)
+    end_at          DateTime        @db.DateTime(0)
+    max_participant Int
+    status          Slot_status
+    created_at      DateTime        @default(now()) @db.DateTime(0)
+    updated_at      DateTime?       @updatedAt @db.DateTime(0)
+    Mission         Mission         @relation(fields: [mission_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    Participation   Participation[]
 
-  @@index([mission_id, start_at, end_at])
-  @@index([start_at, end_at])
-  @@index([mission_id])
+    @@index([mission_id, start_at, end_at])
+    @@index([start_at, end_at])
+    @@index([mission_id])
 }
 
 model Notification {
-  id           Int               @id @default(autoincrement())
-  user_id      Int
-  reference_id Int
-  title        String            @db.VarChar(150)
-  content      String            @db.MediumText
-  type         Notification_type
-  is_read      Boolean
-  created_at   DateTime          @db.DateTime(0)
-  updated_at   DateTime?         @db.DateTime(0)
-  User         User              @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    id           Int               @id @default(autoincrement())
+    user_id      Int
+    reference_id Int
+    title        String            @db.VarChar(150)
+    content      String            @db.MediumText
+    type         Notification_type
+    is_read      Boolean
+    created_at   DateTime          @db.DateTime(0)
+    updated_at   DateTime?         @db.DateTime(0)
+    User         User              @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@index([user_id, type])
+    @@index([user_id, type])
 }
 
 model Participation {
-  id           Int                  @id @default(autoincrement())
-  user_id      Int
-  slot_id      Int
-  status       Participation_status
-  decision_at  DateTime?            @db.DateTime(0)
-  cancelled_at DateTime?            @db.DateTime(0)
-  created_at   DateTime             @default(now()) @db.DateTime(0)
-  updated_at   DateTime?            @updatedAt @db.DateTime(0)
-  User         User                 @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Slot         Slot                 @relation(fields: [slot_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id           Int                  @id @default(autoincrement())
+    user_id      Int
+    slot_id      Int
+    status       Participation_status
+    decision_at  DateTime?            @db.DateTime(0)
+    cancelled_at DateTime?            @db.DateTime(0)
+    created_at   DateTime             @default(now()) @db.DateTime(0)
+    updated_at   DateTime?            @updatedAt @db.DateTime(0)
+    User         User                 @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    Slot         Slot                 @relation(fields: [slot_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([user_id, slot_id], name: "unique_user_slot")
-  @@index([slot_id])
+    @@unique([user_id, slot_id], name: "unique_user_slot")
+    @@index([slot_id])
 }
 
 model Recognition {
-  id          Int              @id @default(autoincrement())
-  user_id     Int
-  event_id    Int
-  type        Recognition_type
-  description String           @db.MediumText
-  created_at  DateTime         @db.DateTime(0)
-  updated_at  DateTime?        @db.DateTime(0)
-  User        User             @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Event       Event            @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    id          Int              @id @default(autoincrement())
+    user_id     Int
+    event_id    Int
+    type        Recognition_type
+    description String           @db.MediumText
+    created_at  DateTime         @db.DateTime(0)
+    updated_at  DateTime?        @db.DateTime(0)
+    User        User             @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    Event       Event            @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([user_id, type])
-  @@index([event_id])
+    @@index([user_id, type])
+    @@index([event_id])
 }
 
 model User {
-  id                                   Int             @id @default(autoincrement())
-  email                                String          @unique() @db.VarChar(255)
-  password_hash                        String          @db.VarChar(150)
-  role                                 User_role
-  created_at                           DateTime        @default(now()) @db.DateTime(0)
-  updated_at                           DateTime?       @updatedAt @db.DateTime(0)
-  Announcement                         Announcement[]
-  Availability                         Availability[]
-  Document                             Document[]
-  Event                                Event[]
-  Feedback_Feedback_from_user_idToUser Feedback[]      @relation("Feedback_from_user_idToUser")
-  Feedback_Feedback_to_user_idToUser   Feedback[]      @relation("Feedback_to_user_idToUser")
-  Tokens                               Token[]
-  Message                              Message[]
-  Notification                         Notification[]
-  Participation                        Participation[]
-  Recognition                          Recognition[]
-  User_profile                         User_profile?
+    id                                   Int             @id @default(autoincrement())
+    email                                String          @unique() @db.VarChar(255)
+    password_hash                        String          @db.VarChar(150)
+    role                                 User_role
+    created_at                           DateTime        @default(now()) @db.DateTime(0)
+    updated_at                           DateTime?       @updatedAt @db.DateTime(0)
+    Announcement                         Announcement[]
+    Availability                         Availability[]
+    Document                             Document[]
+    Event                                Event[]
+    Feedback_Feedback_from_user_idToUser Feedback[]      @relation("Feedback_from_user_idToUser")
+    Feedback_Feedback_to_user_idToUser   Feedback[]      @relation("Feedback_to_user_idToUser")
+    Tokens                               Token[]
+    Message                              Message[]
+    Notification                         Notification[]
+    Participation                        Participation[]
+    Recognition                          Recognition[]
+    User_profile                         User_profile?
 }
 
 model Token {
-  id                  Int                   @id @default(autoincrement())
-  user_id             Int
-  token               String                @db.VarChar(255)
-  is_revoked          Boolean?              @default(false)
-  revoked_by          Token_revokedby_enum? @default(USER)
-  type                Token_type_enum?      @default(REFRESH)
-  session_fingerprint String?               @db.VarChar(100)
-  // user_agent : voir pour faire un hash simple pour simplifier la ligne, pas forcement la chiffrer, md5 ?
-  revoked_at          DateTime?             @db.DateTime(0)
-  created_at          DateTime              @default(now()) @db.DateTime(0)
-  updated_at          DateTime?             @updatedAt @db.DateTime(0)
+    id                  Int                   @id @default(autoincrement())
+    user_id             Int
+    token               String                @db.VarChar(255)
+    is_revoked          Boolean?              @default(false)
+    revoked_by          Token_revokedby_enum? @default(USER)
+    type                Token_type_enum?      @default(REFRESH)
+    session_fingerprint String?               @db.VarChar(100)
+    // user_agent : voir pour faire un hash simple pour simplifier la ligne, pas forcement la chiffrer, md5 ?
+    revoked_at          DateTime?             @db.DateTime(0)
+    created_at          DateTime              @default(now()) @db.DateTime(0)
+    updated_at          DateTime?             @updatedAt @db.DateTime(0)
 
-  User User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    User User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([revoked_at])
+    @@index([revoked_at])
 }
 
 model User_profile {
-  user_id      Int       @id
-  first_name   String?   @db.VarChar(100)
-  last_name    String?   @db.VarChar(100)
-  phone_number String?   @db.VarChar(20)
-  birthdate    DateTime? @db.Date
-  address_id   Int?
-  bio          String?   @db.MediumText
-  avatar_url   String?   @db.VarChar(255)
-  created_at   DateTime  @default(now()) @db.DateTime(0)
-  updated_at   DateTime? @updatedAt @db.DateTime(0)
-  User         User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  Address      Address?  @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    user_id      Int       @id
+    first_name   String?   @db.VarChar(100)
+    last_name    String?   @db.VarChar(100)
+    phone_number String?   @db.VarChar(20)
+    birthdate    DateTime? @db.Date
+    address_id   Int?
+    bio          String?   @db.MediumText
+    avatar_url   String?   @db.VarChar(255)
+    created_at   DateTime  @default(now()) @db.DateTime(0)
+    updated_at   DateTime? @updatedAt @db.DateTime(0)
+    User         User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    Address      Address?  @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@index([user_id])
-  @@index([address_id])
+    @@index([user_id])
+    @@index([address_id])
 }
 
 enum Participation_status {
-  PENDING
-  ACCEPTED
-  REJECTED
-  CANCELLED
+    PENDING
+    ACCEPTED
+    REJECTED
+    CANCELLED
 }
 
 enum Token_revokedby_enum {
-  USER
-  ADMIN
-  SYSTEM
+    USER
+    ADMIN
+    SYSTEM
 }
 
 enum Token_type_enum {
-  REFRESH
+    REFRESH
 }
 
 enum Recognition_type {
-  BADGE
+    BADGE
 }
 
 enum User_role {
-  USER
-  PLATFORM_ADMIN
+    USER
+    PLATFORM_ADMIN
 }
 
 enum Mission_status {
-  OPEN
-  FULL
-  COMPLETED
+    OPEN
+    FULL
+    COMPLETED
 }
 
 enum Slot_status {
-  OPEN
-  FULL
-  CLOSED
-  CANCELLED
+    OPEN
+    FULL
+    CLOSED
+    CANCELLED
 }
 
 enum Notification_type {
-  ANNOUNCEMENT
-  MESSAGE
-  MISSION
-  EVENT
+    ANNOUNCEMENT
+    MESSAGE
+    MISSION
+    EVENT
 }
 
 enum Event_status {
-  OPEN
-  CLOSED
-  DRAFT
-  CANCELLED
+    OPEN
+    CLOSED
+    DRAFT
+    CANCELLED
 }
