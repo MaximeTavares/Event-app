@@ -57,6 +57,6 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd /home/ubuntu/event-app
+            cd /home/ubuntu/Event-app
             docker compose -f infra/docker/docker-compose.prod.yml pull
             docker compose -f infra/docker/docker-compose.prod.yml up -d
