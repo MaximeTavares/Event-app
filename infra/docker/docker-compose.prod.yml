@@ -11,7 +11,7 @@ services:
     # AUTH SERVICE
     # -------------------------
     ms-auth:
-        image: ghcr.io/${GITHUB_OWNER}/ms-auth:latest
+        image: ghcr.io/MaximeTavares/ms-auth:latest
         restart: always
         environment:
             - NATS_URL=nats://nats:4222
@@ -22,7 +22,7 @@ services:
     # GATEWAY
     # -------------------------
     gateway:
-        image: ghcr.io/${GITHUB_OWNER}/gateway:latest
+        image: ghcr.io/MaximeTavares/gateway:latest
         ports:
             - "3000:3000"
         restart: always
@@ -35,7 +35,7 @@ services:
     # FRONT
     # -------------------------
     front:
-        image: ghcr.io/${GITHUB_OWNER}/front:latest
+        image: ghcr.io/MaximeTavares/front:latest
         ports:
             - "80:80"
         restart: always
