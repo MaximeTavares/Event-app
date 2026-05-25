@@ -1,0 +1,53 @@
+name: front CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/front/**"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Variables
+      - name: Set image variables
+        run: |
+          echo "IMAGE=ghcr.io/${{ github.repository_owner }}/front" >> $GITHUB_ENV
+          echo "SHA_TAG=${{ github.sha }}" >> $GITHUB_ENV
+
+      # 3. Login GHCR
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 4. Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t $IMAGE:latest \
+            -t $IMAGE:$SHA_TAG \
+            ./apps/front
+
+      # 5. Push latest
+      - name: Push latest
+        run: |
+          docker push $IMAGE:latest
+
+      # 6. Push versioned
+      - name: Push versioned
+        run: |
+          docker push $IMAGE:$SHA_TAG
