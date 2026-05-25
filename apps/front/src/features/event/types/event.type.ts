@@ -110,7 +110,7 @@ export interface EventDetails {
 
 export interface EventDetailsApiResponse {
     id: number;
-    organizer_id: number;
+    organizer_id: number | string;
     title: string;
     description: string;
     program: string;

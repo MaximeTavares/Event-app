@@ -52,7 +52,7 @@ export interface SlotFromEventDetails {
 
 export interface SlotDetailsApiResponse {
     id: number;
-    organizer_id: number;
+    organizer_id: number | string;
     start_at: Date;
     end_at: Date;
     current_participants: number;

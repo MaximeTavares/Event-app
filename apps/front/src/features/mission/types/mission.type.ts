@@ -50,7 +50,7 @@ export interface MissionFromEventDetails {
 export type MissionDetailsApiResponse = {
     id: number;
     event_id: number;
-    organizer_id: number;
+    organizer_id: number | string;
     title: string;
     description: string;
     status: MissionStatus;

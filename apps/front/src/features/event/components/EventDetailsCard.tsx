@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Modal2 } from '../../../shared/components/UI/Modal2';
 import { formatDate } from '../../../shared/utils/formatDate';
-import { useAuthStore } from '../../auth/store/auth.store';
 import {
     eventStatusColor,
     eventStatusLabel,
@@ -24,13 +23,15 @@ import { MissionCreationForm } from '../../mission/components/MissionCreationFor
 import type { MissionCreationFormValues } from '../../mission/validation/MissionCreation.schema';
 import { useCreateMission } from '../../mission/hooks/use_mission.service';
 import { AddIcon } from '../../../shared/components/UI/icons/icons';
+import { useMe } from '../../auth/hooks/use_auth.service';
 
 interface EventDetailsProps {
     event: EventDetailsApiResponse;
 }
 
 export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useMe();
+
     const navigate = useNavigate();
 
     // Check is the current User is the organizer
