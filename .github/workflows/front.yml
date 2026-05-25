@@ -2,10 +2,9 @@ name: front CI/CD
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "apps/front/**"
+    branches: [main]
+    paths: ["apps/front/**"]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
