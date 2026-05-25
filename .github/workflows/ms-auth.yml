@@ -2,10 +2,9 @@ name: ms-auth CI/CD
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "services/ms-auth/**"
+    branches: [main]
+    paths: ["services/ms-auth/**"]
+  workflow_dispatch:
 
 jobs:
   build:
