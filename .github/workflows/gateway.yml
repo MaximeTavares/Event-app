@@ -2,10 +2,9 @@ name: gateway CI/CD
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "apps/gateway/**"
+    branches: [main]
+    paths: ["apps/gateway/**"]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
