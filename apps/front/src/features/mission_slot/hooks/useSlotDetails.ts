@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
-import { useAuthStore } from '../../auth/store/auth.store';
 import type { SlotDetailsApiResponse } from '../types/slot.type';
 import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema';
 import { useUpdateSlot, useDeleteSlot } from './use_slot.service';
+import { useMe } from '../../auth/hooks/use_auth.service';
 
 export function useSlotDetails(slot: SlotDetailsApiResponse) {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useMe();
+
     const navigate = useNavigate();
 
     const pendingParticipants = slot.participants.filter(

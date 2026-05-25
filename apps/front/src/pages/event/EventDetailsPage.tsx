@@ -7,11 +7,11 @@ import { RadioTabs } from '../../shared/components/UI/RadioTabs';
 import { DiscussionIcon, DocumentsIcon, InfoIcon } from '../../shared/components/UI/icons/icons';
 import { EventDiscussion } from '../../features/event/components/EventDiscussion';
 import { EventDocuments } from '../../features/event/components/EventDocuments';
-import { useAuthStore } from '../../features/auth/store/auth.store';
+import { useMe } from '../../features/auth/hooks/use_auth.service';
 
 export function EventDetailsPage() {
     const { eventId } = useParams<{ eventId: string }>();
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useMe();
 
     const { data: event, isLoading, isError } = useGetEventById(Number(eventId));
 

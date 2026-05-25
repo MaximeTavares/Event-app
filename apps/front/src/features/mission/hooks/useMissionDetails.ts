@@ -1,13 +1,14 @@
 import { useNavigate } from 'react-router';
-import { useAuthStore } from '../../auth/store/auth.store';
 import type { MissionDetailsApiResponse, UpdateMissionInput } from '../types/mission.type';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { useCreateSlot } from '../../mission_slot/hooks/use_slot.service';
 import type { SlotCreationOutputValues } from '../../mission_slot/validation/SlotCreation.schema';
 import { useDeleteMission, useUpdateMission } from './use_mission.service';
+import { useMe } from '../../auth/hooks/use_auth.service';
 
 export function useMissionDetails(mission: MissionDetailsApiResponse) {
-    const user = useAuthStore((state) => state.user);
+    const { data: user } = useMe();
+
     const navigate = useNavigate();
 
     // Check if user can edit
