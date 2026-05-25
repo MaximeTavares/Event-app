@@ -28,6 +28,7 @@ services:
         restart: always
         environment:
             - NATS_URL=nats://nats:4222
+            - GEOAPIFY_API_KEY=${GEOAPIFY_API_KEY}
         depends_on:
             - nats
 
