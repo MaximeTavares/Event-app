@@ -1,0 +1,41 @@
+services:
+    # -------------------------
+    # EVENT BUS
+    # -------------------------
+    nats:
+        image: nats:latest
+        ports:
+            - "4222:4222"
+
+    # -------------------------
+    # AUTH SERVICE
+    # -------------------------
+    ms-auth:
+        image: ghcr.io/${GITHUB_OWNER}/ms-auth:latest
+        restart: always
+        environment:
+            - NATS_URL=nats://nats:4222
+        depends_on:
+            - nats
+
+    # -------------------------
+    # GATEWAY
+    # -------------------------
+    gateway:
+        image: ghcr.io/${GITHUB_OWNER}/gateway:latest
+        ports:
+            - "3000:3000"
+        restart: always
+        environment:
+            - NATS_URL=nats://nats:4222
+        depends_on:
+            - nats
+
+    # -------------------------
+    # FRONT
+    # -------------------------
+    front:
+        image: ghcr.io/${GITHUB_OWNER}/front:latest
+        ports:
+            - "80:80"
+        restart: always
