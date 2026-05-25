@@ -1,17 +1,16 @@
-# BUILD
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
-
 COPY . .
 
+RUN npm ci
+
 RUN npx prisma generate
+
 RUN npm run build
 
-# PROD
+
 FROM node:20-alpine
 
 WORKDIR /app
@@ -21,8 +20,6 @@ RUN npm ci --only=production
 
 COPY --from=builder /app/dist ./dist
 
-
-
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/apps/gateway/main.js"]
