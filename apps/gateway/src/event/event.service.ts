@@ -5,7 +5,6 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { CreateAddressDto } from 'src/address/dto/create-address.dto';
 import { CreateEventDto } from './dto/create-event.dto';
 import {
     EventDetailsDTO,
@@ -13,14 +12,16 @@ import {
     PaginatedEventsDTO,
 } from './dto/event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { PrismaService } from 'prisma/prisma.service';
 import { eventWithAddressAndUser } from './prisma/event.select';
 import { mapEvent, toEventDetails } from './dto/event.mapper';
-import { UserService } from 'src/user/user.service';
-import { toGeocodeDto } from 'src/address/mapper/address.mapper';
-import { Coordinates } from 'src/geoapify/type/geoapify.type';
 import { EventFiltersDto } from './dto/event-filters.dto';
-import { Event_status, Prisma } from 'prisma/generated/prisma/client';
+import { PrismaService } from '../../prisma/prisma.service';
+import { Event_status } from '../../prisma/generated/prisma/browser';
+import { CreateAddressDto } from '../address/dto/create-address.dto';
+import { toGeocodeDto } from '../address/mapper/address.mapper';
+import { Coordinates } from '../geoapify/type/geoapify.type';
+import { UserService } from '../user/user.service';
+import { Prisma } from '../../prisma/generated/prisma/client';
 
 @Injectable()
 export class EventService {
