@@ -26,9 +26,7 @@ jobs:
             export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
             export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
-            cd /home/ubuntu/Event-app
+            cd /opt/event-app
 
-            git pull origin main
-
-            docker compose -f infra/docker/docker-compose.prod.yml pull
-            docker compose -f infra/docker/docker-compose.prod.yml up -d --force-recreate
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
