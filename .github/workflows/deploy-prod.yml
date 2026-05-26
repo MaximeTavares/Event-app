@@ -1,41 +1,32 @@
-# name: Deploy Production
+name: Deploy stack
 
-# on:
-#     workflow_run:
-#         workflows:
-#             - Front Build
-#             - Gateway Build
-#             - ms-auth Build
-#         types:
-#             - completed
-#     workflow_dispatch:
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
 
-# jobs:
-#     deploy:
-#         runs-on: ubuntu-latest
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-#         steps:
-#             - name: Deploy EC2
-#               uses: appleboy/ssh-action@v1.0.3
-#               with:
-#                   host: ${{ secrets.EC2_HOST }}
-#                   username: ubuntu
-#                   key: ${{ secrets.EC2_KEY }}
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
 
-#                   script: |
+          script: |
 
-#                       export IMAGE_TAG=${{ github.sha }}
+            export IMAGE_TAG=latest
 
-#                       export GEOAPIFY_API_KEY="${{ secrets.GEOAPIFY_API_KEY }}"
-#                       export JWT_ACCESS_SECRET="${{ secrets.JWT_ACCESS_SECRET }}"
-#                       export JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}"
+            export FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
-#                       cd /home/ubuntu/Event-app
+            cd /home/ubuntu/Event-app
 
-#                       docker compose -f infra/docker/docker-compose.prod.yml pull
-
-#                       docker compose \
-#                         -f infra/docker/docker-compose.prod.yml \
-#                         up -d
-
-#                       docker ps
+            docker compose -f infra/docker/docker-compose.prod.yml pull
+            docker compose -f infra/docker/docker-compose.prod.yml up -d --force-recreate

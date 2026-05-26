@@ -52,28 +52,28 @@ jobs:
               run: |
                   docker push $IMAGE:$SHA_TAG
 
-            # 7. Deploy
-            - name: Deploy gateway
-              uses: appleboy/ssh-action@v1.0.3
-              with:
-                  host: ${{ secrets.EC2_HOST }}
-                  username: ubuntu
-                  key: ${{ secrets.EC2_KEY }}
+            # # 7. Deploy
+            # - name: Deploy gateway
+            #   uses: appleboy/ssh-action@v1.0.3
+            #   with:
+            #       host: ${{ secrets.EC2_HOST }}
+            #       username: ubuntu
+            #       key: ${{ secrets.EC2_KEY }}
 
-                  script: |
+            #       script: |
 
-                      export IMAGE_TAG=${{ github.sha }}
-                      export FRONTEND_URL=${{ secrets.FRONTEND_URL}}
-                      export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
-                      export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-                      export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
+            #           export IMAGE_TAG=${{ github.sha }}
+            #           export FRONTEND_URL=${{ secrets.FRONTEND_URL}}
+            #           export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            #           export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            #           export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
-                      cd /home/ubuntu/Event-app
+            #           cd /home/ubuntu/Event-app
 
-                      docker compose \
-                        -f infra/docker/docker-compose.prod.yml \
-                        pull gateway
+            #           docker compose \
+            #             -f infra/docker/docker-compose.prod.yml \
+            #             pull gateway
 
-                      docker compose \
-                        -f infra/docker/docker-compose.prod.yml \
-                        up -d gateway
+            #           docker compose \
+            #             -f infra/docker/docker-compose.prod.yml \
+            #             up -d gateway
