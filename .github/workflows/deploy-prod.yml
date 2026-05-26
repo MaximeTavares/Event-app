@@ -28,5 +28,7 @@ jobs:
 
             cd /home/ubuntu/Event-app
 
+            git pull origin main
+
             docker compose -f infra/docker/docker-compose.prod.yml pull
             docker compose -f infra/docker/docker-compose.prod.yml up -d --force-recreate

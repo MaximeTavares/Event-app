@@ -27,6 +27,7 @@ services:
     restart: unless-stopped
     environment:
       NATS_URL: nats://nats:4222
+      MONGO_URL: mongodb://mongo:27017/auth
       FRONTEND_URL: ${FRONTEND_URL}
       GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
