@@ -16,6 +16,7 @@ services:
         restart: unless-stopped
         environment:
             NATS_URL: nats://nats:4222
+            FRONTEND_URL: ${FRONTEND_URL}
             GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
             JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
             JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
@@ -40,6 +41,7 @@ services:
         restart: unless-stopped
         environment:
             NATS_URL: nats://nats:4222
+            FRONTEND_URL: ${FRONTEND_URL}
             GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
             JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
             JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
