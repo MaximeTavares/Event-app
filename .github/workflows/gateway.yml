@@ -1,9 +1,9 @@
-name: Front Build
+name: Gatewat CI/CD
 
 on:
     push:
         branches: [main]
-        paths: ["apps/front/**"]
+        paths: ["apps/gateway/**"]
     workflow_dispatch:
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
             - name: Set image variables
               run: |
                   OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-                  echo "IMAGE=ghcr.io/$OWNER/front" >> $GITHUB_ENV
+                  echo "IMAGE=ghcr.io/$OWNER/gateway" >> $GITHUB_ENV
                   echo "SHA_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
             # 3. Login GHCR
@@ -40,7 +40,7 @@ jobs:
                   docker build \
                     -t $IMAGE:latest \
                     -t $IMAGE:$SHA_TAG \
-                    ./apps/front
+                    ./apps/gateway
 
             # 5. Push latest
             - name: Push latest
@@ -51,3 +51,29 @@ jobs:
             - name: Push versioned
               run: |
                   docker push $IMAGE:$SHA_TAG
+
+            # 7. Deploy
+            - name: Deploy gateway
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ubuntu
+                  key: ${{ secrets.EC2_KEY }}
+
+                  script: |
+
+                      export IMAGE_TAG=${{ github.sha }}
+
+                      export JWT_ACCESS_SECRET="${{ secrets.JWT_ACCESS_SECRET }}"
+                      export JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}"
+                      export GEOAPIFY_API_KEY="${{ secrets.GEOAPIFY_API_KEY }}"
+
+                      cd /home/ubuntu/Event-app
+
+                      docker compose \
+                        -f infra/docker/docker-compose.prod.yml \
+                        pull gateway
+
+                      docker compose \
+                        -f infra/docker/docker-compose.prod.yml \
+                        up -d gateway

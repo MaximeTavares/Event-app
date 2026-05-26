@@ -1,4 +1,4 @@
-name: ms-auth Build
+name: ms-auth CI/CD
 
 on:
     push:
@@ -48,4 +48,31 @@ jobs:
 
             # 6. Push versioned
             - name: Push sha
-              run: docker push $IMAGE:$SHA_TAG
+              run:
+                  docker push $IMAGE:$SHA_TAG
+
+                  # 7. Deploy
+            - name: Deploy ms-auth
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ubuntu
+                  key: ${{ secrets.EC2_KEY }}
+
+                  script: |
+
+                      export IMAGE_TAG=${{ github.sha }}
+
+                      export JWT_ACCESS_SECRET="${{ secrets.JWT_ACCESS_SECRET }}"
+                      export JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}"
+                      export GEOAPIFY_API_KEY="${{ secrets.GEOAPIFY_API_KEY }}"
+
+                      cd /home/ubuntu/Event-app
+
+                      docker compose \
+                        -f infra/docker/docker-compose.prod.yml \
+                        pull ms-auth
+
+                      docker compose \
+                        -f infra/docker/docker-compose.prod.yml \
+                        up -d ms-auth
