@@ -34,10 +34,15 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
+            - name: Inject env
+              run: |
+                  echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > apps/front/.env.production
+
             # 4. Build Docker image
             - name: Build Docker image
               run: |
                   docker build \
+                    --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
                     -t $IMAGE:latest \
                     -t $IMAGE:$SHA_TAG \
                     ./apps/front
