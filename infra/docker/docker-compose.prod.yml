@@ -16,6 +16,7 @@ services:
         restart: unless-stopped
         environment:
             NATS_URL: nats://nats:4222
+            MONGO_URL: mongodb://mongo:27017/auth
             FRONTEND_URL: ${FRONTEND_URL}
             GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
             JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
@@ -64,3 +65,17 @@ services:
         ports:
             - "80:80"
         restart: unless-stopped
+
+    # -------------------------
+    # Mongo
+    # -------------------------
+    mongo:
+        image: mongo:latest
+        restart: unless-stopped
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongo_data:/data/db
+
+    volumes:
+        mongo_data:

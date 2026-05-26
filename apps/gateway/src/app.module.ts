@@ -15,6 +15,7 @@ import { GeoapifyModule } from './geoapify/geoapify.module';
 import { NatsModule } from './nats/nats.module';
 import { AuthController } from './ms-auth/auth.controller';
 import { PrismaModule } from '../prisma/prisma.module';
+import { HealthController } from './health.controller';
 
 @Module({
     imports: [
@@ -31,7 +32,7 @@ import { PrismaModule } from '../prisma/prisma.module';
         ParticipationModule,
         GeoapifyModule,
     ],
-    controllers: [AppController, AuthController],
+    controllers: [AppController, AuthController, HealthController],
     providers: [AppService],
 })
 export class AppModule {}
