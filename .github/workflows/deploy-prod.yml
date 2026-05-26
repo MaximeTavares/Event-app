@@ -8,6 +8,7 @@ on:
             - ms-auth Build
         types:
             - completed
+    workflow_dispatch:
 
 jobs:
     deploy:

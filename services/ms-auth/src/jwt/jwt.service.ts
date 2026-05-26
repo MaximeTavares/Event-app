@@ -20,7 +20,7 @@ export class JwtTokenService {
         //Génération de l'accessToken
 
         return this.jwtService.signAsync(payload, {
-            secret: process.env.ACCESSSECRET,
+            secret: process.env.JWT_ACCESS_SECRET,
             expiresIn: (process.env.ACCESEXPIRE as StringValue) ?? '5m',
             algorithm: (process.env.JWTALGORITHM as Algorithm) ?? 'HS512',
         });
@@ -34,7 +34,7 @@ export class JwtTokenService {
 
         //Génération du refreshToken
         return this.jwtService.signAsync(payload, {
-            secret: process.env.REFRESHSECRET,
+            secret: process.env.JWT_REFRESH_SECRET,
             expiresIn: (process.env.REFRESHEXPIRE as StringValue) ?? '7d',
             algorithm: (process.env.JWTALGORITHM as Algorithm) ?? 'HS512',
         });
@@ -51,7 +51,7 @@ export class JwtTokenService {
 
     async verifyToken(token: string) {
         const payload: JwtPayload = await this.jwtService.verifyAsync(token, {
-            secret: process.env.REFRESHSECRET,
+            secret: process.env.JWT_REFRESH_SECRET,
         });
 
         return payload;

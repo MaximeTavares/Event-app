@@ -45,7 +45,7 @@ export class AuthGuard implements CanActivate {
                     algorithms: [
                         (process.env.JWTALGORITHM as Algorithm) ?? 'HS512',
                     ],
-                    secret: process.env.ACCESSSECRET,
+                    secret: process.env.JWT_ACCESS_SECRET,
                 },
             );
             // Assignation du payload à la request afin qu'elle soit accessible sur nos routes
