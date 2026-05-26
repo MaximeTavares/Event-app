@@ -1,83 +1,120 @@
 services:
-    services:
-        nginx-proxy-manager:
-            image: "jc21/nginx-proxy-manager:latest"
-            container_name: nginx-proxy-manager
-            restart: always
-            ports:
-                # These ports are in format <host-port>:<container-port>
-                - "80:80" # Public HTTP Port
-                - "443:443" # Public HTTPS Port
-                - "81:81" # Admin Web Port
-                # Add any other Stream port you want to expose
-                # - '21:21' # FTP
 
-            # Uncomment the next line if you uncomment anything in the section
-            environment:
-                # Uncomment this if you want to change the location of
-                # the SQLite DB file within the container
-                # DB_SQLITE_FILE: "/data/database.sqlite"
+  # -------------------------
+  # NGINX PROXY MANAGER
+  # -------------------------
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
 
-                # Uncomment this if IPv6 is not enabled on your host
-                DISABLE_IPV6: "true"
-            networks:
-                - nginx-network
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
 
-            volumes:
-                - ./data:/data
-                - ./letsencrypt:/etc/letsencrypt
+    environment:
+      DISABLE_IPV6: "true"
 
-    nats:
-        image: nats:latest
-        restart: unless-stopped
-        # ports:
-        #   - "4222:4222"
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
 
-    ms-auth:
-        image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
-        restart: unless-stopped
-        environment:
-            NATS_URL: nats://nats:4222
-            MONGO_URL: mongodb://mongo:27017/auth
-            FRONTEND_URL: ${FRONTEND_URL}
-            GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
-            JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
-            JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-        depends_on:
-            - nats
+    networks:
+      - nginx-network
 
-    gateway:
-        image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
-        # ports:
-        #   - "3000:3000"
-        restart: unless-stopped
-        environment:
-            NATS_URL: nats://nats:4222
-            MONGO_URL: mongodb://mongo:27017/auth
-            FRONTEND_URL: ${FRONTEND_URL}
-            GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
-            JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
-            JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-        depends_on:
-            - nats
 
-    front:
-        image: ghcr.io/maximetavares/front:${IMAGE_TAG}
-        # ports:
-        #   - "80:80"
-        restart: unless-stopped
+  # -------------------------
+  # EVENT BUS
+  # -------------------------
+  nats:
+    image: nats:latest
+    restart: unless-stopped
 
-    mongo:
-        image: mongo:latest
-        restart: unless-stopped
-        # ports:
-        #   - "27017:27017"
-        volumes:
-            - mongo_data:/data/db
 
+  # -------------------------
+  # AUTH SERVICE
+  # -------------------------
+  ms-auth:
+    image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
+    restart: unless-stopped
+
+    environment:
+      NATS_URL: nats://nats:4222
+      MONGO_URL: mongodb://mongo:27017/auth
+      FRONTEND_URL: ${FRONTEND_URL}
+      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+
+    depends_on:
+      - nats
+      - mongo
+
+    networks:
+      - nginx-network
+
+
+  # -------------------------
+  # GATEWAY
+  # -------------------------
+  gateway:
+    image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
+    restart: unless-stopped
+
+    environment:
+      NATS_URL: nats://nats:4222
+      MONGO_URL: mongodb://mongo:27017/auth
+      FRONTEND_URL: ${FRONTEND_URL}
+      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+
+    depends_on:
+      - nats
+      - mongo
+
+    networks:
+      - nginx-network
+
+
+  # -------------------------
+  # FRONT
+  # -------------------------
+  front:
+    image: ghcr.io/maximetavares/front:${IMAGE_TAG}
+    restart: unless-stopped
+
+    networks:
+      - nginx-network
+
+
+  # -------------------------
+  # MONGO
+  # -------------------------
+  mongo:
+    image: mongo:latest
+    restart: unless-stopped
+
+    volumes:
+      - mongo_data:/data/db
+
+    networks:
+      - nginx-network
+
+
+# -------------------------
+# VOLUMES
+# -------------------------
 volumes:
-    mongo_data:
+  mongo_data:
+  npm_data:
+  npm_letsencrypt:
 
+
+# -------------------------
+# NETWORK
+# -------------------------
 networks:
-    nginx-network:
-        name: nginx-network
+  nginx-network:
+    name: nginx-network
