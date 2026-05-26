@@ -46,8 +46,9 @@ jobs:
           push: true
           no-cache: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/front:latest
-            ghcr.io/${{ github.repository_owner }}/front:${{ github.sha }}
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            ghcr.io/$OWNER/front:latest
+            ghcr.io/$OWNER/front:${{ github.sha }}
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
 
