@@ -4,6 +4,7 @@ services:
     # -------------------------
     nats:
         image: nats:latest
+        restart: unless-stopped
         ports:
             - "4222:4222"
 
@@ -11,36 +12,46 @@ services:
     # AUTH SERVICE
     # -------------------------
     ms-auth:
-        image: ghcr.io/maximetavares/ms-auth:latest
-        restart: always
-        env_file:
-            - .env
+        image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
+        restart: unless-stopped
         environment:
-            - NATS_URL=nats://nats:4222
+            NATS_URL: nats://nats:4222
+            JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+            JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
         depends_on:
             - nats
+        healthcheck:
+            test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+            interval: 10s
+            timeout: 5s
+            retries: 3
 
     # -------------------------
     # GATEWAY
     # -------------------------
     gateway:
-        image: ghcr.io/maximetavares/gateway:latest
+        image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
         ports:
             - "3000:3000"
-        restart: always
-        env_file:
-            - .env
+        restart: unless-stopped
         environment:
-            - NATS_URL=nats://nats:4222
-            - GEOAPIFY_API_KEY=${GEOAPIFY_API_KEY}
+            NATS_URL: nats://nats:4222
+            GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
+            JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+            JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
         depends_on:
             - nats
+        healthcheck:
+            test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+            interval: 10s
+            timeout: 5s
+            retries: 3
 
     # -------------------------
     # FRONT
     # -------------------------
     front:
-        image: ghcr.io/maximetavares/front:latest
+        image: ghcr.io/maximetavares/front:${IMAGE_TAG}
         ports:
             - "80:80"
-        restart: always
+        restart: unless-stopped

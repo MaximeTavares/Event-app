@@ -1,0 +1,40 @@
+name: Deploy Production
+
+on:
+    workflow_run:
+        workflows:
+            - Front Build
+            - Gateway Build
+            - ms-auth Build
+        types:
+            - completed
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Deploy EC2
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ubuntu
+                  key: ${{ secrets.EC2_KEY }}
+
+                  script: |
+
+                      export IMAGE_TAG=${{ github.sha }}
+
+                      export GEOAPIFY_API_KEY="${{ secrets.GEOAPIFY_API_KEY }}"
+                      export JWT_ACCESS_SECRET="${{ secrets.JWT_ACCESS_SECRET }}"
+                      export JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}"
+
+                      cd /home/ubuntu/Event-app
+
+                      docker compose -f infra/docker/docker-compose.prod.yml pull
+
+                      docker compose \
+                        -f infra/docker/docker-compose.prod.yml \
+                        up -d
+
+                      docker ps
