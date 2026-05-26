@@ -23,6 +23,7 @@ jobs:
       - name: Set image variables
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "OWNER=$OWNER" >> $GITHUB_ENV
           echo "IMAGE=ghcr.io/$OWNER/front" >> $GITHUB_ENV
           echo "SHA_TAG=${{ github.sha }}" >> $GITHUB_ENV
 
@@ -46,9 +47,8 @@ jobs:
           push: true
           no-cache: true
           tags: |
-            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-            ghcr.io/$OWNER/front:latest
-            ghcr.io/$OWNER/front:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
 
