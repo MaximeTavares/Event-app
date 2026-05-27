@@ -42,9 +42,9 @@ jobs:
       - name: Deploy staging
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.STAGING_HOST }}
+          host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.STAGING_KEY }}
+          key: ${{ secrets.EC2_KEY }}
 
           script: |
             cd /opt/event-app

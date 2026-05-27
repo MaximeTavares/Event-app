@@ -1,0 +1,120 @@
+services:
+
+  # -------------------------
+  # NGINX PROXY MANAGER
+  # -------------------------
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+
+    environment:
+      DISABLE_IPV6: "true"
+
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+
+    networks:
+      - nginx-network
+
+
+  # -------------------------
+  # EVENT BUS
+  # -------------------------
+  nats:
+    image: nats:latest
+    restart: unless-stopped
+
+
+  # -------------------------
+  # AUTH SERVICE
+  # -------------------------
+  ms-auth:
+    image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
+    restart: unless-stopped
+
+    environment:
+      NATS_URL: nats://nats:4222
+      MONGO_URL: mongodb://mongo:27017/auth
+      FRONTEND_URL: ${FRONTEND_URL}
+      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+
+    depends_on:
+      - nats
+      - mongo
+
+    networks:
+      - nginx-network
+
+
+  # -------------------------
+  # GATEWAY
+  # -------------------------
+  gateway:
+    image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
+    restart: unless-stopped
+
+    environment:
+      NATS_URL: nats://nats:4222
+      MONGO_URL: mongodb://mongo:27017/auth
+      FRONTEND_URL: ${FRONTEND_URL}
+      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+
+    depends_on:
+      - nats
+      - mongo
+
+    networks:
+      - nginx-network
+
+
+  # -------------------------
+  # FRONT
+  # -------------------------
+  front:
+    image: ghcr.io/maximetavares/front:${IMAGE_TAG}
+    restart: unless-stopped
+
+    networks:
+      - nginx-network
+
+
+  # -------------------------
+  # MONGO
+  # -------------------------
+  mongo:
+    image: mongo:latest
+    restart: unless-stopped
+
+    volumes:
+      - mongo_data:/data/db
+
+    networks:
+      - nginx-network
+
+
+# -------------------------
+# VOLUMES
+# -------------------------
+volumes:
+  mongo_data:
+  npm_data:
+  npm_letsencrypt:
+
+
+# -------------------------
+# NETWORK
+# -------------------------
+networks:
+  nginx-network:
+    name: nginx-network

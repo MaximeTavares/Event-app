@@ -43,9 +43,9 @@ jobs:
       - name: Deploy production
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.PROD_HOST }}
+          host: ${{ secrets.EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.PROD_KEY }}
+          key: ${{ secrets.EC2_KEY }}
 
           script: |
             cd /opt/event-app
