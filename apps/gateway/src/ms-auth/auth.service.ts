@@ -12,8 +12,8 @@ export class AuthService {
         response.cookie(cookieName, token, {
             ...options,
             httpOnly: true,
-            secure: false,
-            sameSite: 'strict',
+            secure: true,
+            sameSite: 'none',
             path: '/',
         });
     }
