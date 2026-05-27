@@ -3,8 +3,11 @@ name: Front CI/CD
 on:
   push:
     branches: [main]
-    paths: ["apps/front/**"]
+    paths:
+      - "apps/front/**"
+
   workflow_dispatch:
+
 
 jobs:
   build-and-deploy:
@@ -15,32 +18,65 @@ jobs:
       packages: write
 
     steps:
+
+      # -------------------------
+      # CHECKOUT
+      # -------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Login GHCR
+
+      # -------------------------
+      # SET VARIABLES
+      # -------------------------
+      - name: Set variables
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "OWNER=$OWNER" >> $GITHUB_ENV
+
+
+      # -------------------------
+      # SETUP BUILDX
+      # -------------------------
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+
+      # -------------------------
+      # LOGIN GHCR
+      # -------------------------
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set variables
-        run: |
-          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          echo "OWNER=$OWNER" >> $GITHUB_ENV
 
-      - name: Build & Push
-        run: |
-          docker build \
-            --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
-            -t ghcr.io/$OWNER/front:${{ github.sha }} \
-            -t ghcr.io/$OWNER/front:latest \
-            ./apps/front
+      # -------------------------
+      # BUILD & PUSH
+      # -------------------------
+      - name: Build & Push Front
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/front
 
-          docker push ghcr.io/$OWNER/front:${{ github.sha }}
-          docker push ghcr.io/$OWNER/front:latest
+          push: true
 
+          build-args: |
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+
+          tags: |
+            ghcr.io/${{ env.OWNER }}/front:${{ github.sha }}
+            ghcr.io/${{ env.OWNER }}/front:latest
+
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+
+      # -------------------------
+      # DEPLOY EC2
+      # -------------------------
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -49,9 +85,13 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
 
           script: |
+
             cd /opt/event-app/prod
 
             export IMAGE_TAG=${{ github.sha }}
 
             docker compose pull front
+
             docker compose up -d front
+
+            docker image prune -af
