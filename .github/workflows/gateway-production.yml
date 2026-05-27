@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "apps/gateway/**"
+  workflow_dispatch:
+
 
 jobs:
 

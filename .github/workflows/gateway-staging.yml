@@ -6,6 +6,8 @@ on:
       - develop
     paths:
       - "apps/gateway/**"
+  workflow_dispatch:
+    
 
 jobs:
 
