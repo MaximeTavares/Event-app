@@ -1,0 +1,55 @@
+name: Gateway Staging
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "apps/gateway/**"
+
+jobs:
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: staging
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lowercase owner
+        run: |
+          echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: ./apps/gateway
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER }}/gateway:staging
+
+      - name: Deploy staging
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ubuntu
+          key: ${{ secrets.STAGING_KEY }}
+
+          script: |
+            cd /opt/event-app
+
+            export IMAGE_TAG=staging
+
+            docker compose pull gateway
+            docker compose up -d gateway
