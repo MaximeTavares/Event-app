@@ -1,41 +1,19 @@
 services:
 
   # -------------------------
-  # NGINX PROXY MANAGER
-  # -------------------------
-  nginx-proxy-manager:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager
-    restart: unless-stopped
-
-    ports:
-      - "80:80"
-      - "443:443"
-      - "81:81"
-
-    environment:
-      DISABLE_IPV6: "true"
-
-    volumes:
-      - npm_data:/data
-      - npm_letsencrypt:/etc/letsencrypt
-
-    networks:
-      - nginx-network
-
-
-  # -------------------------
   # EVENT BUS
   # -------------------------
   nats:
     image: nats:latest
     restart: unless-stopped
+    networks:
+      - nginx-network
 
 
   # -------------------------
   # AUTH SERVICE
   # -------------------------
-  ms-auth:
+  ms-auth-staging:
     image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
     restart: unless-stopped
 
@@ -58,7 +36,7 @@ services:
   # -------------------------
   # GATEWAY
   # -------------------------
-  gateway:
+  gateway-staging:
     image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
     restart: unless-stopped
 
@@ -81,7 +59,7 @@ services:
   # -------------------------
   # FRONT
   # -------------------------
-  front:
+  front-staging:
     image: ghcr.io/maximetavares/front:${IMAGE_TAG}
     restart: unless-stopped
 
@@ -97,7 +75,7 @@ services:
     restart: unless-stopped
 
     volumes:
-      - mongo_data:/data/db
+      - mongo_data_staging:/data/db
 
     networks:
       - nginx-network
@@ -107,9 +85,7 @@ services:
 # VOLUMES
 # -------------------------
 volumes:
-  mongo_data:
-  npm_data:
-  npm_letsencrypt:
+  mongo_data_staging:
 
 
 # -------------------------
@@ -117,4 +93,4 @@ volumes:
 # -------------------------
 networks:
   nginx-network:
-    name: nginx-network
+    external: true

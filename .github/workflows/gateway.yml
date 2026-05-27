@@ -1,79 +1,53 @@
-# name: Gateway CI/CD
+name: Gateway CI/CD
 
-# on:
-#     push:
-#         branches: [main]
-#         paths: ["apps/gateway/**"]
-#     workflow_dispatch:
+on:
+  push:
+    branches: [main]
+    paths: ["apps/gateway/**"]
+  workflow_dispatch:
 
-# jobs:
-#     build-and-push:
-#         runs-on: ubuntu-latest
 
-#         permissions:
-#             contents: read
-#             packages: write
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
-#         steps:
-#             # 1. Checkout repo
-#             - name: Checkout repository
-#               uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-#             # 2. Variables
-#             - name: Set image variables
-#               run: |
-#                   OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-#                   echo "IMAGE=ghcr.io/$OWNER/gateway" >> $GITHUB_ENV
-#                   echo "SHA_TAG=${{ github.sha }}" >> $GITHUB_ENV
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-#             # 3. Login GHCR
-#             - name: Login to GHCR
-#               uses: docker/login-action@v3
-#               with:
-#                   registry: ghcr.io
-#                   username: ${{ github.actor }}
-#                   password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & Push
+        run: |
+          docker build \
+            -t ghcr.io/${{ github.repository_owner }}/gateway:${{ github.sha }} \
+            -t ghcr.io/${{ github.repository_owner }}/gateway:latest \
+            ./apps/gateway
 
-#             # 4. Build Docker image
-#             - name: Build Docker image
-#               run: |
-#                   docker build \
-#                     -t $IMAGE:latest \
-#                     -t $IMAGE:$SHA_TAG \
-#                     ./apps/gateway
+          docker push ghcr.io/${{ github.repository_owner }}/gateway:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/gateway:latest
 
-#             # 5. Push latest
-#             - name: Push latest
-#               run: |
-#                   docker push $IMAGE:latest
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
 
-#             # 6. Push versioned
-#             - name: Push versioned
-#               run: |
-#                   docker push $IMAGE:$SHA_TAG
+          script: |
+            cd /opt/event-app/prod
 
-#             # # 7. Deploy
-#             # - name: Deploy gateway
-#             #   uses: appleboy/ssh-action@v1.0.3
-#             #   with:
-#             #       host: ${{ secrets.EC2_HOST }}
-#             #       username: ubuntu
-#             #       key: ${{ secrets.EC2_KEY }}
+            export IMAGE_TAG=${{ github.sha }}
 
-#             #       script: |
+            export FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
-#             #           export IMAGE_TAG=${{ github.sha }}
-#             #           export FRONTEND_URL=${{ secrets.FRONTEND_URL}}
-#             #           export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
-#             #           export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-#             #           export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
-
-#             #           cd /home/ubuntu/Event-app
-
-#             #           docker compose \
-#             #             -f infra/docker/docker-compose.prod.yml \
-#             #             pull gateway
-
-#             #           docker compose \
-#             #             -f infra/docker/docker-compose.prod.yml \
-#             #             up -d gateway
+            docker compose pull gateway
+            docker compose up -d gateway

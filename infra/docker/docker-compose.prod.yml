@@ -1,35 +1,13 @@
 services:
 
   # -------------------------
-  # NGINX PROXY MANAGER
-  # -------------------------
-  nginx-proxy-manager:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager
-    restart: unless-stopped
-
-    ports:
-      - "80:80"
-      - "443:443"
-      - "81:81"
-
-    environment:
-      DISABLE_IPV6: "true"
-
-    volumes:
-      - npm_data:/data
-      - npm_letsencrypt:/etc/letsencrypt
-
-    networks:
-      - nginx-network
-
-
-  # -------------------------
   # EVENT BUS
   # -------------------------
   nats:
     image: nats:latest
     restart: unless-stopped
+    networks:
+      - nginx-network
 
 
   # -------------------------
@@ -108,8 +86,6 @@ services:
 # -------------------------
 volumes:
   mongo_data:
-  npm_data:
-  npm_letsencrypt:
 
 
 # -------------------------
@@ -117,4 +93,4 @@ volumes:
 # -------------------------
 networks:
   nginx-network:
-    name: nginx-network
+    external: true
