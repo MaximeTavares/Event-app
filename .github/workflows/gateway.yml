@@ -1,11 +1,6 @@
-name: Gateway CI/CD
+name: Gateway - PROD
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "apps/gateway/**"
-
   workflow_dispatch:
 
 

@@ -1,6 +1,11 @@
-name: Front CI/CD
+name: Ms-auth - STAGING
 
 on:
+  push:
+    branches: [develop]
+    paths:
+      - "services/ms-auth/**"
+      
   workflow_dispatch:
 
 
@@ -51,19 +56,16 @@ jobs:
       # -------------------------
       # BUILD & PUSH
       # -------------------------
-      - name: Build & Push Front
+      - name: Build & Push ms-auth
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/front
+          context: ./services/ms-auth
 
           push: true
 
-          build-args: |
-            VITE_API_URL=${{ secrets.VITE_API_URL }}
-
           tags: |
-            ghcr.io/${{ env.OWNER }}/front:${{ github.sha }}
-            ghcr.io/${{ env.OWNER }}/front:latest
+            ghcr.io/${{ env.OWNER }}/ms-auth:${{ github.sha }}
+            ghcr.io/${{ env.OWNER }}/ms-auth:latest
 
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -81,12 +83,19 @@ jobs:
 
           script: |
 
-            cd /opt/event-app/prod
+            cd /opt/event-app/staging
 
             export IMAGE_TAG=${{ github.sha }}
 
-            docker compose pull front
+            export FRONTEND_URL=${{ secrets.FRONTEND_URL_STAGING }}
 
-            docker compose up -d front
+            export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+
+            export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
+
+            docker compose pull ms-auth
+
+            docker compose up -d ms-auth
 
             docker image prune -af

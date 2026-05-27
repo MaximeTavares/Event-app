@@ -1,11 +1,6 @@
-name: ms-auth CI/CD
+name: Ms-auth - PROD
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "services/ms-auth/**"
-
   workflow_dispatch:
 
 

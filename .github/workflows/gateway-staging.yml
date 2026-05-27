@@ -1,6 +1,11 @@
-name: Front CI/CD
+name: Gateway -  STAGING
 
 on:
+  push:
+    branches: [develop]
+    paths:
+      - "apps/gateway/**"
+
   workflow_dispatch:
 
 
@@ -22,7 +27,7 @@ jobs:
 
 
       # -------------------------
-      # SET VARIABLES
+      # SET LOWERCASE OWNER
       # -------------------------
       - name: Set variables
         run: |
@@ -31,7 +36,7 @@ jobs:
 
 
       # -------------------------
-      # SETUP BUILDX
+      # SETUP DOCKER BUILDX
       # -------------------------
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -51,19 +56,16 @@ jobs:
       # -------------------------
       # BUILD & PUSH
       # -------------------------
-      - name: Build & Push Front
+      - name: Build & Push Gateway
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/front
+          context: ./apps/gateway
 
           push: true
 
-          build-args: |
-            VITE_API_URL=${{ secrets.VITE_API_URL }}
-
           tags: |
-            ghcr.io/${{ env.OWNER }}/front:${{ github.sha }}
-            ghcr.io/${{ env.OWNER }}/front:latest
+            ghcr.io/${{ env.OWNER }}/gateway:${{ github.sha }}
+            ghcr.io/${{ env.OWNER }}/gateway:latest
 
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -81,12 +83,42 @@ jobs:
 
           script: |
 
-            cd /opt/event-app/prod
+            # -------------------------
+            # GO TO STAGING FOLDER
+            # -------------------------
+            cd /opt/event-app/staging
 
+
+            # -------------------------
+            # IMAGE VERSION
+            # -------------------------
             export IMAGE_TAG=${{ github.sha }}
 
-            docker compose pull front
 
-            docker compose up -d front
+            # -------------------------
+            # ENV VARIABLES
+            # -------------------------
+            export FRONTEND_URL=${{ secrets.FRONTEND_URL_STAGING }}
 
+            export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+
+            export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
+
+
+            # -------------------------
+            # PULL NEW IMAGE
+            # -------------------------
+            docker compose pull gateway
+
+
+            # -------------------------
+            # RESTART GATEWAY
+            # -------------------------
+            docker compose up -d gateway
+
+
+            # -------------------------
+            # CLEAN UNUSED IMAGES
+            # -------------------------
             docker image prune -af

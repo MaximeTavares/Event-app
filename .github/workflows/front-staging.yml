@@ -1,6 +1,11 @@
-name: Front CI/CD
+name: Front - STAGING
 
 on:
+  push:
+    branches: [develop]
+    paths:
+      - "apps/front/**"
+
   workflow_dispatch:
 
 
@@ -59,7 +64,7 @@ jobs:
           push: true
 
           build-args: |
-            VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_API_URL=${{ secrets.VITE_API_URL_STAGING }}
 
           tags: |
             ghcr.io/${{ env.OWNER }}/front:${{ github.sha }}
@@ -81,7 +86,7 @@ jobs:
 
           script: |
 
-            cd /opt/event-app/prod
+            cd /opt/event-app/staging
 
             export IMAGE_TAG=${{ github.sha }}
 
