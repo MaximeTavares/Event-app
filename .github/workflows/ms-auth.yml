@@ -1,78 +1,61 @@
 name: ms-auth CI/CD
 
 on:
-    push:
-        branches: [main]
-        paths: ["services/ms-auth/**"]
-    workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["services/ms-auth/**"]
+  workflow_dispatch:
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
-        permissions:
-            contents: read
-            packages: write
+    permissions:
+      contents: read
+      packages: write
 
-        steps:
-            # 1. Checkout repo
-            - name: Checkout
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            # 2. Variables
-            - name: Set variables
-              run: |
-                  OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-                  echo "IMAGE=ghcr.io/$OWNER/ms-auth" >> $GITHUB_ENV
-                  echo "SHA_TAG=${{ github.sha }}" >> $GITHUB_ENV
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-            # 3. Login GHCR
-            - name: Login GHCR
-              uses: docker/login-action@v3
-              with:
-                  registry: ghcr.io
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set variables
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "OWNER=$OWNER" >> $GITHUB_ENV
 
-            # 4. Build Docker image
-            - name: Build image
-              run: |
-                  docker build \
-                    -t $IMAGE:latest \
-                    -t $IMAGE:$SHA_TAG \
-                    ./services/ms-auth
+      - name: Build & Push
+        run: |
+          docker build \
+            -t ghcr.io/$OWNER/ms-auth:${{ github.sha }} \
+            -t ghcr.io/$OWNER/ms-auth:latest \
+            ./services/ms-auth
 
-            # 5. Push latest
-            - name: Push latest
-              run: docker push $IMAGE:latest
+          docker push ghcr.io/$OWNER/ms-auth:${{ github.sha }}
+          docker push ghcr.io/$OWNER/ms-auth:latest
 
-            # 6. Push versioned
-            - name: Push sha
-              run:
-                  docker push $IMAGE:$SHA_TAG
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
 
-            #       # 7. Deploy
-            # - name: Deploy ms-auth
-            #   uses: appleboy/ssh-action@v1.0.3
-            #   with:
-            #       host: ${{ secrets.EC2_HOST }}
-            #       username: ubuntu
-            #       key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /opt/event-app/prod
 
-            #       script: |
+            export IMAGE_TAG=${{ github.sha }}
 
-            #           export IMAGE_TAG=${{ github.sha }}
+            export FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
-            #           export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
-            #           export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-            #           export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
-
-            #           cd /home/ubuntu/Event-app
-
-            #           docker compose \
-            #             -f infra/docker/docker-compose.prod.yml \
-            #             pull ms-auth
-
-            #           docker compose \
-            #             -f infra/docker/docker-compose.prod.yml \
-            #             up -d ms-auth
+            docker compose pull ms-auth
+            docker compose up -d ms-auth
