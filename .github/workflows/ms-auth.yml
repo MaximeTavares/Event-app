@@ -1,16 +1,50 @@
-name: Ms-auth - PROD
+name: Ms-auth - CI/CD
 
 on:
+  push:
+    branches: [develop]
+    paths:
+      - "services/ms-auth/**"
   workflow_dispatch:
+  pull_request:
+    branches: [develop, main]
 
 
 jobs:
-  build-and-deploy:
+
+  # =====================================================
+  # QUALITY (SONARCLOUD)
+  # =====================================================
+  quality:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+
+  # =====================================================
+  # BUILD + PUSH (COMMON)
+  # =====================================================
+  build:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
       packages: write
+
+    outputs:
+      image_tag: ${{ github.sha }}
 
     steps:
 
@@ -66,10 +100,17 @@ jobs:
           cache-to: type=gha,mode=max
 
 
-      # -------------------------
-      # DEPLOY EC2
-      # -------------------------
-      - name: Deploy to EC2
+  # =====================================================
+  # STAGING DEPLOY (AUTO)
+  # =====================================================
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Deploy STAGING
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -77,20 +118,44 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
 
           script: |
+            cd /opt/event-app/staging
 
+            export IMAGE_TAG=${{ github.sha }}
+
+            export FRONTEND_URL=${{ secrets.FRONTEND_URL_STAGING }}
+            export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
+
+            docker compose pull ms-auth
+            docker compose up -d ms-auth
+
+  # =====================================================
+  # PROD DEPLOY (MANUAL)
+  # =====================================================
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy PROD
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+
+          script: |
             cd /opt/event-app/prod
 
             export IMAGE_TAG=${{ github.sha }}
 
             export FRONTEND_URL=${{ secrets.FRONTEND_URL }}
-
             export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
             export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-
             export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
             docker compose pull ms-auth
-
             docker compose up -d ms-auth
-
-            docker image prune -af
