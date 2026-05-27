@@ -1,0 +1,67 @@
+name: Gateway Quality
+
+on:
+  pull_request:
+    paths:
+      - "apps/gateway/**"
+
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - "apps/gateway/**"
+
+jobs:
+
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./apps/gateway
+
+    steps:
+
+      # -------------------------------------------------
+      # Checkout
+      # -------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------------------------------------
+      # Node
+      # -------------------------------------------------
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/gateway/package-lock.json
+
+      # -------------------------------------------------
+      # Install
+      # -------------------------------------------------
+      - name: Install dependencies
+        run: npm ci
+
+      # -------------------------------------------------
+      # Lint
+      # -------------------------------------------------
+      - name: Run ESLint
+        run: npm run lint
+
+      # -------------------------------------------------
+      # Tests
+      # -------------------------------------------------
+      - name: Run tests
+        run: npm run test:cov
+
+      # -------------------------------------------------
+      # SonarCloud
+      # -------------------------------------------------
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
