@@ -75,7 +75,7 @@ services:
     restart: unless-stopped
 
     volumes:
-      - mongo_data:/data/db
+      - mongo_data_prod:/data/db
 
     networks:
       - nginx-network
@@ -85,7 +85,7 @@ services:
 # VOLUMES
 # -------------------------
 volumes:
-  mongo_data:
+  mongo_data_prod:
 
 
 # -------------------------

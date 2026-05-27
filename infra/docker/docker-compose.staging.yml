@@ -7,7 +7,7 @@ services:
     image: nats:latest
     restart: unless-stopped
     networks:
-      - app-network
+      - nginx-network
 
 
   # -------------------------
@@ -17,15 +17,15 @@ services:
     image: mongo:latest
     restart: unless-stopped
     volumes:
-      - mongo_data:/data/db
+      - mongo_data_staging:/data/db
     networks:
-      - app-network
+      - nginx-network
 
 
   # -------------------------
   # MS-AUTH
   # -------------------------
-  ms-auth:
+  ms-auth-staging:
     image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
     restart: unless-stopped
 
@@ -42,13 +42,13 @@ services:
       - mongo
 
     networks:
-      - app-network
+      - nginx-network
 
 
   # -------------------------
   # GATEWAY
   # -------------------------
-  gateway:
+  gateway-staging:
     image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
     restart: unless-stopped
 
@@ -65,30 +65,30 @@ services:
       - mongo
 
     networks:
-      - app-network
+      - nginx-network
 
 
   # -------------------------
   # FRONT
   # -------------------------
-  front:
+  front-staging:
     image: ghcr.io/maximetavares/front:${IMAGE_TAG}
     restart: unless-stopped
 
     networks:
-      - app-network
+      - nginx-network
 
 
 # -------------------------
 # VOLUMES
 # -------------------------
 volumes:
-  mongo_data:
+  mongo_data_staging:
 
 
 # -------------------------
 # NETWORK
 # -------------------------
 networks:
-  app-network:
-    name: app-network
+  nginx-network:
+    external: true

@@ -127,8 +127,8 @@ jobs:
             export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
             export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
-            docker compose pull gateway
-            docker compose up -d gateway
+            docker compose pull gateway-staging
+            docker compose up -d gateway-staging
 
   # =====================================================
   # PROD DEPLOY (MANUAL)

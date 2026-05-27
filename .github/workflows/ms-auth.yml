@@ -127,8 +127,8 @@ jobs:
             export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
             export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
-            docker compose pull ms-auth
-            docker compose up -d ms-auth
+            docker compose pull ms-auth-staging
+            docker compose up -d ms-auth-staging
 
   # =====================================================
   # PROD DEPLOY (MANUAL)

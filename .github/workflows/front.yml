@@ -124,8 +124,8 @@ jobs:
 
             export IMAGE_TAG=${{ github.sha }}
 
-            docker compose pull front
-            docker compose up -d front
+            docker compose pull front-staging
+            docker compose up -d front-staging
 
   # =====================================================
   # PROD DEPLOY (MANUAL)
