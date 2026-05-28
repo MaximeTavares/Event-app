@@ -19,15 +19,15 @@ export default function SigninPage() {
     };
 
     return (
-        <>
-            <FormLayout title="Connexion">
-                <SignInForm />
-            </FormLayout>
+        <FormLayout title="Connexion" width="lg">
+            <SignInForm />
 
-            <GoogleLogin
-                onSuccess={(credentialsResponse) => onGoogleLogin(credentialsResponse)}
-                onError={() => console.log('Login failed')}
-            ></GoogleLogin>
-        </>
+            <div className="flex justify-center items-center">
+                <GoogleLogin
+                    onSuccess={(credentialsResponse) => onGoogleLogin(credentialsResponse)}
+                    onError={() => console.log('Login failed')}
+                ></GoogleLogin>
+            </div>
+        </FormLayout>
     );
 }
