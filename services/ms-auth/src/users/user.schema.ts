@@ -14,6 +14,13 @@ export class User {
 
     @Prop({ default: 'USER' })
     role: Role;
+
+    @Prop()
+    providers: {
+        google?: {
+            sub: string;
+        };
+    };
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
