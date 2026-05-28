@@ -11,35 +11,23 @@ services:
 
 
   # -------------------------
-  # MONGO
+  # AUTH SERVICE
   # -------------------------
-  mongo:
-    image: mongo:latest
-    restart: unless-stopped
-    volumes:
-      - mongo_data_staging:/data/db
-    networks:
-      - nginx-network
-
-
-  # -------------------------
-  # MS-AUTH
-  # -------------------------
-  ms-auth-staging:
+  ms-auth:
     image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
     restart: unless-stopped
 
     environment:
       NATS_URL: nats://nats:4222
-      MONGO_URL: mongodb://mongo:27017/auth
+      MONGO_URL: ${MONGO_URL}
       FRONTEND_URL: ${FRONTEND_URL}
       GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
 
     depends_on:
       - nats
-      - mongo
 
     networks:
       - nginx-network
@@ -48,21 +36,21 @@ services:
   # -------------------------
   # GATEWAY
   # -------------------------
-  gateway-staging:
+  gateway:
     image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
     restart: unless-stopped
 
     environment:
       NATS_URL: nats://nats:4222
-      MONGO_URL: mongodb://mongo:27017/auth
+      MONGO_URL: ${MONGO_URL}
       FRONTEND_URL: ${FRONTEND_URL}
       GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
 
     depends_on:
       - nats
-      - mongo
 
     networks:
       - nginx-network
@@ -71,24 +59,17 @@ services:
   # -------------------------
   # FRONT
   # -------------------------
-  front-staging:
+  front:
     image: ghcr.io/maximetavares/front:${IMAGE_TAG}
     restart: unless-stopped
 
     networks:
       - nginx-network
 
-
-# -------------------------
-# VOLUMES
-# -------------------------
-volumes:
-  mongo_data_staging:
-
-
 # -------------------------
 # NETWORK
 # -------------------------
 networks:
   nginx-network:
+    name: ${NETWORK_NAME}
     external: true

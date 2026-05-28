@@ -17,17 +17,11 @@ services:
     image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
     restart: unless-stopped
 
-    environment:
-      NATS_URL: nats://nats:4222
-      MONGO_URL: mongodb://mongo:27017/auth
-      FRONTEND_URL: ${FRONTEND_URL}
-      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+    env_file:
+      - .env
 
     depends_on:
       - nats
-      - mongo
 
     networks:
       - nginx-network
@@ -40,17 +34,11 @@ services:
     image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
     restart: unless-stopped
 
-    environment:
-      NATS_URL: nats://nats:4222
-      MONGO_URL: mongodb://mongo:27017/auth
-      FRONTEND_URL: ${FRONTEND_URL}
-      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+    env_file:
+      - .env
 
     depends_on:
       - nats
-      - mongo
 
     networks:
       - nginx-network
@@ -66,31 +54,10 @@ services:
     networks:
       - nginx-network
 
-
-  # -------------------------
-  # MONGO
-  # -------------------------
-  mongo:
-    image: mongo:latest
-    restart: unless-stopped
-
-    volumes:
-      - mongo_data_prod:/data/db
-
-    networks:
-      - nginx-network
-
-
-# -------------------------
-# VOLUMES
-# -------------------------
-volumes:
-  mongo_data_prod:
-
-
 # -------------------------
 # NETWORK
 # -------------------------
 networks:
   nginx-network:
+    name: ${NETWORK_NAME}
     external: true

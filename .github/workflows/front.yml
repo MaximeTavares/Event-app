@@ -122,10 +122,8 @@ jobs:
           script: |
             cd /opt/event-app/staging
 
-            export IMAGE_TAG=${{ github.sha }}
-
-            docker compose pull front-staging
-            docker compose up -d front-staging
+            docker compose pull front
+            docker compose up -d front
 
   # =====================================================
   # PROD DEPLOY (MANUAL)
@@ -146,8 +144,6 @@ jobs:
 
           script: |
             cd /opt/event-app/prod
-
-            export IMAGE_TAG=${{ github.sha }}
 
             docker compose pull front
             docker compose up -d front
