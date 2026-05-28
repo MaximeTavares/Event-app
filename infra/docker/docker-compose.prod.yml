@@ -25,6 +25,7 @@ services:
 
     networks:
       - nginx-network
+      - app-network
 
 
   # -------------------------
@@ -42,22 +43,26 @@ services:
 
     networks:
       - nginx-network
+      - app-network
 
 
   # -------------------------
   # FRONT
   # -------------------------
   front:
-    image: ghcr.io/maximetavares/front:${IMAGE_TAG}
+    image: ghcr.io/maximetavares/front:prod
     restart: unless-stopped
 
     networks:
       - nginx-network
+      - app-network
 
 # -------------------------
 # NETWORK
 # -------------------------
 networks:
   nginx-network:
-    name: ${NETWORK_NAME}
     external: true
+
+  app-network:
+    driver: bridge
