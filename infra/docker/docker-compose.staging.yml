@@ -17,20 +17,15 @@ services:
     image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
     restart: unless-stopped
 
-    environment:
-      NATS_URL: nats://nats:4222
-      MONGO_URL: ${MONGO_URL}
-      FRONTEND_URL: ${FRONTEND_URL}
-      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    env_file:
+      - .env
 
     depends_on:
       - nats
 
     networks:
       - nginx-network
+      - app-network
 
 
   # -------------------------
@@ -40,36 +35,34 @@ services:
     image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
     restart: unless-stopped
 
-    environment:
-      NATS_URL: nats://nats:4222
-      MONGO_URL: ${MONGO_URL}
-      FRONTEND_URL: ${FRONTEND_URL}
-      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY}
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    env_file:
+      - .env
 
     depends_on:
       - nats
 
     networks:
       - nginx-network
+      - app-network
 
 
   # -------------------------
   # FRONT
   # -------------------------
   front:
-    image: ghcr.io/maximetavares/front:${IMAGE_TAG}
+    image: ghcr.io/maximetavares/front:staging
     restart: unless-stopped
 
     networks:
       - nginx-network
+      - app-network
 
 # -------------------------
 # NETWORK
 # -------------------------
 networks:
   nginx-network:
-    name: ${NETWORK_NAME}
     external: true
+
+  app-network:
+    driver: bridge
