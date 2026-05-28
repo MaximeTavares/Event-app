@@ -122,8 +122,8 @@ jobs:
           script: |
             cd /opt/event-app/staging
 
-            docker compose pull front
-            docker compose up -d front
+            IMAGE_TAG=${{ github.sha }} docker compose pull front
+            IMAGE_TAG=${{ github.sha }} docker compose up -d front --remove-orphans
 
   # =====================================================
   # PROD DEPLOY (MANUAL)

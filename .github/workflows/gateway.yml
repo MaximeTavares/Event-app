@@ -120,8 +120,8 @@ jobs:
           script: |
             cd /opt/event-app/staging
 
-            docker compose pull gateway
-            docker compose up -d gateway
+            IMAGE_TAG=${{ github.sha }} docker compose pull gateway
+            IMAGE_TAG=${{ github.sha }} docker compose up -d gateway --remove-orphans
 
   # =====================================================
   # PROD DEPLOY (MANUAL)
