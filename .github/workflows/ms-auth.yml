@@ -120,15 +120,8 @@ jobs:
           script: |
             cd /opt/event-app/staging
 
-            export IMAGE_TAG=${{ github.sha }}
-
-            export FRONTEND_URL=${{ secrets.FRONTEND_URL_STAGING }}
-            export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
-            export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-            export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
-
-            docker compose pull ms-auth
-            docker compose up -d ms-auth
+            IMAGE_TAG=${{ github.sha }} docker compose pull ms-auth
+            IMAGE_TAG=${{ github.sha }} docker compose up -d ms-auth --remove-orphans
 
   # =====================================================
   # PROD DEPLOY (MANUAL)
@@ -150,12 +143,5 @@ jobs:
           script: |
             cd /opt/event-app/prod
 
-            export IMAGE_TAG=${{ github.sha }}
-
-            export FRONTEND_URL=${{ secrets.FRONTEND_URL }}
-            export JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
-            export JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-            export GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
-
-            docker compose pull ms-auth
-            docker compose up -d ms-auth
+            IMAGE_TAG=${{ github.sha }} docker compose pull ms-auth
+            IMAGE_TAG=${{ github.sha }} docker compose up -d ms-auth --remove-orphans
