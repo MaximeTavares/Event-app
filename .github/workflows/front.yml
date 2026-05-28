@@ -2,12 +2,17 @@ name: Front - CI/CD
 
 on:
   push:
-    branches: [develop]
+    branches:
+      - develop
     paths:
       - "apps/front/**"
+
   workflow_dispatch:
+
   pull_request:
-    branches: [develop, main]
+    branches:
+      - develop
+      - main
 
 
 jobs:
@@ -32,8 +37,9 @@ jobs:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORG }}
 
+
   # =====================================================
-  # BUILD + PUSH (COMMON)
+  # BUILD + PUSH (STAGING + PROD DANS LE MÊME JOB)
   # =====================================================
   build:
     if: github.event_name != 'pull_request'
@@ -43,37 +49,19 @@ jobs:
       contents: read
       packages: write
 
-    outputs:
-      image_tag: ${{ github.sha }}
-
     steps:
 
-      # -------------------------
-      # CHECKOUT
-      # -------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
-
-      # -------------------------
-      # SET VARIABLES
-      # -------------------------
       - name: Set variables
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           echo "OWNER=$OWNER" >> $GITHUB_ENV
 
-
-      # -------------------------
-      # SETUP BUILDX
-      # -------------------------
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-
-      # -------------------------
-      # LOGIN GHCR
-      # -------------------------
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -81,11 +69,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-
-      # -------------------------
-      # BUILD & PUSH
-      # -------------------------
-      - name: Build & Push Front
+      # =====================================================
+      # BUILD STAGING
+      # =====================================================
+      - name: Build & Push Front STAGING
+        if: github.ref == 'refs/heads/develop'
         uses: docker/build-push-action@v6
         with:
           context: ./apps/front
@@ -93,27 +81,47 @@ jobs:
           push: true
 
           build-args: |
-            VITE_API_URL=${{ github.ref == 'refs/heads/main' && secrets.VITE_API_URL || secrets.VITE_API_URL_STAGING }}
+            VITE_API_URL=${{ secrets.VITE_API_URL_STAGING }}
 
           tags: |
-            ghcr.io/${{ env.OWNER }}/front:${{ github.sha }}
-            ghcr.io/${{ env.OWNER }}/front:latest
+            ghcr.io/${{ env.OWNER }}/front:staging
 
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # =====================================================
+      # BUILD PROD
+      # =====================================================
+      - name: Build & Push Front PROD
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/front
+
+          push: true
+
+          build-args: |
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+
+          tags: |
+            ghcr.io/${{ env.OWNER }}/front:prod
+
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+
   # =====================================================
-  # STAGING DEPLOY (AUTO)
+  # DEPLOY STAGING
   # =====================================================
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
     needs: build
     runs-on: ubuntu-latest
-    environment: staging
 
     steps:
       - name: Deploy STAGING
         uses: appleboy/ssh-action@v1.0.3
+
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
@@ -121,24 +129,22 @@ jobs:
 
           script: |
             cd /opt/event-app/staging
-
-            export IMAGE_TAG=${{ github.sha }}
-
             docker compose pull front
-            docker compose up -d front
+            docker compose up -d front --remove-orphans
+
 
   # =====================================================
-  # PROD DEPLOY (MANUAL)
+  # DEPLOY PROD
   # =====================================================
   deploy-prod:
     if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Deploy PROD
         uses: appleboy/ssh-action@v1.0.3
+
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
@@ -146,8 +152,5 @@ jobs:
 
           script: |
             cd /opt/event-app/prod
-
-            export IMAGE_TAG=${{ github.sha }}
-
             docker compose pull front
-            docker compose up -d front
+            docker compose up -d front --remove-orphans
