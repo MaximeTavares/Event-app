@@ -143,5 +143,5 @@ jobs:
           script: |
             cd /opt/event-app/prod
 
-            docker compose pull gateway
-            docker compose up -d gateway --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose pull gateway
+            IMAGE_TAG=${{ github.sha }} docker compose up -d gateway --remove-orphans

@@ -143,5 +143,5 @@ jobs:
           script: |
             cd /opt/event-app/prod
 
-            docker compose pull ms-auth
-            docker compose up -d ms-auth
+            IMAGE_TAG=${{ github.sha }} docker compose pull ms-auth
+            IMAGE_TAG=${{ github.sha }} docker compose up -d ms-auth --remove-orphans
