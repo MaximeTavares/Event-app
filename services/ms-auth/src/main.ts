@@ -16,4 +16,4 @@ async function bootstrap() {
     await app.listen();
     console.log('ms-auth running 🚀');
 }
-bootstrap();
+void bootstrap();

@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserProfileModule } from './user-profile/user-profile.module';
-import { AddressModule } from './address/address.module';
 import { EventModule } from './event/event.module';
 
 import { AuthModule } from './ms-auth/auth.module';
@@ -24,7 +23,6 @@ import { HealthController } from './health.controller';
         PrismaModule,
         UserModule,
         UserProfileModule,
-        AddressModule,
         EventModule,
         MissionModule,
         AuthModule,

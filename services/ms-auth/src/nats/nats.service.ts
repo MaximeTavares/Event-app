@@ -12,7 +12,10 @@ export class NatsService {
         this.nats.emit(subject, data);
     }
 
-    async send(subject: string, data: Record<string, unknown>) {
+    async send(
+        subject: string,
+        data: Record<string, unknown>,
+    ): Promise<unknown> {
         return firstValueFrom(this.nats.send(subject, data));
     }
 }
