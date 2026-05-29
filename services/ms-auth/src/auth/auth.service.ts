@@ -1,16 +1,16 @@
 import { JwtTokenService } from './../jwt/jwt.service';
 import { Injectable } from '@nestjs/common';
 import { SigninDto, SignupDto } from 'src/dto/auth.dto';
-import { NatsService } from 'src/nats/nats.service';
 import { RpcException } from '@nestjs/microservices';
 import { compare, hash } from 'src/utils/password.util';
 import { UserService } from 'src/users/user.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
+import { GoogleAuthService } from '../../google/google-auth.service';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly natsService: NatsService,
+        private readonly googleAuthService: GoogleAuthService,
         private readonly userService: UserService,
         private readonly jwtTokenService: JwtTokenService,
         private readonly refreshTokenService: RefreshTokenService,
@@ -40,7 +40,8 @@ export class AuthService {
 
         // Récupérer les infos de l'utilisateur et vérifier s'il existe
         const user = await this.userService.findByEmail(data.email);
-        if (!user) throw new RpcException('Email ou mot de passe incorrect');
+        if (!user?.password)
+            throw new RpcException('Email ou mot de passe incorrect');
 
         //On compare les mdp
         const isValid = await compare(data.password, user.password);
@@ -61,9 +62,46 @@ export class AuthService {
         };
     }
 
-    async refresh(refreshToken: string) {
-        console.log('MS AUTH → refresh called');
+    async googleSignin(idToken: string) {
+        // 1. Verify google token
+        const payload = await this.googleAuthService.verifyToken(idToken);
 
+        // 2. Find or create user
+        const user = await this.userService.findOrCreateGoogleUser({
+            email: payload.email!,
+            googleSub: payload.sub,
+            firstName: payload.given_name,
+            lastName: payload.family_name,
+            avatarUrl: payload.picture,
+        });
+
+        // 3. JWT Token generation
+        const accessToken = await this.jwtTokenService.generateAccessToken({
+            id: user.id,
+            email: user.email,
+            role: user.role,
+        });
+
+        const refreshToken = await this.jwtTokenService.generateRefreshToken({
+            id: user.id,
+        });
+
+        await this.refreshTokenService.save(user.id, refreshToken);
+
+        // 4. Return information
+
+        return {
+            accessToken,
+            refreshToken,
+            // user: {
+            //     id: user.id,
+            //     email: user.email,
+            //     role: user.role,
+            // },
+        };
+    }
+
+    async refresh(refreshToken: string) {
         // 1. Verify refresh token (JWT)
         let payload: { sub: string };
 
