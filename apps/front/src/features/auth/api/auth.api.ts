@@ -9,7 +9,7 @@ export class AuthApi {
     }
 
     static async googleSignin(idToken: string): Promise<AuthResponse> {
-        const { data } = await api.post('ms/auth/google', idToken);
+        const { data } = await api.post('ms/auth/google', { idToken });
 
         return data;
     }
