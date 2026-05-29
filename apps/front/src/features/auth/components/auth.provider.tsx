@@ -27,7 +27,7 @@ export function AuthProvider({ children }: Props) {
         };
 
         restoreSession();
-    });
+    }, []);
 
     return children;
 }
