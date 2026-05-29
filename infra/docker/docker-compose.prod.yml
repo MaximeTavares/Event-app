@@ -3,66 +3,94 @@ services:
   # -------------------------
   # EVENT BUS
   # -------------------------
-  nats:
+  prod-nats:
     image: nats:latest
     restart: unless-stopped
+    container_name: prod-nats
     networks:
-      - nginx-network
-
+      - nginx-prod
 
   # -------------------------
   # AUTH SERVICE
   # -------------------------
-  ms-auth:
+  prod-ms-auth:
     image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
     restart: unless-stopped
+    container_name: prod-ms-auth
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
     env_file:
       - .env
 
     depends_on:
-      - nats
+      prod-nats:
+        condition: service_started
 
     networks:
-      - nginx-network
-      - app-network
+      - nginx-prod
 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   # -------------------------
   # GATEWAY
   # -------------------------
-  gateway:
+  prod-gateway:
     image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
     restart: unless-stopped
+    container_name: prod-gateway
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
     env_file:
       - .env
 
     depends_on:
-      - nats
+      prod-nats:
+        condition: service_started
 
     networks:
-      - nginx-network
-      - app-network
+      - nginx-prod
 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   # -------------------------
   # FRONT
   # -------------------------
-  front:
+  prod-front:
     image: ghcr.io/maximetavares/front:prod
     restart: unless-stopped
+    container_name: prod-front
 
     networks:
-      - nginx-network
-      - app-network
+      - nginx-prod
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
 # -------------------------
 # NETWORK
 # -------------------------
 networks:
-  nginx-network:
+  nginx-prod:
     external: true
-
-  app-network:
-    driver: bridge
+    name: nginx-prod

@@ -3,66 +3,94 @@ services:
   # -------------------------
   # EVENT BUS
   # -------------------------
-  nats:
+  staging-nats:
     image: nats:latest
     restart: unless-stopped
+    container_name: staging-nats
     networks:
-      - nginx-network
-
+      - nginx-staging
 
   # -------------------------
   # AUTH SERVICE
   # -------------------------
-  ms-auth:
+  staging-ms-auth:
     image: ghcr.io/maximetavares/ms-auth:${IMAGE_TAG}
     restart: unless-stopped
+    container_name: staging-ms-auth
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
     env_file:
       - .env
 
     depends_on:
-      - nats
+      staging-nats:
+        condition: service_started
 
     networks:
-      - nginx-network
-      - app-network
+      - nginx-staging
 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   # -------------------------
   # GATEWAY
   # -------------------------
-  gateway:
+  staging-gateway:
     image: ghcr.io/maximetavares/gateway:${IMAGE_TAG}
     restart: unless-stopped
+    container_name: staging-gateway
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
     env_file:
       - .env
 
     depends_on:
-      - nats
+      staging-nats:
+        condition: service_started
 
     networks:
-      - nginx-network
-      - app-network
+      - nginx-staging
 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   # -------------------------
   # FRONT
   # -------------------------
-  front:
+  staging-front:
     image: ghcr.io/maximetavares/front:staging
     restart: unless-stopped
+    container_name: staging-front
 
     networks:
-      - nginx-network
-      - app-network
+      - nginx-staging
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
 # -------------------------
 # NETWORK
 # -------------------------
 networks:
-  nginx-network:
+  nginx-staging:
     external: true
-
-  app-network:
-    driver: bridge
+    name: nginx-staging
