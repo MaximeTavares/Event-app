@@ -138,10 +138,10 @@ jobs:
             cd /opt/event-app/staging
 
             echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull gateway
+            IMAGE_TAG=${{ github.sha }} docker compose pull staging-gateway
 
             echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d gateway --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose up -d staging-gateway --remove-orphans
 
             echo "⏳ Waiting for service..."
             sleep 10
@@ -170,10 +170,10 @@ jobs:
             cd /opt/event-app/prod
 
             echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull gateway
+            IMAGE_TAG=${{ github.sha }} docker compose pull prod-gateway
 
             echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d gateway --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose up -d prod-gateway --remove-orphans
 
             echo "⏳ Waiting for service..."
             sleep 10

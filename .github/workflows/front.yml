@@ -148,10 +148,10 @@ jobs:
             cd /opt/event-app/staging
 
             echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull front
+            IMAGE_TAG=${{ github.sha }} docker compose pull staging-front
 
             echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d front --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose up -d staging-front --remove-orphans
 
             echo "⏳ Waiting for service..."
             sleep 10
@@ -179,12 +179,12 @@ jobs:
 
           script: |
             cd /opt/event-app/prod
-            
+
             echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull front
+            IMAGE_TAG=${{ github.sha }} docker compose pull prod-front
 
             echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d front --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose up -d prod-front --remove-orphans
 
             echo "⏳ Waiting for service..."
             sleep 10
