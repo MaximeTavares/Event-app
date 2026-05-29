@@ -15,6 +15,7 @@ import { NatsModule } from './nats/nats.module';
 import { AuthController } from './ms-auth/auth.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { HealthController } from './health.controller';
+import { HealthModule } from './health.module';
 
 @Module({
     imports: [
@@ -29,6 +30,7 @@ import { HealthController } from './health.controller';
         SlotModule,
         ParticipationModule,
         GeoapifyModule,
+        HealthModule,
     ],
     controllers: [AppController, AuthController, HealthController],
     providers: [AppService],
