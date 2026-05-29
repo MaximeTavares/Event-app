@@ -38,7 +38,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Generate Prisma
-        run: npx prisma generate --ignore-scripts
+        run: npx prisma generate
 
       - name: Lint
         run: npm run lint
