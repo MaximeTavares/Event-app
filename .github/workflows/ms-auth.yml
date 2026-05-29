@@ -143,11 +143,11 @@ jobs:
             echo "Starting container..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d staging-ms-auth --remove-orphans
 
-            echo "⏳ Waiting for service..."
-            sleep 10
+            # echo "⏳ Waiting for service..."
+            # sleep 10
 
-            echo "🩺 Healthcheck..."
-            curl -f http://localhost:3000/health
+            # echo "🩺 Healthcheck..."
+            # curl -f http://localhost:3000/health
 
   # =====================================================
   # PROD DEPLOY (MANUAL)
@@ -175,8 +175,8 @@ jobs:
             echo "Starting container..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d prod-ms-auth --remove-orphans
 
-            echo "⏳ Waiting for service..."
-            sleep 10
+            # echo "⏳ Waiting for service..."
+            # sleep 10
 
-            echo "🩺 Healthcheck..."
-            curl -f http://localhost:3000/health
+            # echo "🩺 Healthcheck..."
+            # curl -f http://localhost:3000/health

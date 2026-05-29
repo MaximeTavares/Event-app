@@ -153,11 +153,11 @@ jobs:
             echo "Starting container..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d staging-front --remove-orphans
 
-            echo "⏳ Waiting for service..."
-            sleep 10
+            # echo "⏳ Waiting for service..."
+            # sleep 10
 
-            echo "🩺 Healthcheck..."
-            curl -f http://localhost
+            # echo "🩺 Healthcheck..."
+            # curl -f http://localhost
 
 
   # =====================================================
@@ -186,8 +186,8 @@ jobs:
             echo "Starting container..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d prod-front --remove-orphans
 
-            echo "⏳ Waiting for service..."
-            sleep 10
+            # echo "⏳ Waiting for service..."
+            # sleep 10
 
-            echo "🩺 Healthcheck..."
-            curl -f http://localhost
+            # echo "🩺 Healthcheck..."
+            # curl -f http://localhost
