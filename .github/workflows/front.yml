@@ -157,7 +157,7 @@ jobs:
             sleep 10
 
             echo "🩺 Healthcheck..."
-            curl -f http://localhost:3000/health
+            curl -f http://localhost
 
 
   # =====================================================
@@ -190,4 +190,4 @@ jobs:
             sleep 10
 
             echo "🩺 Healthcheck..."
-            curl -f http://localhost:3000/health
+            curl -f http://localhost
