@@ -29,7 +29,7 @@
     "@nestjs/microservices": "^11.1.21",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.6",
-    "@prisma/adapter-mariadb": "^7.5.0",
+    "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.5.0",
     "@types/bcrypt": "^6.0.0",
     "argon2": "^0.44.0",
