@@ -17,6 +17,20 @@ export function useSignin() {
     });
 }
 
+export function useGoogleSignin() {
+    const { setAccessToken } = useAuthStore();
+    const queryClient = useQueryClient();
+
+    return useMutation<AuthResponse, Error, { idToken: string }>({
+        mutationFn: (payload) => AuthApi.googleSignin(payload.idToken),
+        onSuccess: async (res) => {
+            setAccessToken(res.accessToken);
+            queryClient.setQueryData(['me'], res.user);
+            queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+    });
+}
+
 export function useMe() {
     const { accessToken } = useAuthStore();
 
