@@ -138,10 +138,10 @@ jobs:
             cd /opt/event-app/staging
 
             echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull ms-auth
+            IMAGE_TAG=${{ github.sha }} docker compose pull staging-ms-auth
 
             echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d ms-auth --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose up -d staging-ms-auth --remove-orphans
 
             echo "⏳ Waiting for service..."
             sleep 10
@@ -170,10 +170,10 @@ jobs:
             cd /opt/event-app/prod
 
             echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull ms-auth
+            IMAGE_TAG=${{ github.sha }} docker compose pull prod-ms-auth
 
             echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d ms-auth --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose up -d prod-ms-auth --remove-orphans
 
             echo "⏳ Waiting for service..."
             sleep 10
