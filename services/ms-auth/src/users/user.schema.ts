@@ -9,17 +9,39 @@ export class User {
     @Prop({ required: true, unique: true })
     email: string;
 
-    @Prop({ required: true })
-    password: string;
+    @Prop()
+    password?: string;
 
     @Prop({ default: 'USER' })
     role: Role;
 
-    @Prop()
+    @Prop({
+        type: {
+            google: {
+                sub: String,
+            },
+        },
+        default: {},
+    })
     providers: {
         google?: {
             sub: string;
         };
+    };
+
+    @Prop({
+        type: {
+            firstName: String,
+            lastName: String,
+            avatarUrl: String,
+        },
+
+        default: {},
+    })
+    profile: {
+        firstName?: string;
+        lastName?: string;
+        avatarUrl?: string;
     };
 }
 
