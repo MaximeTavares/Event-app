@@ -31,6 +31,29 @@ export class AuthController {
     }
 
     @Public()
+    @Post('google')
+    async googleSignin(
+        @Body() body: { idToken: string },
+        @Res({ passthrough: true }) response: Response,
+    ) {
+        const result = await this.natsService.send<
+            SigninResponse,
+            { idToken: string }
+        >('auth.google', body);
+        console.log('🚀 ~ AuthController ~ googleSignin ~ result:', result);
+
+        this.authService.insertIntoCookies(
+            'refresh_token',
+            result.refreshToken,
+            response,
+        );
+
+        return {
+            accessToken: result.accessToken,
+        };
+    }
+
+    @Public()
     @Post('signin')
     async signin(
         @Body() dto: SigninDto,
