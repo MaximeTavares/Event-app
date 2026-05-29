@@ -16,14 +16,12 @@ export default function SigninPage() {
 
             if (!idToken) throw new Error('Missing google token');
 
-            const data = await signin.mutateAsync({ idToken });
+            await signin.mutateAsync({ idToken });
             await queryClient.invalidateQueries({
                 queryKey: ['me'],
             });
 
             navigate('/');
-
-            console.log(data);
         } catch (error) {
             console.log(error);
         }
