@@ -45,10 +45,7 @@ export class AuthService {
         // Récupérer les infos de l'utilisateur et vérifier s'il existe
         const user = await this.userService.findByEmail(data.email);
         if (!user?.password)
-            throw new RpcException({
-                statusCode: 400,
-                message: 'Email ou mot de passe incorrect',
-            });
+            throw new RpcException('Email ou mot de passe incorrect');
 
         //On compare les mdp
         const isValid = await compare(data.password, user.password);

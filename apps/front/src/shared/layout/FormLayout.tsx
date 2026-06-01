@@ -4,39 +4,19 @@ interface FormLayoutProps {
     title: string;
     children: ReactNode;
     width?: 'sm' | 'md' | 'lg' | 'xl';
-    variant?: 'default' | 'modal';
 }
 
 const widthMap = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-} as const;
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+};
 
-export function FormLayout({
-    title,
-    children,
-    width = 'md',
-    variant = 'default',
-}: Readonly<FormLayoutProps>) {
-    const widthClass = variant === 'modal' ? 'w-full' : widthMap[width];
-
+export function FormLayout({ title, children, width = 'md' }: Readonly<FormLayoutProps>) {
     return (
         <fieldset
-            className={`
-                fieldset
-                bg-base-200
-                border-base-300
-                rounded-box
-                border
-                p-6
-                flex
-                flex-col
-                gap-4
-                mx-auto
-                ${widthClass}
-            `}
+            className={`fieldset bg-base-200 border-base-300 rounded-box w-full border p-6 flex flex-col gap-4 ${widthMap[width]}`}
         >
             <h1 className="text-center text-primary text-3xl font-bold">{title}</h1>
             {children}
