@@ -9,5 +9,7 @@ export function useGetCurrentUserWithProfileAndAddress(): UseQueryResult<
     return useQuery<UserWithProfileAndAddress | null, Error>({
         queryKey: ['user-profile', 'me'],
         queryFn: () => getCurrentUserWithProfileAndAddress(),
+        retry: false,
+        staleTime: 1000 * 60 * 5,
     });
 }
