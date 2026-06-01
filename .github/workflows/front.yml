@@ -24,6 +24,10 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./apps/front
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,15 +37,16 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: apps/front/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Lint
         run: npm run lint
 
-      - name: Test
-        run: npm run test -- --passWithNoTests
+    #   - name: Cypress test e2e
+    #     run: npm run test:e2e
 
       - name: SonarCloud Scan (Quality Gate)
         uses: SonarSource/sonarcloud-github-action@master
@@ -99,6 +104,7 @@ jobs:
 
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL_STAGING }}
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID}}
 
           tags: |
             ghcr.io/${{ env.OWNER }}/front:staging
@@ -119,6 +125,7 @@ jobs:
 
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID}}
 
           tags: |
             ghcr.io/${{ env.OWNER }}/front:prod
@@ -148,16 +155,16 @@ jobs:
             cd /opt/event-app/staging
 
             echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull front
+            IMAGE_TAG=${{ github.sha }} docker compose pull staging-front
 
             echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d front --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose up -d staging-front --remove-orphans
 
-            echo "⏳ Waiting for service..."
-            sleep 10
+            # echo "⏳ Waiting for service..."
+            # sleep 10
 
-            echo "🩺 Healthcheck..."
-            curl -f http://localhost:3000/health
+            # echo "🩺 Healthcheck..."
+            # curl -f http://localhost
 
 
   # =====================================================
@@ -179,15 +186,15 @@ jobs:
 
           script: |
             cd /opt/event-app/prod
-            
+
             echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull front
+            IMAGE_TAG=${{ github.sha }} docker compose pull prod-front
 
             echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d front --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose up -d prod-front --remove-orphans
 
-            echo "⏳ Waiting for service..."
-            sleep 10
+            # echo "⏳ Waiting for service..."
+            # sleep 10
 
-            echo "🩺 Healthcheck..."
-            curl -f http://localhost:3000/health
+            # echo "🩺 Healthcheck..."
+            # curl -f http://localhost

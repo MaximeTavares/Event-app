@@ -18,8 +18,6 @@ export async function getEvents(filters?: EventFilters): Promise<PaginatedEvents
 
 export async function getEventById(id: number): Promise<EventDetailsApiResponse> {
     const { data } = await api.get<EventDetailsApiResponse>(`/events/${id}?details=true`);
-
-    console.log('🚀 ~ getEventById ~ data:', data);
     return data;
 }
 

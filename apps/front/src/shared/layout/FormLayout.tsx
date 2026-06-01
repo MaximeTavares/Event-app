@@ -3,17 +3,23 @@ import type { ReactNode } from 'react';
 interface FormLayoutProps {
     title: string;
     children: ReactNode;
+    width?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export function FormLayout({ title, children }: Readonly<FormLayoutProps>) {
+const widthMap = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+};
+
+export function FormLayout({ title, children, width = 'md' }: Readonly<FormLayoutProps>) {
     return (
-        <div className="flex justify-center items-center p-6">
-            <div className="w-full max-w-3xl">
-                <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4 flex flex-col gap-4">
-                    <h1 className="flex justify-center text-primary text-3xl font-bold">{title}</h1>
-                    {children}
-                </fieldset>
-            </div>
-        </div>
+        <fieldset
+            className={`fieldset bg-base-200 border-base-300 rounded-box w-full border p-6 flex flex-col gap-4 ${widthMap[width]}`}
+        >
+            <h1 className="text-center text-primary text-3xl font-bold">{title}</h1>
+            {children}
+        </fieldset>
     );
 }

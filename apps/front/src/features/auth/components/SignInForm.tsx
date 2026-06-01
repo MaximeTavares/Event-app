@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Link, useNavigate } from 'react-router';
-import { OAuthButtons } from './OAuthButtons';
 import { loginSchema } from '../validation/Signin.schema';
 import { FormField } from '../../../shared/components/UI/formField/FormField';
 import { useSignin } from '../hooks/use_auth.service';
@@ -63,8 +62,6 @@ export function SignInForm() {
             <button data-cy="signin-submit" className="btn btn-neutral mt-2 w-full">
                 Se connecter
             </button>
-
-            <OAuthButtons />
 
             <Link to={'/auth/signup'}>
                 <p className="flex justify-center">Vous n'avez pas de compte ?</p>

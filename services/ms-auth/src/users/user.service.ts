@@ -24,4 +24,33 @@ export class UserService {
     async create(data: Partial<User>) {
         return this.userModel.create(data);
     }
+
+    async findOrCreateGoogleUser(data: {
+        email: string;
+        googleSub: string;
+        firstName?: string;
+        lastName?: string;
+        avatarUrl?: string;
+    }) {
+        const user = await this.userModel.findOne({ email: data.email });
+
+        if (!user) {
+            const newUser = await this.userModel.create({
+                email: data.email,
+                providers: {
+                    google: {
+                        sub: data.googleSub,
+                    },
+                },
+                profile: {
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    avatarUrl: data.avatarUrl,
+                },
+            });
+
+            return newUser;
+        }
+        return user;
+    }
 }

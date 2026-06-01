@@ -1,4 +1,4 @@
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { type SigninDto, type SignupDto } from 'src/dto/auth.dto';
@@ -19,6 +19,11 @@ export class AuthController {
     @MessagePattern('auth.signin')
     signin(data: SigninDto) {
         return this.authService.signin(data);
+    }
+
+    @MessagePattern('auth.google')
+    googleSignin(@Payload() data: { idToken: string }) {
+        return this.authService.googleSignin(data.idToken);
     }
 
     @MessagePattern('auth.refresh')

@@ -34,8 +34,6 @@ export function EventCreationPage() {
 
         try {
             await promise;
-            console.log('🚀 ~ handleSubmit ~ promise:', promise);
-
             navigate('/me/events');
         } catch (err) {
             const error = err as AxiosError<ApiError>;

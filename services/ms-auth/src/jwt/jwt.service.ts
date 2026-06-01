@@ -40,15 +40,6 @@ export class JwtTokenService {
         });
     }
 
-    async deleteRefreshToken(token: string): Promise<void> {
-        //TODO Gérer mongo db
-        // await this.prisma.token.deleteMany({
-        //     where: {
-        //         token,
-        //     },
-        // });
-    }
-
     async verifyToken(token: string) {
         const payload: JwtPayload = await this.jwtService.verifyAsync(token, {
             secret: process.env.JWT_REFRESH_SECRET,
@@ -65,7 +56,7 @@ export class JwtTokenService {
     ) {
         response.cookie(cookieName, token, {
             ...option,
-            secure: false, //TODO : a changer en prod
+            secure: false,
             httpOnly: true,
             sameSite: 'strict',
             path: '/ms/auth/refresh_token',

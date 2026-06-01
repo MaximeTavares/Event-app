@@ -7,6 +7,8 @@ CREATE TABLE `Address` (
     `city` VARCHAR(100) NOT NULL,
     `postal_code` VARCHAR(20) NOT NULL,
     `country` VARCHAR(100) NOT NULL,
+    `coordinates_lat` FLOAT NULL,
+    `coordinates_lon` FLOAT NULL,
     `created_at` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updated_at` DATETIME(0) NULL,
 
@@ -133,6 +135,7 @@ CREATE TABLE `Slot` (
     `start_at` DATETIME(0) NOT NULL,
     `end_at` DATETIME(0) NOT NULL,
     `max_participant` INTEGER NOT NULL,
+    `status` ENUM('OPEN', 'FULL', 'CLOSED', 'CANCELLED') NOT NULL,
     `created_at` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updated_at` DATETIME(0) NULL,
 
@@ -160,15 +163,18 @@ CREATE TABLE `Notification` (
 
 -- CreateTable
 CREATE TABLE `Participation` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NOT NULL,
     `slot_id` INTEGER NOT NULL,
     `status` ENUM('PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED') NOT NULL,
-    `registered_at` DATETIME(0) NOT NULL,
+    `decision_at` DATETIME(0) NULL,
+    `cancelled_at` DATETIME(0) NULL,
     `created_at` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updated_at` DATETIME(0) NULL,
 
     INDEX `Participation_slot_id_idx`(`slot_id`),
-    UNIQUE INDEX `Participation_user_id_slot_id_key`(`user_id`, `slot_id`)
+    UNIQUE INDEX `Participation_user_id_slot_id_key`(`user_id`, `slot_id`),
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -203,7 +209,7 @@ CREATE TABLE `User` (
 CREATE TABLE `Token` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NOT NULL,
-    `token` VARCHAR(100) NOT NULL,
+    `token` VARCHAR(255) NOT NULL,
     `is_revoked` BOOLEAN NULL DEFAULT false,
     `revoked_by` ENUM('USER', 'ADMIN', 'SYSTEM') NULL DEFAULT 'USER',
     `type` ENUM('REFRESH') NULL DEFAULT 'REFRESH',
