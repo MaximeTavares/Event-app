@@ -40,7 +40,6 @@ export class AuthController {
             SigninResponse,
             { idToken: string }
         >('auth.google', body);
-        console.log('🚀 ~ AuthController ~ googleSignin ~ result:', result);
 
         this.authService.insertIntoCookies(
             'refresh_token',

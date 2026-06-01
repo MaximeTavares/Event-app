@@ -1,9 +1,15 @@
 # -------------------------
 # BASE
 # -------------------------
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+  ca-certificates \
+  openssl \
+  && update-ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 
 # -------------------------
@@ -12,7 +18,6 @@ WORKDIR /app
 FROM base AS deps
 
 COPY package*.json ./
-
 RUN npm ci
 
 
@@ -22,20 +27,16 @@ RUN npm ci
 FROM base AS builder
 
 COPY --from=deps /app/node_modules ./node_modules
-
-COPY prisma ./prisma
-
-RUN npx prisma generate
-
 COPY . .
 
+RUN npx prisma generate
 RUN npm run build
 
 
 # -------------------------
 # PRODUCTION
 # -------------------------
-FROM node:20-alpine AS production
+FROM base AS production
 
 RUN apk add --no-cache wget
 
@@ -44,12 +45,15 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
-RUN npm ci --omit=dev
-
+# app build
 COPY --from=builder /app/dist ./dist
+
+# prisma runtime
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 3000
 

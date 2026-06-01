@@ -23,6 +23,10 @@ jobs:
       run:
         working-directory: ./apps/gateway
 
+    defaults:
+      run:
+        working-directory: ./apps/gateway
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,12 +37,10 @@ jobs:
           node-version: 20
           cache: npm
           cache-dependency-path: apps/gateway/package-lock.json
+          cache-dependency-path: apps/gateway/package-lock.json
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
-
-      - name: Generate Prisma
-        run: ./node_modules/.bin/prisma generate
 
       - name: Lint
         run: npm run lint
@@ -143,19 +145,28 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
 
           script: |
+            set -e
+
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             cd /opt/event-app/staging
 
-            echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull staging-gateway
+            IMAGE=ghcr.io/${OWNER}/gateway:${{ github.sha }}
 
-            echo "Starting container..."
+            echo "Pulling image..."
+            docker pull $IMAGE
+
+            echo "Running Prisma migrations ..."
+            docker run --rm \
+              --network nginx-staging \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              $IMAGE \
+              npx prisma migrate deploy
+
+            echo "Deploying app..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d staging-gateway --remove-orphans
 
-            # echo "⏳ Waiting for service..."
-            # sleep 10
-
-            # echo "🩺 Healthcheck..."
-            # curl -f http://localhost:3000/health
+            echo "Cleanup old images..."
+            docker image prune -f
 
   # =====================================================
   # PROD DEPLOY (MANUAL)
@@ -175,16 +186,25 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
 
           script: |
+            set -e
+
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             cd /opt/event-app/prod
 
-            echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull prod-gateway
+            IMAGE=ghcr.io/${OWNER}/gateway:${{ github.sha }}
 
-            echo "Starting container..."
+            echo "Pulling image..."
+            docker pull $IMAGE
+
+            echo "Running Prisma migrations ..."
+            docker run --rm \
+              --network nginx-prod \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              $IMAGE \
+              npx prisma migrate deploy
+
+            echo "Deploying app..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d prod-gateway --remove-orphans
 
-            # echo "⏳ Waiting for service..."
-            # sleep 10
-
-            # echo "🩺 Healthcheck..."
-            # curl -f http://localhost:3000/health
+            echo "Cleanup..."
+            docker image prune -f
