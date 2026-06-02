@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { RefreshToken } from './refresh-token.schema';
 import { Model } from 'mongoose';
 import { compare, hash } from 'src/utils/password.util';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class RefreshTokenService {
@@ -43,9 +44,14 @@ export class RefreshTokenService {
     }
 
     async rotate(userId: string, oldToken: string, newToken: string) {
-        const valid = await this.validate(userId, oldToken);
+        const isValid = await this.validate(userId, oldToken);
 
-        if (!valid) return;
+        if (!isValid) {
+            throw new RpcException({
+                statusCode: 401,
+                message: 'Invalid Refresh Token',
+            });
+        }
 
         await this.save(userId, newToken);
     }
