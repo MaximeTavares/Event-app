@@ -42,7 +42,7 @@ export class UserProfileService {
     ) {}
 
     async create(
-        userId: number,
+        userId: string,
         createUserProfileDto: CreateUserProfileDto,
     ): Promise<UserWithProfileAndAddressDTO> {
         const { profileData, addressData } =
@@ -58,10 +58,10 @@ export class UserProfileService {
         const newProfile = await this.prisma.user_profile.create({
             data: {
                 ...profileData,
+                user_id: userId,
                 birthdate: profileData.birthdate
                     ? new Date(profileData.birthdate)
                     : null,
-                User: { connect: { id: userId } },
                 Address: enrichedAddress,
             },
             include: this.includeUserAndAddress,
@@ -71,7 +71,7 @@ export class UserProfileService {
     }
 
     async update(
-        userId: number,
+        userId: string,
         updateUserProfileDto: UpdateUserProfileDto,
     ): Promise<UserWithProfileAndAddressDTO> {
         const { profileData, addressData } =
@@ -100,7 +100,7 @@ export class UserProfileService {
     }
 
     async findUserWithProfile(
-        userId: number,
+        userId: string,
     ): Promise<UserWithProfileAndAddressDTO | null> {
         const user = await this.prisma.user_profile.findUnique({
             where: { user_id: userId },
@@ -112,7 +112,7 @@ export class UserProfileService {
         return mapUserProfileAddress(user);
     }
 
-    async countProfileById(userId: number): Promise<number> {
+    async countProfileById(userId: string): Promise<number> {
         const user = await this.prisma.user_profile.count({
             where: { user_id: userId },
         });

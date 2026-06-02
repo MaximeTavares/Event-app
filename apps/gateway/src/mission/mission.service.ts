@@ -65,7 +65,7 @@ export class MissionService {
                 title: true,
                 description: true,
                 status: true,
-                Event: { select: { user_id: true } },
+                Event: { select: { organizer_id: true } },
                 Slot: {
                     select: {
                         id: true,
@@ -77,18 +77,18 @@ export class MissionService {
                             select: {
                                 id: true,
                                 status: true,
-                                User: {
-                                    select: {
-                                        id: true,
-                                        email: true,
-                                        User_profile: {
-                                            select: {
-                                                first_name: true,
-                                                last_name: true,
-                                            },
-                                        },
-                                    },
-                                },
+                                // User: {
+                                //     select: {
+                                //         id: true,
+                                //         email: true,
+                                //         User_profile: {
+                                //             select: {
+                                //                 first_name: true,
+                                //                 last_name: true,
+                                //             },
+                                //         },
+                                //     },
+                                // },
                             },
                         },
                     },
@@ -102,7 +102,7 @@ export class MissionService {
     }
 
     async update(
-        userId: number,
+        userId: string,
         missionId: number,
         updateMissionDto: UpdateMissionDto,
     ): Promise<MissionDTO> {
@@ -116,7 +116,7 @@ export class MissionService {
         return mapMission(updatedMission);
     }
 
-    async remove(userId: number, missionId: number) {
+    async remove(userId: string, missionId: number) {
         await this.verifyOwnership(userId, missionId);
 
         await this.prisma.mission.delete({
@@ -126,7 +126,7 @@ export class MissionService {
         return { message: 'Mission removed successfully' };
     }
 
-    async verifyOwnership(userId: number, missionId: number) {
+    async verifyOwnership(userId: string, missionId: number) {
         const mission = await this.prisma.mission.findUnique({
             where: { id: missionId },
             include: { Event: true },
@@ -134,7 +134,7 @@ export class MissionService {
 
         if (!mission) throw new NotFoundException('Mission not found');
 
-        if (mission?.Event.user_id !== userId)
+        if (mission?.Event.organizer_id !== userId)
             throw new ForbiddenException('Not allowed');
 
         return mission;

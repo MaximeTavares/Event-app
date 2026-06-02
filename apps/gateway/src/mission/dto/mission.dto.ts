@@ -26,7 +26,7 @@ export type MissionWithSlotDTO = {
 export type MissionWithDetails = {
     id: number;
     event_id: number;
-    organizer_id: number;
+    organizer_id: string;
     title: string;
     description: string;
     status: Mission_status;
@@ -40,7 +40,7 @@ export type MissionWithRelation = {
     description: string;
     status: Mission_status;
     Event: {
-        user_id: number;
+        organizer_id: string;
     };
     Slot: {
         id: number;
@@ -51,14 +51,14 @@ export type MissionWithRelation = {
         Participation: {
             id: number;
             status: Participation_status;
-            User: {
-                id: number;
-                email: string;
-                User_profile: {
-                    first_name: string | null;
-                    last_name: string | null;
-                } | null;
-            };
+            // User: {
+            //     id: string;
+            //     email: string;
+            //     User_profile: {
+            //         first_name: string | null;
+            //         last_name: string | null;
+            //     } | null;
+            // };
         }[];
     }[];
 };

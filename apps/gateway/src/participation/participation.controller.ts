@@ -15,7 +15,7 @@ export class ParticipationController {
 
     @Post('slots/:id/participate')
     create(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('id', ParseIntPipe) slotId: number,
     ) {
         return this.participationService.create(userId, slotId);
@@ -32,28 +32,28 @@ export class ParticipationController {
     }
 
     @Get('me/participations')
-    getMyParticipations(@User('id') userId: number) {
+    getMyParticipations(@User('id') userId: string) {
         return this.participationService.getMyParticipations(userId);
     }
 
     @Get('me/slots')
-    getMySlots(@User('id') userId: number) {
+    getMySlots(@User('id') userId: string) {
         return this.participationService.getMySlots(userId);
     }
 
     @Get('me/missions')
-    getMyMissions(@User('id') userId: number) {
+    getMyMissions(@User('id') userId: string) {
         return this.participationService.getMyMissions(userId);
     }
 
     @Get('me/events')
-    getMyEvents(@User('id') userId: number) {
+    getMyEvents(@User('id') userId: string) {
         return this.participationService.getMyEvents(userId);
     }
 
     @Patch('participations/:id/accept')
     acceptParticipation(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('id', ParseIntPipe) participationId: number,
     ) {
         return this.participationService.acceptParticipation(
@@ -64,7 +64,7 @@ export class ParticipationController {
 
     @Patch('participations/:id/reject')
     rejectParticipation(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('id', ParseIntPipe) participationId: number,
     ) {
         return this.participationService.rejectParticipation(
@@ -75,7 +75,7 @@ export class ParticipationController {
 
     @Patch('participations/:id/cancel')
     cancelParticipation(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('id', ParseIntPipe) participationId: number,
     ) {
         return this.participationService.cancelParticipation(

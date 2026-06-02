@@ -1,5 +1,6 @@
 export const eventWithAddressAndUser = {
     id: true,
+    organizer_id: true,
     title: true,
     description: true,
     program: true,
@@ -19,15 +20,6 @@ export const eventWithAddressAndUser = {
             country: true,
             coordinates_lat: true,
             coordinates_lon: true,
-            created_at: true,
-            updated_at: true,
-        },
-    },
-    User: {
-        select: {
-            id: true,
-            email: true,
-            role: true,
             created_at: true,
             updated_at: true,
         },

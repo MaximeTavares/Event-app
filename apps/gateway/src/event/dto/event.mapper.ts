@@ -1,7 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { eventWithAddressAndUser } from '../prisma/event.select';
 import { EventDetailsDTO, EventDTO, EventWithRelations } from './event.dto';
-import { mapUser } from 'src/user/mapper/user.mapper';
 
 export type EventWithAddressAndUser = Prisma.EventGetPayload<{
     select: typeof eventWithAddressAndUser;
@@ -10,6 +9,7 @@ export type EventWithAddressAndUser = Prisma.EventGetPayload<{
 export function mapEvent(event: EventWithAddressAndUser): EventDTO {
     return {
         id: event.id,
+        organizer_id: event.organizer_id,
         title: event.title,
         description: event.description,
         program: event.program,
@@ -19,14 +19,13 @@ export function mapEvent(event: EventWithAddressAndUser): EventDTO {
         created_at: event.created_at,
         updated_at: event.updated_at,
         address: event.Address,
-        user: mapUser(event.User),
     };
 }
 
 export function toEventDetails(event: EventWithRelations): EventDetailsDTO {
     return {
         id: event.id,
-        organizer_id: event.user_id,
+        organizer_id: event.organizer_id,
         title: event.title,
         description: event.description,
         program: event.program,
@@ -49,11 +48,11 @@ export function toEventDetails(event: EventWithRelations): EventDetailsDTO {
                 status: s.status,
                 current_participants: s.Participation.length,
                 available_place: s.max_participant - s.Participation.length,
-                participations: s.Participation.map((p) => ({
-                    id: p.User.id,
-                    first_name: p.User.User_profile?.first_name,
-                    last_name: p.User.User_profile?.last_name,
-                })),
+                // participations: s.Participation.map((p) => ({
+                //     id: p.User.id,
+                //     first_name: p.User.User_profile?.first_name,
+                //     last_name: p.User.User_profile?.last_name,
+                // })),
             })),
         })),
     };

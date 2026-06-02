@@ -35,7 +35,7 @@ export class ParticipationService {
      * @returns Creation of a participation in "Pending" state
      */
     async create(
-        currentUserId: number,
+        currentUserId: string,
         slotId: number,
     ): Promise<ParticipationDTO> {
         return await this.prisma.$transaction(async (tx) => {
@@ -79,7 +79,7 @@ export class ParticipationService {
     private async getSlotContext(
         tx: Prisma.TransactionClient,
         slotId: number,
-        currentUserId: number,
+        currentUserId: string,
     ) {
         //Count currentParticipants
         const currentParticipants = await tx.participation.count({
@@ -101,7 +101,7 @@ export class ParticipationService {
 
     private async createOrRejointParticipation(
         tx: Prisma.TransactionClient,
-        currentUserId: number,
+        currentUserId: string,
         slotId: number,
         existing: ParticipationDTO | null,
     ) {
@@ -147,7 +147,7 @@ export class ParticipationService {
         return participation;
     }
 
-    async getMyParticipations(userId: number): Promise<ParticipationDTO[]> {
+    async getMyParticipations(userId: string): Promise<ParticipationDTO[]> {
         const participations = await this.prisma.participation.findMany({
             where: { user_id: userId },
         });
@@ -172,7 +172,7 @@ export class ParticipationService {
      * @throws {NotFoundException} If no slots are found (optional, depending on your implementation)
     
      */
-    async getMySlots(userId: number): Promise<SlotDTO[]> {
+    async getMySlots(userId: string): Promise<SlotDTO[]> {
         const participations = await this.prisma.participation.findMany({
             where: { user_id: userId },
             select: {
@@ -257,7 +257,7 @@ export class ParticipationService {
         return [...itemMap.values()];
     }
 
-    async getMyMissions(userId: number): Promise<Mission[]> {
+    async getMyMissions(userId: string): Promise<Mission[]> {
         const participations = await this.prisma.participation.findMany({
             where: { user_id: userId },
             select: {
@@ -279,7 +279,7 @@ export class ParticipationService {
     }
 
     async getMyEvents(
-        userId: number,
+        userId: string,
     ): Promise<Omit<EventDTO, 'user' | 'address'>[]> {
         const participations = await this.prisma.participation.findMany({
             where: { user_id: userId },
@@ -306,7 +306,7 @@ export class ParticipationService {
     }
 
     async acceptParticipation(
-        currentUserId: number,
+        currentUserId: string,
         participationId: number,
     ): Promise<ParticipationDTO> {
         return this.prisma.$transaction((tx) =>
@@ -320,7 +320,7 @@ export class ParticipationService {
     }
 
     async rejectParticipation(
-        currentUserId: number,
+        currentUserId: string,
         participationId: number,
     ): Promise<ParticipationDTO> {
         return this.prisma.$transaction((tx) =>
@@ -334,7 +334,7 @@ export class ParticipationService {
     }
 
     async cancelParticipation(
-        currentUserId: number,
+        currentUserId: string,
         participationId: number,
     ): Promise<ParticipationDTO> {
         return this.prisma.$transaction((tx) =>
@@ -349,7 +349,7 @@ export class ParticipationService {
 
     async updateParticipation(
         tx: Prisma.TransactionClient,
-        currentUserId: number,
+        currentUserId: string,
         participationId: number,
         action: 'ACCEPT' | 'REJECT' | 'CANCEL',
     ) {
@@ -400,7 +400,7 @@ export class ParticipationService {
                             select: {
                                 Event: {
                                     select: {
-                                        user_id: true,
+                                        organizer_id: true,
                                     },
                                 },
                             },
@@ -415,7 +415,7 @@ export class ParticipationService {
             userId: participation.user_id,
             status: participation.status,
             event: {
-                organizerId: participation.Slot.Mission.Event.user_id,
+                organizerId: participation.Slot.Mission.Event.organizer_id,
             },
         };
     }

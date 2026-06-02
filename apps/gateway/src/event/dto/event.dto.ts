@@ -12,7 +12,7 @@ import { UserDTO } from 'src/user/dto/user.dto';
 
 export class EventDTO {
     id: number;
-    user: UserDTO;
+    organizer_id: string;
     title: string;
     description: string;
     program: string;
@@ -41,7 +41,7 @@ export class EventWithRelations {
     status: Event_status;
     created_at: Date;
     updated_at: Date | null;
-    user_id: number;
+    organizer_id: string;
     Address: Address | null;
     Mission: {
         id: number;
@@ -57,14 +57,14 @@ export class EventWithRelations {
             Participation: {
                 id: number;
                 status: Participation_status;
-                User: {
-                    id: number;
-                    email: string;
-                    User_profile: {
-                        first_name: string | null;
-                        last_name: string | null;
-                    } | null;
-                };
+                // User: {
+                //     id: string;
+                //     email: string;
+                //     User_profile: {
+                //         first_name: string | null;
+                //         last_name: string | null;
+                //     } | null;
+                // };
             }[];
         }[];
     }[];
@@ -72,7 +72,7 @@ export class EventWithRelations {
 
 export type EventDetailsDTO = {
     id: number;
-    organizer_id: number;
+    organizer_id: string;
     title: string;
     description: string;
     program: string;

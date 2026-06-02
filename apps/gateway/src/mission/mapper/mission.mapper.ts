@@ -23,7 +23,7 @@ export function toMissionDetails(
     return {
         id: mission.id,
         event_id: mission.event_id,
-        organizer_id: mission.Event.user_id,
+        organizer_id: mission.Event.organizer_id,
         title: mission.title,
         description: mission.description,
         status: mission.status,
@@ -35,11 +35,11 @@ export function toMissionDetails(
             status: s.status,
             current_participants: s.Participation.length,
             available_place: s.max_participant - s.Participation.length,
-            participations: s.Participation.map((p) => ({
-                user_id: p.User.id,
-                first_name: p.User.User_profile?.first_name,
-                last_name: p.User.User_profile?.last_name,
-            })),
+            // participations: s.Participation.map((p) => ({
+            //     user_id: p.User.id,
+            //     first_name: p.User.User_profile?.first_name,
+            //     last_name: p.User.User_profile?.last_name,
+            // })),
         })),
     };
 }

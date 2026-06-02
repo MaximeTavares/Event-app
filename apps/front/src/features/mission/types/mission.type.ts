@@ -63,7 +63,7 @@ export type MissionDetailsApiResponse = {
         available_place: number;
         status: 'OPEN' | 'FULL' | 'CLOSED' | 'CANCELLED';
         participations: {
-            id: number;
+            id: string;
             first_name: string;
             last_name: string;
         }[];

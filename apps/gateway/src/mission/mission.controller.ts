@@ -27,7 +27,7 @@ export class MissionController {
 
     @Post('events/:event_id/missions')
     async create(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('event_id', ParseIntPipe) eventId: number,
         @Body() createMissionDto: CreateMissionDto,
     ): Promise<MissionDTO> {
@@ -35,7 +35,7 @@ export class MissionController {
 
         if (!event) throw new NotFoundException('Event not found');
 
-        if (event.data.user.id !== userId)
+        if (event.data.organizer_id !== userId)
             throw new ForbiddenException("You're not allowed");
 
         return this.missionService.create(eventId, createMissionDto);
@@ -58,7 +58,7 @@ export class MissionController {
 
     @Patch('missions/:id')
     async update(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('id', ParseIntPipe) missionId: number,
         @Body() updateMissionDto: UpdateMissionDto,
     ) {
@@ -67,7 +67,7 @@ export class MissionController {
 
     @Delete('missions/:id')
     async remove(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('id', ParseIntPipe) missionId: number,
     ) {
         return this.missionService.remove(userId, missionId);

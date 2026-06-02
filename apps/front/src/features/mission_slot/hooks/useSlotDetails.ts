@@ -6,6 +6,7 @@ import { useUpdateSlot, useDeleteSlot } from './use_slot.service';
 import { useMe } from '../../auth/hooks/use_auth.service';
 
 export function useSlotDetails(slot: SlotDetailsApiResponse) {
+    console.log('🚀 ~ useSlotDetails ~ slot:', slot.participants);
     const { data: user } = useMe();
 
     const navigate = useNavigate();

@@ -2,7 +2,7 @@ import { Participation_status } from '@prisma/client';
 
 export type ParticipationDTO = {
     id: number;
-    user_id: number;
+    user_id: string;
     slot_id: number;
     status: Participation_status;
     decision_at: Date | null;

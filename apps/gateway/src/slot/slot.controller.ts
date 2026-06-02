@@ -20,7 +20,7 @@ export class SlotController {
 
     @Post('missions/:id/slots')
     async create(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('id', ParseIntPipe) missionId: number,
         @Body() createSlotDto: CreateSlotDto,
     ) {
@@ -38,7 +38,7 @@ export class SlotController {
 
     @Patch('slots/:id')
     update(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('id', ParseIntPipe) slotId: number,
         @Body() updateSlotDto: UpdateSlotDto,
     ) {
@@ -47,7 +47,7 @@ export class SlotController {
 
     @Delete('slots/:id')
     remove(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Param('id', ParseIntPipe) slotId: number,
     ) {
         return this.slotService.remove(userId, slotId);

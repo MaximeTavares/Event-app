@@ -17,6 +17,25 @@ export class UserService {
         return this.userModel.findById(id);
     }
 
+    async findManyByIds(userIds: string[]) {
+        const users = await this.userModel
+            .find({
+                _id: {
+                    $in: userIds,
+                },
+            })
+            .lean()
+            .exec();
+
+        return users.map((user) => ({
+            id: user._id.toString(),
+            email: user.email,
+            first_name: user.profile.firstName,
+            last_name: user.profile.lastName,
+            avatar_url: user.profile.avatarUrl,
+        }));
+    }
+
     async findAll() {
         return this.userModel.find();
     }
