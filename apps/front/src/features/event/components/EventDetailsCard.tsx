@@ -80,7 +80,7 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
 
         toast.promise(promise, {
             loading: 'Chargement...',
-            success: 'Mission créer avec succés',
+            success: 'Mission créée avec succès',
             error: (err: AxiosError<ApiError>) => {
                 return err.response?.data.message || 'Erreur lors de la création';
             },
