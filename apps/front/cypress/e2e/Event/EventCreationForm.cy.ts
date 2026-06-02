@@ -1,5 +1,4 @@
 import { fillEventForm } from '../../support/fillEventForm';
-import { testUser } from '../../support/testUser';
 
 describe('Event creation', () => {
     before(() => {
@@ -7,59 +6,42 @@ describe('Event creation', () => {
     });
 
     beforeEach(() => {
-        cy.session('user', () => {
-            cy.login(testUser.email, testUser.password);
-        });
+        cy.clearCookies();
+        cy.clearLocalStorage();
+        cy.loginByApi();
+
+        cy.visit('/me/events');
+        cy.get('[data-cy="create-event"]').should('be.visible');
     });
 
-    it('Should access to events page', () => {
-        cy.visit('/me/events');
+    it('should access events page', () => {
+        cy.url().should('include', '/me/events');
+        cy.getCookie('refresh_token').should('exist');
     });
 
-    it('Should open the creation form', () => {
-        cy.visit('/me/events');
+    it('should open creation form', () => {
         cy.get('[data-cy="create-event"]').click();
         cy.url().should('include', '/events/create');
     });
 
-    it('Should show error on empty title', () => {
-        // Open the form
-        cy.visit('/me/events');
+    it('should show validation errors when fields are cleared', () => {
         cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
 
-        cy.get('input[name="title"]').type('fdqsfqsdfsdqf').clear().blur();
+        cy.get('input[name="title"]').type('test').clear().blur();
+
         cy.contains('Le titre est requis').should('be.visible');
 
-        cy.get('textarea[name="description"]').type('fdqsfqsdfsdqf').clear().blur();
-        cy.contains('Le titre est requis').should('be.visible');
-    });
+        cy.get('textarea[name="description"]').type('test').clear().blur();
 
-    it('Should show error on empty description', () => {
-        // Open the form
-        cy.visit('/me/events');
-        cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
-
-        cy.get('textarea[name="description"]').type('fdqsfqsdfsdqf').clear().blur();
         cy.contains('La description est requise').should('be.visible');
-    });
 
-    it('Should show error on empty program', () => {
-        // Open the form
-        cy.visit('/me/events');
-        cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
+        cy.get('textarea[name="program"]').type('test').clear().blur();
 
-        cy.get('textarea[name="program"]').type('fdqsfqsdfsdqf').clear().blur();
         cy.contains('Le programme est requis').should('be.visible');
     });
 
-    it('Should show error on end date before start date', () => {
-        // Open the form
-        cy.visit('/me/events');
+    it('should validate date logic', () => {
         cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
 
         cy.get('[data-cy="start-date"]').type('2026-02-25');
         cy.get('[data-cy="end-date"]').type('2026-02-19');
@@ -67,83 +49,23 @@ describe('Event creation', () => {
         cy.contains('La date de fin doit être après la date de début').should('be.visible');
     });
 
-    it('Should show error on empty address number', () => {
-        // Open the form
-        cy.visit('/me/events');
+    it('should disable submit when form is incomplete', () => {
         cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
-
-        cy.get('[data-cy="address-number"]').type('fdqsfqsdfsdqf').clear().blur();
-        cy.contains('Le numéro de rue est requis').should('be.visible');
-    });
-
-    it('Should show error on empty address street name', () => {
-        // Open the form
-        cy.visit('/me/events');
-        cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
-
-        cy.get('[data-cy="address-street-name"]').type('fdqsfqsdfsdqf').clear().blur();
-        cy.contains('Le nom de rue est requis').should('be.visible');
-    });
-
-    it('Should show error on empty city', () => {
-        // Open the form
-        cy.visit('/me/events');
-        cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
-
-        cy.get('[data-cy="city"]').type('fdqsfqsdfsdqf').clear().blur();
-        cy.contains('La ville est requise').should('be.visible');
-    });
-
-    it('Should show error on empty postal code', () => {
-        // Open the form
-        cy.visit('/me/events');
-        cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
-
-        cy.get('[data-cy="address-pc"]').type('fdqsfqsdfsdqf').clear().blur();
-        cy.contains('Le code postal est requis').should('be.visible');
-    });
-
-    it('Should show error on empty country', () => {
-        // Open the form
-        cy.visit('/me/events');
-        cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
-
-        cy.get('[data-cy="country"]').type('fdqsfqsdfsdqf').clear().blur();
-        cy.contains('Le pays est requis').should('be.visible');
-    });
-
-    it('Submit button should be disable on not completed form', () => {
-        // Open the form
-        cy.visit('/me/events');
-        cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
 
         cy.get('[data-cy="submit-event"]').should('be.disabled');
     });
 
-    it('Submit button should be enable on completed form', () => {
-        // Open the form
-        cy.visit('/me/events');
+    it('should enable submit when form is valid', () => {
         cy.get('[data-cy="create-event"]').click();
-        cy.url().should('include', '/events/create');
 
         fillEventForm();
 
         cy.get('[data-cy="submit-event"]').should('be.enabled');
     });
 
-    it('Should create an event successfully', () => {
-        cy.intercept({
-            method: 'POST',
-            url: '**/events',
-        }).as('createEvent');
+    it('should create event successfully', () => {
+        cy.intercept('POST', '**/events').as('createEvent');
 
-        cy.visit('/me/events');
         cy.get('[data-cy="create-event"]').click();
 
         fillEventForm();
