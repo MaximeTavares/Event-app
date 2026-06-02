@@ -32,13 +32,13 @@ export function useGoogleSignin() {
 }
 
 export function useMe() {
-    const { accessToken } = useAuthStore();
+    const { accessToken, initialized } = useAuthStore();
 
     return useQuery({
         queryKey: ['me'],
         queryFn: AuthApi.me,
         retry: false,
-        enabled: !!accessToken,
+        enabled: initialized && !!accessToken,
     });
 }
 
@@ -66,20 +66,24 @@ export function useSignout() {
 }
 
 export function useRefreshToken() {
-    const { setAccessToken, accessToken } = useAuthStore();
+    const { setAccessToken, accessToken, initialized } = useAuthStore();
     const queryClient = useQueryClient();
 
     return useQuery({
         queryKey: ['refresh_token'],
         queryFn: async () => {
             const res = await AuthApi.refresh();
+
             setAccessToken(res.accessToken);
+
             if (res.user) {
                 queryClient.setQueryData(['me'], res.user);
             }
+
             return res;
         },
         retry: false,
-        enabled: !accessToken,
+
+        enabled: initialized && !accessToken,
     });
 }
