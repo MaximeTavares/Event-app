@@ -19,7 +19,7 @@ CREATE TABLE `Address` (
 -- CreateTable
 CREATE TABLE `Announcement` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `author_id` INTEGER NOT NULL,
+    `author_id` VARCHAR(191) NOT NULL,
     `event_id` INTEGER NOT NULL,
     `title` VARCHAR(150) NOT NULL,
     `content` MEDIUMTEXT NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE `Announcement` (
 -- CreateTable
 CREATE TABLE `Availability` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
     `start_at` DATETIME(0) NOT NULL,
     `end_at` DATETIME(0) NOT NULL,
     `created_at` DATETIME(0) NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE `Document` (
 -- CreateTable
 CREATE TABLE `Event` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
+    `organizer_id` VARCHAR(191) NOT NULL,
     `title` VARCHAR(150) NOT NULL,
     `description` MEDIUMTEXT NOT NULL,
     `program` MEDIUMTEXT NOT NULL,
@@ -75,10 +75,10 @@ CREATE TABLE `Event` (
     `created_at` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updated_at` DATETIME(0) NULL,
 
-    INDEX `Event_start_date_end_date_user_id_idx`(`start_date`, `end_date`, `user_id`),
+    INDEX `Event_start_date_end_date_organizer_id_idx`(`start_date`, `end_date`, `organizer_id`),
     INDEX `Event_address_id_idx`(`address_id`),
-    INDEX `Event_user_id_idx`(`user_id`),
-    UNIQUE INDEX `Event_user_id_address_id_start_date_key`(`user_id`, `address_id`, `start_date`),
+    INDEX `Event_organizer_id_idx`(`organizer_id`),
+    UNIQUE INDEX `Event_organizer_id_address_id_start_date_key`(`organizer_id`, `address_id`, `start_date`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -86,8 +86,8 @@ CREATE TABLE `Event` (
 CREATE TABLE `Feedback` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `event_id` INTEGER NOT NULL,
-    `from_user_id` INTEGER NOT NULL,
-    `to_user_id` INTEGER NOT NULL,
+    `from_user_id` VARCHAR(191) NOT NULL,
+    `to_user_id` VARCHAR(191) NOT NULL,
     `rating` TINYINT NOT NULL,
     `comment` MEDIUMTEXT NOT NULL,
     `suggestion` MEDIUMTEXT NOT NULL,
@@ -105,7 +105,7 @@ CREATE TABLE `Message` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `event_id` INTEGER NOT NULL,
     `content` MEDIUMTEXT NOT NULL,
-    `sender_id` INTEGER NOT NULL,
+    `sender_id` VARCHAR(191) NOT NULL,
     `created_at` DATETIME(0) NOT NULL,
     `updated_at` DATETIME(0) NULL,
 
@@ -148,7 +148,7 @@ CREATE TABLE `Slot` (
 -- CreateTable
 CREATE TABLE `Notification` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
     `reference_id` INTEGER NOT NULL,
     `title` VARCHAR(150) NOT NULL,
     `content` MEDIUMTEXT NOT NULL,
@@ -164,7 +164,7 @@ CREATE TABLE `Notification` (
 -- CreateTable
 CREATE TABLE `Participation` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
     `slot_id` INTEGER NOT NULL,
     `status` ENUM('PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED') NOT NULL,
     `decision_at` DATETIME(0) NULL,
@@ -180,7 +180,7 @@ CREATE TABLE `Participation` (
 -- CreateTable
 CREATE TABLE `Recognition` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
     `event_id` INTEGER NOT NULL,
     `type` ENUM('BADGE') NOT NULL,
     `description` MEDIUMTEXT NOT NULL,
@@ -208,7 +208,7 @@ CREATE TABLE `User` (
 -- CreateTable
 CREATE TABLE `Token` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `user_id` INTEGER NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
     `token` VARCHAR(255) NOT NULL,
     `is_revoked` BOOLEAN NULL DEFAULT false,
     `revoked_by` ENUM('USER', 'ADMIN', 'SYSTEM') NULL DEFAULT 'USER',
@@ -224,7 +224,7 @@ CREATE TABLE `Token` (
 
 -- CreateTable
 CREATE TABLE `User_profile` (
-    `user_id` INTEGER NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
     `first_name` VARCHAR(100) NULL,
     `last_name` VARCHAR(100) NULL,
     `phone_number` VARCHAR(20) NULL,
@@ -241,16 +241,7 @@ CREATE TABLE `User_profile` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `Announcement` ADD CONSTRAINT `Announcement_author_id_fkey` FOREIGN KEY (`author_id`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE `Announcement` ADD CONSTRAINT `Announcement_event_id_fkey` FOREIGN KEY (`event_id`) REFERENCES `Event`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `Availability` ADD CONSTRAINT `Availability_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `Document` ADD CONSTRAINT `Document_uploaded_by_fkey` FOREIGN KEY (`uploaded_by`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `Document` ADD CONSTRAINT `Document_event_id_fkey` FOREIGN KEY (`event_id`) REFERENCES `Event`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -259,22 +250,10 @@ ALTER TABLE `Document` ADD CONSTRAINT `Document_event_id_fkey` FOREIGN KEY (`eve
 ALTER TABLE `Event` ADD CONSTRAINT `Event_address_id_fkey` FOREIGN KEY (`address_id`) REFERENCES `Address`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `Event` ADD CONSTRAINT `Event_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE `Feedback` ADD CONSTRAINT `Feedback_event_id_fkey` FOREIGN KEY (`event_id`) REFERENCES `Event`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `Feedback` ADD CONSTRAINT `Feedback_from_user_id_fkey` FOREIGN KEY (`from_user_id`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `Feedback` ADD CONSTRAINT `Feedback_to_user_id_fkey` FOREIGN KEY (`to_user_id`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE `Message` ADD CONSTRAINT `Message_event_id_fkey` FOREIGN KEY (`event_id`) REFERENCES `Event`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `Message` ADD CONSTRAINT `Message_sender_id_fkey` FOREIGN KEY (`sender_id`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `Mission` ADD CONSTRAINT `Mission_event_id_fkey` FOREIGN KEY (`event_id`) REFERENCES `Event`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -283,25 +262,10 @@ ALTER TABLE `Mission` ADD CONSTRAINT `Mission_event_id_fkey` FOREIGN KEY (`event
 ALTER TABLE `Slot` ADD CONSTRAINT `Slot_mission_id_fkey` FOREIGN KEY (`mission_id`) REFERENCES `Mission`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `Notification` ADD CONSTRAINT `Notification_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `Participation` ADD CONSTRAINT `Participation_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE `Participation` ADD CONSTRAINT `Participation_slot_id_fkey` FOREIGN KEY (`slot_id`) REFERENCES `Slot`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `Recognition` ADD CONSTRAINT `Recognition_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE `Recognition` ADD CONSTRAINT `Recognition_event_id_fkey` FOREIGN KEY (`event_id`) REFERENCES `Event`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `Token` ADD CONSTRAINT `Token_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `User_profile` ADD CONSTRAINT `User_profile_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `User_profile` ADD CONSTRAINT `User_profile_address_id_fkey` FOREIGN KEY (`address_id`) REFERENCES `Address`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
