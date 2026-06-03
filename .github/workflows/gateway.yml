@@ -158,7 +158,7 @@ jobs:
               --network nginx-staging \
               -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
               $IMAGE \
-              npx prisma migrate deploy
+              npx prisma db push
 
             echo "Deploying app..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d staging-gateway --remove-orphans
