@@ -10,7 +10,7 @@ interface IEventComponent {
 
 const EventCard = ({ eventData }: IEventComponent) => {
     return (
-        <div className="card bg-base-100 w-96 card-border border-primary shadow-xl shadow-primary">
+        <div className="card bg-base-100 w-96 card-border border-base-300 shadow shadow-base">
             <div className="card-body items-start text-center">
                 <div className="card-actions w-full justify-end gap-8">
                     <Button size="xs" circle disabled>

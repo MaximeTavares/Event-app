@@ -2,7 +2,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Link, useNavigate } from 'react-router';
 import { passwordRules, registerSchema } from '../validation/Signup.schema';
-import { OAuthButtons } from './OAuthButtons';
 import { FormField } from '../../../shared/components/UI/formField/FormField';
 import { useSignup } from '../hooks/use_auth.service';
 import type { SignupFormData } from '../types/types';
@@ -82,8 +81,6 @@ export function SignUpForm() {
             />
 
             <button className="btn btn-neutral mt-2 w-full">S'inscrire</button>
-
-            <OAuthButtons />
 
             <Link to={'/auth/signin'}>
                 <p className="flex justify-center">Déjà un compte ?</p>

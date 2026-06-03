@@ -1,9 +1,10 @@
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { SignInForm } from '../../features/auth/components/SignInForm';
-import { FormLayout } from '../../shared/layout/FormLayout';
 import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGoogleSignin } from '../../features/auth/hooks/use_auth.service';
+import { PageContainer } from '../../shared/layout/PageContainer';
+import { Card } from '../../shared/layout/Card';
 
 export default function SigninPage() {
     const navigate = useNavigate();
@@ -28,15 +29,17 @@ export default function SigninPage() {
     };
 
     return (
-        <FormLayout title="Connexion" width="lg">
-            <SignInForm />
+        <PageContainer>
+            <Card title="Se connecter" size="lg">
+                <SignInForm />
 
-            <div className="flex justify-center items-center">
-                <GoogleLogin
-                    onSuccess={(credentialsResponse) => onGoogleLogin(credentialsResponse)}
-                    onError={() => console.log('Login failed')}
-                ></GoogleLogin>
-            </div>
-        </FormLayout>
+                <div className="flex justify-center items-center p-3">
+                    <GoogleLogin
+                        onSuccess={(credentialsResponse) => onGoogleLogin(credentialsResponse)}
+                        onError={() => console.log('Login failed')}
+                    ></GoogleLogin>
+                </div>
+            </Card>
+        </PageContainer>
     );
 }

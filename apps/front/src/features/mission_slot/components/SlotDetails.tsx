@@ -6,9 +6,10 @@ import { DeleteModal } from '../../../shared/components/UI/DeleteModal';
 import { useState } from 'react';
 import { SlotCreationForm } from './SlotCreationForm';
 import { useSlotDetails } from '../hooks/useSlotDetails';
-import { FormModal } from '../../../shared/components/UI/FormModal';
 import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema';
 import { SlotMapper } from '../mapper/SlotMapper';
+import { Modal2 } from '../../../shared/components/UI/Modal2';
+import { Card } from '../../../shared/layout/Card';
 
 type SlotDetailsProps = {
     slot: SlotDetailsApiResponse;
@@ -84,18 +85,16 @@ export function SlotDetails({ slot }: Readonly<SlotDetailsProps>) {
             </div>
 
             {/* EDIT MODAL */}
-            <FormModal
-                formTitle="Modification de créneau"
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-            >
-                <SlotCreationForm
-                    onSubmit={onUpdate}
-                    isSubmitting={useUpdate.isPending}
-                    error={useUpdate.isError}
-                    defaultValues={SlotMapper.toDefaultValues(slot)}
-                />
-            </FormModal>
+            <Modal2 isOpen={isEditModalOpen} size="lg" onClose={() => setIsEditModalOpen(false)}>
+                <Card title="Modification de créneau" size="full">
+                    <SlotCreationForm
+                        onSubmit={onUpdate}
+                        isSubmitting={useUpdate.isPending}
+                        error={useUpdate.isError}
+                        defaultValues={SlotMapper.toDefaultValues(slot)}
+                    />
+                </Card>
+            </Modal2>
 
             {/* DELETE MODAL */}
             <DeleteModal

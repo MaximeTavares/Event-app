@@ -6,7 +6,6 @@ import {
     eventStatusLabel,
     type EventDetailsApiResponse,
 } from '../types/event.type';
-import { FormLayout } from '../../../shared/layout/FormLayout';
 import { EventUpdateForm } from './EventUpdateForm';
 import { useNavigate } from 'react-router';
 import { useDeleteEvent, useUpdateEvent } from '../hooks/use_event.service';
@@ -24,6 +23,8 @@ import type { MissionCreationFormValues } from '../../mission/validation/Mission
 import { useCreateMission } from '../../mission/hooks/use_mission.service';
 import { AddIcon } from '../../../shared/components/UI/icons/icons';
 import { useMe } from '../../auth/hooks/use_auth.service';
+import { ModalContent } from '../../../shared/layout/ModalContent';
+import { Card } from '../../../shared/layout/Card';
 
 interface EventDetailsProps {
     event: EventDetailsApiResponse;
@@ -185,14 +186,14 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
 
             {/* EDIT MODAL */}
             <Modal2 isOpen={isEditModalOpen} size="lg" onClose={() => setIsEditModalOpen(false)}>
-                <FormLayout title="Modification d'évènement">
+                <Card title="Modification d'évènement" size="full">
                     <EventUpdateForm
                         event={event}
                         onSubmit={handleSubmit}
                         isSubmitting={updateMutation.isPending}
                         error={updateMutation.isError}
                     />
-                </FormLayout>
+                </Card>
             </Modal2>
 
             {/* CREATE MISSION MODAL */}
@@ -201,13 +202,15 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
                 size="lg"
                 onClose={() => setIsCreateMissionModalOpen(false)}
             >
-                <FormLayout title="Création de mission">
-                    <MissionCreationForm
-                        onSubmit={handleMissionSubmit}
-                        isSubmitting={createMissionMutation.isPending}
-                        error={missionErrorMessage}
-                    />
-                </FormLayout>
+                <Card title="Création de mission" size="full">
+                    <ModalContent>
+                        <MissionCreationForm
+                            onSubmit={handleMissionSubmit}
+                            isSubmitting={createMissionMutation.isPending}
+                            error={missionErrorMessage}
+                        />
+                    </ModalContent>
+                </Card>
             </Modal2>
 
             {/* DELETE MODAL */}

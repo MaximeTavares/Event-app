@@ -16,6 +16,8 @@ import {
 import HomeMapSection from '../shared/components/UI/map/HomeMapSection';
 import HomeEventsList from '../features/event/components/HomeEventsList';
 import type { EventStatus } from '../features/event/types/event.type';
+import { PageContainer } from '../shared/layout/PageContainer';
+import { Section } from '../shared/layout/Section';
 
 const statusOptions: { label: string; value: EventStatus }[] = [
     { label: 'Ouvert', value: 'OPEN' },
@@ -141,52 +143,54 @@ export default function Home() {
     }, [events, isEventsLoading, isEventsError, eventsError, location.distanceKm]);
 
     return (
-        <div className="flex flex-wrap gap-4 space-y-4">
-            <HomeFilters
-                statusOptions={statusOptions}
-                status={status}
-                onStatusChange={(value) => {
-                    setCurrentPage(1);
-                    setStatus(value);
-                }}
-                location={location}
-                onLocationChange={(updater) => {
-                    setCurrentPage(1);
-                    setLocation((prev) => updater(prev));
-                }}
-                filterDateValue={filterDateValue}
-                onFilterDateValueChange={(value) => {
-                    setCurrentPage(1);
-                    setFilterDateValue(value);
-                }}
-                isMapVisible={isMapVisible}
-                onToggleMap={() => setIsMapVisible((prev) => !prev)}
-                onReset={() => {
-                    setCurrentPage(1);
-                    setStatus(null);
-                    setFilterDateValue({ start: null, end: null });
-                    setLocation({ city: '', distanceKm: 0 });
-                }}
-            />
+        <PageContainer>
+            <Section>
+                <HomeFilters
+                    statusOptions={statusOptions}
+                    status={status}
+                    onStatusChange={(value) => {
+                        setCurrentPage(1);
+                        setStatus(value);
+                    }}
+                    location={location}
+                    onLocationChange={(updater) => {
+                        setCurrentPage(1);
+                        setLocation((prev) => updater(prev));
+                    }}
+                    filterDateValue={filterDateValue}
+                    onFilterDateValueChange={(value) => {
+                        setCurrentPage(1);
+                        setFilterDateValue(value);
+                    }}
+                    isMapVisible={isMapVisible}
+                    onToggleMap={() => setIsMapVisible((prev) => !prev)}
+                    onReset={() => {
+                        setCurrentPage(1);
+                        setStatus(null);
+                        setFilterDateValue({ start: null, end: null });
+                        setLocation({ city: '', distanceKm: 0 });
+                    }}
+                />
 
-            <HomeMapSection
-                mapWarningMessage={mapWarningMessage}
-                isMapVisible={isMapVisible}
-                isEventsLoading={isEventsLoading}
-                isEventsError={isEventsError}
-                mapStatusMessage={mapStatusMessage}
-                effectiveOrigin={effectiveOrigin}
-                eventMapPoints={eventMapPoints}
-                radiusMeters={location.distanceKm * 1000}
-            />
+                <HomeMapSection
+                    mapWarningMessage={mapWarningMessage}
+                    isMapVisible={isMapVisible}
+                    isEventsLoading={isEventsLoading}
+                    isEventsError={isEventsError}
+                    mapStatusMessage={mapStatusMessage}
+                    effectiveOrigin={effectiveOrigin}
+                    eventMapPoints={eventMapPoints}
+                    radiusMeters={location.distanceKm * 1000}
+                />
 
-            <HomeEventsList
-                listStatusMessage={listStatusMessage}
-                events={events ?? []}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-            />
-        </div>
+                <HomeEventsList
+                    listStatusMessage={listStatusMessage}
+                    events={events ?? []}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+            </Section>
+        </PageContainer>
     );
 }
