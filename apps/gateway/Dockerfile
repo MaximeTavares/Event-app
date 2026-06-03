@@ -40,7 +40,7 @@ RUN npm run build
 # -------------------------
 # PRODUCTION
 # -------------------------
-FROM base AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 
