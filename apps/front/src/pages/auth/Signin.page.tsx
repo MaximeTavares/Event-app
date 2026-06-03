@@ -1,31 +1,10 @@
-import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google';
 import { SignInForm } from '../../features/auth/components/SignInForm';
 import { FormLayout } from '../../shared/layout/FormLayout';
-import { useNavigate } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
-import { useGoogleSignin } from '../../features/auth/hooks/use_auth.service';
+import { useGoogleAuth } from '../../features/auth/hooks/useGoogleAuth';
 
 export default function SigninPage() {
-    const navigate = useNavigate();
-    const queryClient = useQueryClient();
-    const signin = useGoogleSignin();
-
-    const onGoogleLogin = async (credentialsResponse: CredentialResponse) => {
-        try {
-            const idToken = credentialsResponse.credential;
-
-            if (!idToken) throw new Error('Missing google token');
-
-            await signin.mutateAsync({ idToken });
-            await queryClient.invalidateQueries({
-                queryKey: ['me'],
-            });
-
-            navigate('/');
-        } catch (error) {
-            console.log(error);
-        }
-    };
+    const { googleLogin } = useGoogleAuth();
 
     return (
         <FormLayout title="Connexion" width="lg">
@@ -33,7 +12,7 @@ export default function SigninPage() {
 
             <div className="flex justify-center items-center">
                 <GoogleLogin
-                    onSuccess={(credentialsResponse) => onGoogleLogin(credentialsResponse)}
+                    onSuccess={(credentialsResponse) => googleLogin(credentialsResponse)}
                     onError={() => console.log('Login failed')}
                 ></GoogleLogin>
             </div>

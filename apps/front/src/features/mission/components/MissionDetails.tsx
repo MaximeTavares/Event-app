@@ -11,11 +11,11 @@ import { EditableField } from '../../../shared/components/UI/EditableField';
 import { SlotItem } from '../../mission_slot/components/SlotItem';
 import Button from '../../../shared/components/UI/Button';
 import { Modal2 } from '../../../shared/components/UI/Modal2';
-import { FormLayout } from '../../../shared/layout/FormLayout';
 import { SlotCreationForm } from '../../mission_slot/components/SlotCreationForm';
 import { useMissionDetails } from '../hooks/useMissionDetails';
 import type { SlotCreationOutputValues } from '../../mission_slot/validation/SlotCreation.schema';
 import { AddIcon } from '../../../shared/components/UI/icons/icons';
+import { Card } from '../../../shared/layout/Card';
 
 type MissionDetailsProps = {
     mission: MissionDetailsApiResponse;
@@ -103,13 +103,13 @@ export function MissionDetails({ mission }: Readonly<MissionDetailsProps>) {
                 size="lg"
                 onClose={() => setIsCreateSlotModalOpen(false)}
             >
-                <FormLayout title="Création de créneau">
+                <Card title="Création de créneau" size="full">
                     <SlotCreationForm
                         onSubmit={onCreateSlot}
                         isSubmitting={createSlot.isPending}
                         error={createSlot.isError}
                     />
-                </FormLayout>
+                </Card>
             </Modal2>
 
             {/* DELETE MODAL */}

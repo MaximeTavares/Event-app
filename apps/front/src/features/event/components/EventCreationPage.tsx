@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router';
 import { useCreateEvent } from '../hooks/use_event.service';
 import { EventCreationForm } from './EventCreationForm';
-import { FormLayout } from '../../../shared/layout/FormLayout';
 import type { EventCreationFormValues } from '../validation/eventCreation.schema';
 import { EventMapper } from '../mapper/EventMapper';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
 import type { AxiosError } from 'axios';
+import { PageContainer } from '../../../shared/layout/PageContainer';
+import { Card } from '../../../shared/layout/Card';
 
 export type ApiError = {
     message: string;
@@ -43,12 +44,14 @@ export function EventCreationPage() {
     };
 
     return (
-        <FormLayout title="Création d'évènement">
-            <EventCreationForm
-                onSubmit={handleSubmit}
-                isSubmitting={createMutation.isPending}
-                error={errorMessage}
-            />
-        </FormLayout>
+        <PageContainer>
+            <Card title="Création d'évènement" size="xl">
+                <EventCreationForm
+                    onSubmit={handleSubmit}
+                    isSubmitting={createMutation.isPending}
+                    error={errorMessage}
+                />
+            </Card>
+        </PageContainer>
     );
 }

@@ -52,7 +52,7 @@ export interface SlotFromEventDetails {
 
 export interface SlotDetailsApiResponse {
     id: number;
-    organizer_id: number | string;
+    organizer_id: string;
     start_at: Date;
     end_at: Date;
     current_participants: number;
@@ -61,7 +61,7 @@ export interface SlotDetailsApiResponse {
     status: SlotStatus;
     participants: [
         {
-            id: number;
+            id: string;
             participation_id: number;
             email: string;
             participation_status: ParticipationStatus;

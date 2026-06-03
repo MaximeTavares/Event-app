@@ -28,7 +28,7 @@ export class EventController {
     @Post()
     async create(
         @Body() createEventDTO: CreateEventDto,
-        @User('id') userId: number,
+        @User('id') userId: string,
     ): Promise<EventWithUserAndAddressDTO> {
         return await this.eventService.create(createEventDTO, userId);
     }
@@ -43,7 +43,7 @@ export class EventController {
 
     @Get('my-events')
     async findMyAll(
-        @User('id') userId: number,
+        @User('id') userId: string,
     ): Promise<EventWithUserAndAddressDTO[]> {
         return await this.eventService.findAllMyEvents(userId);
     }
@@ -63,18 +63,18 @@ export class EventController {
     update(
         @Param('id') id: string,
         @Body() updateEventDto: UpdateEventDto,
-        @User('id') userId: number,
+        @User('id') userId: string,
     ) {
         return this.eventService.update(+id, updateEventDto, userId);
     }
 
     @Patch(':id/cancel')
-    cancel(@Param('id') id: string, @User('id') userId: number) {
+    cancel(@Param('id') id: string, @User('id') userId: string) {
         return this.eventService.cancel(+id, userId);
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string, @User('id') userId: number) {
+    remove(@Param('id') id: string, @User('id') userId: string) {
         return this.eventService.remove(+id, userId);
     }
 }

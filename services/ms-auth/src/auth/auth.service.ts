@@ -20,7 +20,11 @@ export class AuthService {
         console.log('Appel du ms signup');
         const existing = await this.userService.findByEmail(data.email);
 
-        if (existing) throw new RpcException('User already exist');
+        if (existing)
+            throw new RpcException({
+                statusCode: 400,
+                message: 'Email ou mot de passe incorrect',
+            });
 
         const hashedPassword = await hash(data.password);
 
@@ -41,11 +45,18 @@ export class AuthService {
         // Récupérer les infos de l'utilisateur et vérifier s'il existe
         const user = await this.userService.findByEmail(data.email);
         if (!user?.password)
-            throw new RpcException('Email ou mot de passe incorrect');
+            throw new RpcException({
+                statusCode: 400,
+                message: 'Email ou mot de passe incorrect',
+            });
 
         //On compare les mdp
         const isValid = await compare(data.password, user.password);
-        if (!isValid) throw new RpcException('Email ou mot de passe incorrect');
+        if (!isValid)
+            throw new RpcException({
+                statusCode: 400,
+                message: 'Email ou mot de passe incorrect',
+            });
 
         // Créer les tokens
         const accessToken =
@@ -108,13 +119,20 @@ export class AuthService {
         try {
             payload = await this.jwtTokenService.verifyToken(refreshToken);
         } catch {
-            throw new RpcException('Invalid refresh token');
+            throw new RpcException({
+                statusCode: 401,
+                message: 'Missing Refresh Token',
+            });
         }
 
         const userId = payload.sub;
         const user = await this.userService.findById(userId);
 
-        if (!user) throw new RpcException('User not found');
+        if (!user)
+            throw new RpcException({
+                statusCode: 401,
+                message: 'Invalid Refresh Token',
+            });
 
         // 2. Check token in DB (rotation / revocation)
         const isValid = await this.refreshTokenService.validate(
@@ -123,7 +141,10 @@ export class AuthService {
         );
 
         if (!isValid) {
-            throw new RpcException('Refresh token revoked');
+            throw new RpcException({
+                statusCode: 401,
+                message: 'Refresh Token revoked',
+            });
         }
 
         // 3. Generate user (optionnel si besoin user data)

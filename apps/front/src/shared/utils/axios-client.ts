@@ -10,6 +10,11 @@ function axiosClient(): AxiosInstance {
 
     let refreshPromise: Promise<string> | null = null;
 
+    const isAuthRoute = (url?: string) => {
+        if (!url) return false;
+        return url.includes('/auth/');
+    };
+
     api.interceptors.request.use((config) => {
         const { accessToken } = useAuthStore.getState();
 
@@ -23,6 +28,8 @@ function axiosClient(): AxiosInstance {
     api.interceptors.response.use(
         (res) => res,
         async (error) => {
+            const originalRequest = error.config;
+
             // 429 - Rate limit
             if (error.response?.status === 429) {
                 const retryAfter = error.response.headers['retry-after'];
@@ -30,14 +37,24 @@ function axiosClient(): AxiosInstance {
                 throw new Error(`Trop de tentatives. Réessayez dans ${seconds} secondes.`);
             }
 
-            // 401 - Token expiré
-            if (error.response?.status === 401 && !error.config._retry) {
-                error.config._retry = true;
+            // DO NOT HANDLE AUTH ROUTES
+            if (isAuthRoute(originalRequest?.url)) {
+                throw error;
+            }
+
+            // NO ACCESS TOKEN = NO REFRESH
+            const { accessToken } = useAuthStore.getState();
+            if (!accessToken) {
+                throw error;
+            }
+
+            // 401 - Token expired
+            if (error.response?.status === 401 && !originalRequest._retry) {
+                originalRequest._retry = true;
 
                 refreshPromise ??= AuthApi.refresh()
-                    .then(async (data) => {
+                    .then((data) => {
                         useAuthStore.getState().setAccessToken(data.accessToken);
-
                         return data.accessToken;
                     })
                     .catch((err) => {
@@ -49,9 +66,11 @@ function axiosClient(): AxiosInstance {
                         refreshPromise = null;
                     });
 
-                const accessToken: string = await refreshPromise;
-                error.config.headers.Authorization = `Bearer ${accessToken}`;
-                return api(error.config);
+                const accessToken = await refreshPromise;
+
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+                return api(originalRequest);
             }
 
             throw error;

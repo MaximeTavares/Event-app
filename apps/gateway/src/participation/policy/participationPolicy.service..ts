@@ -11,7 +11,7 @@ import { ParticipationDTO } from '../dto/participation.dto';
 @Injectable()
 export class ParticipationPolicyService {
     assertCanAccept(
-        userId: number,
+        userId: string,
         participation: ParticipationWithStatusAndOrganizer,
     ): void {
         this.assertOrganizer(userId, participation);
@@ -26,7 +26,7 @@ export class ParticipationPolicyService {
     }
 
     assertCanReject(
-        userId: number,
+        userId: string,
         participation: ParticipationWithStatusAndOrganizer,
     ): void {
         this.assertOrganizer(userId, participation);
@@ -41,7 +41,7 @@ export class ParticipationPolicyService {
     }
 
     assertCanCancel(
-        userId: number,
+        userId: string,
         participation: ParticipationWithStatusAndOrganizer,
     ): void {
         if (userId !== participation.userId)
@@ -67,7 +67,7 @@ export class ParticipationPolicyService {
     }
 
     private assertOrganizer(
-        currentUserId: number,
+        currentUserId: string,
         participation: ParticipationWithStatusAndOrganizer,
     ): void {
         if (currentUserId !== participation.event.organizerId)

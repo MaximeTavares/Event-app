@@ -19,26 +19,19 @@ export type SlotWithParticipations = {
     max_participant: number;
     Mission: {
         Event: {
-            user_id: number;
+            organizer_id: string;
         };
     };
     Participation: {
         id: number;
         status: Participation_status;
-        User: {
-            id: number;
-            email: string;
-            User_profile: {
-                first_name: string | null;
-                last_name: string | null;
-            } | null;
-        };
+        user_id: string;
     }[];
 };
 
 export type SlotWithParticipationDto = {
     id: number;
-    organizer_id: number;
+    organizer_id: string;
     start_at: Date;
     end_at: Date;
     max_participants: number;
@@ -46,11 +39,12 @@ export type SlotWithParticipationDto = {
     available_place: number;
     status: Slot_status;
     participants: {
-        id: number;
+        user_id: string;
         participation_id: number;
         first_name: string | null;
         last_name: string | null;
         email: string;
+        avatar_url: string | null;
         participation_status: Participation_status;
     }[];
 };

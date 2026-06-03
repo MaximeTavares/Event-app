@@ -5,7 +5,7 @@ FROM node:20-slim AS base
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
   ca-certificates \
   openssl \
   && update-ca-certificates \
@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
 FROM base AS deps
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 
 # -------------------------
@@ -27,16 +27,20 @@ RUN npm ci
 FROM base AS builder
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+
+COPY prisma ./prisma
 
 RUN npx prisma generate
+
+COPY . .
+
 RUN npm run build
 
 
 # -------------------------
 # PRODUCTION
 # -------------------------
-FROM base AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 

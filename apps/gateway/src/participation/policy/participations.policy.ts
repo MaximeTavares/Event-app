@@ -55,7 +55,7 @@ export const PARTICIPATION_ACTION_CONFIG = {
         status: 'ACCEPTED',
         applyPolicy: (
             policy: ParticipationPolicyService,
-            userId: number,
+            userId: string,
             participation: ParticipationWithStatusAndOrganizer,
         ) => policy.assertCanAccept(userId, participation),
         decision_at: () => new Date(),
@@ -65,7 +65,7 @@ export const PARTICIPATION_ACTION_CONFIG = {
         status: 'REJECTED',
         applyPolicy: (
             policy: ParticipationPolicyService,
-            userId: number,
+            userId: string,
             participation: ParticipationWithStatusAndOrganizer,
         ) => policy.assertCanReject(userId, participation),
         decision_at: () => new Date(),
@@ -75,7 +75,7 @@ export const PARTICIPATION_ACTION_CONFIG = {
         status: 'CANCELLED',
         applyPolicy: (
             policy: ParticipationPolicyService,
-            userId: number,
+            userId: string,
             participation: ParticipationWithStatusAndOrganizer,
         ) => policy.assertCanCancel(userId, participation),
         decision_at: () => null,

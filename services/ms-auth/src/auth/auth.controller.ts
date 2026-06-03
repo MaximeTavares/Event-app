@@ -36,6 +36,16 @@ export class AuthController {
         return this.userService.findAll();
     }
 
+    @MessagePattern('users.profiles')
+    getProfiles(data: { userIds: string[] }) {
+        return this.userService.findManyByIds(data.userIds);
+    }
+
+    @MessagePattern('user.validate')
+    validateUser(data: { userId: string }) {
+        return this.userService.findById(data.userId);
+    }
+
     @MessagePattern('auth.signout')
     async logout(data: { userId: string }) {
         await this.authService.signout(data.userId);

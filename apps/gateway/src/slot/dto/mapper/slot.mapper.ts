@@ -4,28 +4,31 @@ import {
     SlotWithParticipationDto,
     SlotWithParticipations,
 } from '../slot.dto';
+import { ParticipantWithProfile } from 'src/slot/slot.service';
 
 export class SlotMapper {
     static toSlotWithParticipations(
         slot: SlotWithParticipations,
-        current_participants: number,
+        participants: ParticipantWithProfile[],
+        currentParticipants: number,
     ): SlotWithParticipationDto {
         return {
             id: slot.id,
-            organizer_id: slot.Mission.Event.user_id,
+            organizer_id: slot.Mission.Event.organizer_id,
             start_at: slot.start_at,
             end_at: slot.end_at,
-            current_participants,
-            available_place: slot.max_participant - current_participants,
+            current_participants: currentParticipants,
+            available_place: slot.max_participant - currentParticipants,
             max_participants: slot.max_participant,
             status: slot.status,
-            participants: slot.Participation.map((p) => ({
-                id: p.id,
-                participation_id: p.id,
-                email: p.User.email,
-                participation_status: p.status,
-                first_name: p.User.User_profile?.first_name ?? null,
-                last_name: p.User.User_profile?.last_name ?? null,
+            participants: participants.map((participant) => ({
+                user_id: participant.userId,
+                participation_id: participant.participation_id,
+                participation_status: participant.participation_status,
+                email: participant.email,
+                first_name: participant.first_name ?? null,
+                last_name: participant.last_name ?? null,
+                avatar_url: participant.avatar_url ?? null,
             })),
         };
     }

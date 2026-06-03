@@ -18,9 +18,27 @@ import { useRefreshToken } from './features/auth/hooks/use_auth.service';
 import { SkeletonLoading } from './shared/components/UI/states/SkeletonLoading';
 import { MissionDetailsPage } from './pages/mission/MissionDetailsPage';
 import { SlotDetailsPage } from './pages/Slot/SlotDetailsPage';
+import { useAuthStore } from './features/auth/store/auth.store';
+import { useEffect } from 'react';
 
 function useAuthBootstrap() {
-    return useRefreshToken();
+    const accessToken = useAuthStore((s) => s.accessToken);
+    const initialized = useAuthStore((s) => s.initialized);
+    const setInitialized = useAuthStore((s) => s.setInitialized);
+    const setAccessToken = useAuthStore((s) => s.setAccessToken);
+
+    useEffect(() => {
+        const token = localStorage.getItem('accessToken');
+
+        setAccessToken(token);
+        setInitialized(true);
+    }, [setAccessToken, setInitialized]);
+
+    const refresh = useRefreshToken();
+
+    const shouldRefresh = initialized && !accessToken;
+
+    return shouldRefresh ? refresh : { isLoading: !initialized };
 }
 
 function App() {

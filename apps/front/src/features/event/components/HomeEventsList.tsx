@@ -16,17 +16,17 @@ export default function HomeEventsList({
     currentPage,
     totalPages,
     onPageChange,
-}: HomeEventsListProps) {
+}: Readonly<HomeEventsListProps>) {
     const hasEvents = events.length > 0;
 
     return (
-        <div>
+        <>
             {listStatusMessage ? (
                 <div>{listStatusMessage}</div>
             ) : (
-                <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
                     {events.map((event) => (
-                        <li key={event.id} className="flex justify-center">
+                        <li key={event.id} className="w-full flex justify-center">
                             <EventCard eventData={event} />
                         </li>
                     ))}
@@ -34,12 +34,14 @@ export default function HomeEventsList({
             )}
 
             {hasEvents && totalPages > 1 && (
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={onPageChange}
-                />
+                <div className="flex justify-center mt-6">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={onPageChange}
+                    />
+                </div>
             )}
-        </div>
+        </>
     );
 }

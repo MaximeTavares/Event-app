@@ -7,6 +7,8 @@ export default defineConfig({
         setupNodeEvents() {
             // implement node event listeners here
         },
+        specPattern: 'cypress/e2e/**/*.cy.ts',
+        // supportFile: 'cypress/support/e2e.ts',
         baseUrl: 'http://localhost:5173',
     },
 });

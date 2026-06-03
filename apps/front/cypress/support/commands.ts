@@ -55,9 +55,35 @@ Cypress.Commands.add('login', (email: string, password: string) => {
 Cypress.Commands.add('checkTestUser', () => {
     cy.request({
         method: 'POST',
-        url: 'http://localhost:3000/auth/signup',
-        body: testUser,
+        url: 'http://localhost:3000/ms/auth/signup',
+        body: {
+            email: testUser.email,
+            password: testUser.password,
+        },
         failOnStatusCode: false,
+    });
+});
+
+Cypress.Commands.add('loginByApi', () => {
+    cy.request({
+        method: 'POST',
+        url: 'http://localhost:3000/ms/auth/signin',
+        body: {
+            email: testUser.email,
+            password: testUser.password,
+        },
+    }).then((res) => {
+        console.log('LOGIN RESPONSE:', res.body);
+
+        const accessToken = res.body.accessToken ?? res.body.data?.accessToken;
+
+        const refreshToken = res.body.refreshToken ?? res.body.data?.refreshToken;
+
+        cy.window().then((win) => {
+            win.localStorage.setItem('accessToken', accessToken);
+        });
+
+        cy.setCookie('refresh_token', refreshToken);
     });
 });
 
@@ -67,6 +93,7 @@ declare global {
         interface Chainable {
             login(email: string, password: string): Chainable<void>;
             checkTestUser(): Chainable<void>;
+            loginByApi(): Chainable<void>;
         }
     }
 }

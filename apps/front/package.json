@@ -44,7 +44,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
-    "cypress": "^15.14.1",
+    "cypress": "^15.16.0",
     "daisyui": "^5.5.19",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",

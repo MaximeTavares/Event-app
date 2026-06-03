@@ -3,9 +3,10 @@ import { GeoapifyModule } from 'src/geoapify/geoapify.module';
 import { UserModule } from 'src/user/user.module';
 import { EventController } from './event.controller';
 import { EventService } from './event.service';
+import { NatsModule } from 'src/nats/nats.module';
 
 @Module({
-    imports: [UserModule, GeoapifyModule],
+    imports: [UserModule, GeoapifyModule, NatsModule],
     controllers: [EventController],
     providers: [EventService],
     exports: [EventService],

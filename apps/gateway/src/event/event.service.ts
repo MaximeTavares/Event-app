@@ -21,6 +21,7 @@ import { Coordinates } from '../geoapify/type/geoapify.type';
 import { UserService } from '../user/user.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Event_status, Prisma } from '@prisma/client';
+import { NatsService } from 'src/nats/nats.service';
 
 @Injectable()
 export class EventService {
@@ -28,13 +29,14 @@ export class EventService {
         private readonly prisma: PrismaService,
         private readonly userService: UserService,
         private readonly geoapifyService: GeoapifyService,
+        private readonly natsService: NatsService,
     ) {}
 
     async create(
         createEventDto: CreateEventDto,
-        userId: number,
+        userId: string,
     ): Promise<EventWithUserAndAddressDTO> {
-        await this.userService.validateUser(userId);
+        await this.natsService.send('user.validate', { userId });
 
         const hasConflict = await this.hasEventConflict(
             userId,
@@ -54,6 +56,7 @@ export class EventService {
         const newEvent = await this.prisma.event.create({
             data: {
                 ...eventData,
+                organizer_id: userId,
                 Address: {
                     connectOrCreate: {
                         where: {
@@ -77,7 +80,6 @@ export class EventService {
                         },
                     },
                 },
-                User: { connect: { id: userId } },
                 start_date: new Date(createEventDto.start_date),
                 end_date: new Date(createEventDto.end_date),
             },
@@ -90,14 +92,14 @@ export class EventService {
     }
 
     async hasEventConflict(
-        userId: number,
+        userId: string,
         startDate: Date,
         address: CreateAddressDto,
         excludeEventId?: number,
     ): Promise<boolean> {
         const existingEvent = await this.prisma.event.findFirst({
             where: {
-                user_id: userId,
+                organizer_id: userId,
                 start_date: startDate,
                 ...(excludeEventId ? { NOT: { id: excludeEventId } } : {}),
                 Address: {
@@ -116,12 +118,12 @@ export class EventService {
         return Boolean(existingEvent);
     }
 
-    private async findOwnedEventOrFail(id: number, userId: number) {
+    private async findOwnedEventOrFail(id: number, userId: string) {
         const existingEvent = await this.prisma.event.findUnique({
             where: { id },
             select: {
                 id: true,
-                user_id: true,
+                organizer_id: true,
                 start_date: true,
                 Address: {
                     select: {
@@ -141,7 +143,7 @@ export class EventService {
             throw new NotFoundException('Événement non trouvé.');
         }
 
-        if (existingEvent.user_id !== userId) {
+        if (existingEvent.organizer_id !== userId) {
             throw new ForbiddenException(
                 'Vous ne pouvez pas modifier cet événement.',
             );
@@ -336,12 +338,12 @@ export class EventService {
     }
 
     async findAllMyEvents(
-        userId: number,
+        userId: string,
     ): Promise<EventWithUserAndAddressDTO[]> {
-        await this.userService.validateUser(userId);
+        await this.natsService.send('user.validate', { userId });
 
         const events = await this.prisma.event.findMany({
-            where: { user_id: userId },
+            where: { organizer_id: userId },
             select: eventWithAddressAndUser,
         });
 
@@ -365,7 +367,7 @@ export class EventService {
                 status: true,
                 created_at: true,
                 updated_at: true,
-                user_id: true,
+                organizer_id: true,
                 Address: true,
                 Mission: {
                     select: {
@@ -387,18 +389,6 @@ export class EventService {
                                     select: {
                                         id: true,
                                         status: true,
-                                        User: {
-                                            select: {
-                                                id: true,
-                                                email: true,
-                                                User_profile: {
-                                                    select: {
-                                                        first_name: true,
-                                                        last_name: true,
-                                                    },
-                                                },
-                                            },
-                                        },
                                     },
                                 },
                             },
@@ -433,9 +423,12 @@ export class EventService {
     async update(
         id: number,
         updateEventDto: UpdateEventDto,
-        userId: number,
+        userId: string,
     ): Promise<EventWithUserAndAddressDTO> {
         const existingEvent = await this.findOwnedEventOrFail(id, userId);
+        await this.natsService.send('user.validate', {
+            userId,
+        });
 
         const { address, ...eventData } = updateEventDto;
         const nextStartDate = eventData.start_date
@@ -506,7 +499,7 @@ export class EventService {
                           },
                       }
                     : {}),
-                User: { connect: { id: userId } },
+                organizer_id: userId,
                 status: eventData.status,
             },
             select: eventWithAddressAndUser,
@@ -519,7 +512,7 @@ export class EventService {
 
     async cancel(
         id: number,
-        userId: number,
+        userId: string,
     ): Promise<EventWithUserAndAddressDTO | null> {
         await this.findOwnedEventOrFail(id, userId);
 
@@ -564,7 +557,7 @@ export class EventService {
      */
     async remove(
         id: number,
-        userId: number,
+        userId: string,
     ): Promise<EventWithUserAndAddressDTO | null> {
         await this.findOwnedEventOrFail(id, userId);
 
