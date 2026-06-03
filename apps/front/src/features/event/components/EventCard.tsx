@@ -10,36 +10,39 @@ interface IEventComponent {
 
 const EventCard = ({ eventData }: IEventComponent) => {
     return (
-        <div className="card bg-base-100 w-96 card-border border-base-300 shadow shadow-base">
-            <div className="card-body items-start text-center">
-                <div className="card-actions w-full justify-end gap-8">
+        <div className="card w-full bg-base-100 border border-base-300 shadow flex flex-col">
+            <div className="card-body flex flex-col gap-3 items-start text-left">
+                <div className="card-actions w-full justify-end">
                     <Button size="xs" circle disabled>
-                        <GrFavorite className="my-1.5 inline-block size-4" />
+                        <GrFavorite className="size-4" />
                     </Button>
                 </div>
-                <h2 className="card-title gap-8">{eventData.title}</h2>
-                <div className="card-body">
-                    <p>{eventData.description}</p>
-                    <div className="flex gap-2">
-                        <GrSchedule className="my-1.5 size-5" />
-                        <span>
-                            Du {formatDate(eventData.start_date)} au{' '}
-                            {formatDate(eventData.end_date)}
-                        </span>
-                    </div>
-                    <div className="flex gap-2">
-                        <GrMap className="my-1.5 size-5" />
-                        <span>
-                            {eventData.address?.postal_code} {eventData.address?.city}
-                        </span>
-                    </div>
+
+                <h2 className="card-title">{eventData.title}</h2>
+
+                <p className="wrap-break-word text-sm opacity-80">{eventData.description}</p>
+
+                <div className="flex gap-2 text-sm">
+                    <GrSchedule className="size-5 shrink-0" />
+                    <span className="wrap-break-word">
+                        Du {formatDate(eventData.start_date)} au {formatDate(eventData.end_date)}
+                    </span>
                 </div>
-                <div className="card-actions">
+
+                <div className="flex gap-2 text-sm">
+                    <GrMap className="size-5 shrink-0" />
+                    <span className="wrap-break-word">
+                        {eventData.address?.postal_code} {eventData.address?.city}
+                    </span>
+                </div>
+
+                <div className="card-actions w-full justify-between mt-2">
                     <Button as={Link} to={`/events/${eventData.id}`} variant="ghost">
-                        Voir Plus
+                        Voir
                     </Button>
+
                     <Button variant="primary" disabled>
-                        S'inscrire à l'évènement
+                        S'inscrire
                     </Button>
                 </div>
             </div>

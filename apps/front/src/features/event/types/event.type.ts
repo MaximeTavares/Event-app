@@ -3,7 +3,6 @@ import type {
     AddressForCreateEvent,
     AddressForUpdateEvent,
 } from '../../address/types/address.type';
-import type { User } from '../../user/types/user.type';
 import type { UserWithProfileAndAddress } from '../../user_profile/types/types';
 
 export interface Event {
@@ -25,7 +24,7 @@ export interface BaseEvent {
     program: string;
     start_date: Date;
     end_date: Date;
-    user?: User;
+    organizer_id: string;
     address: Address | null;
     status: EventStatus;
 }
@@ -75,7 +74,7 @@ export interface EventApiResponse {
     program: string;
     start_date: Date;
     end_date: Date;
-    user: User;
+    organizer_id: string;
     address: {
         street_name: string;
         street_number: string;
@@ -96,7 +95,7 @@ export interface EventDetails {
     program: string;
     start_date: Date;
     end_date: Date;
-    user: User;
+    organizer_id: string;
     address: {
         street_name: string;
         street_number: string;

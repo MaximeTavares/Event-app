@@ -1,4 +1,5 @@
 import Pagination from '../../../shared/components/UI/Pagination';
+import { Grid } from '../../../shared/layout/Grid';
 import type { BaseEvent } from '../types/event.type';
 import EventCard from './EventCard';
 
@@ -19,18 +20,18 @@ export default function HomeEventsList({
 }: Readonly<HomeEventsListProps>) {
     const hasEvents = events.length > 0;
 
+    const listEvent = events.filter((e) => e.status === 'OPEN');
+
     return (
         <>
             {listStatusMessage ? (
                 <div>{listStatusMessage}</div>
             ) : (
-                <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-                    {events.map((event) => (
-                        <li key={event.id} className="w-full flex justify-center">
-                            <EventCard eventData={event} />
-                        </li>
+                <Grid>
+                    {listEvent.map((event) => (
+                        <EventCard key={event.id} eventData={event} />
                     ))}
-                </ul>
+                </Grid>
             )}
 
             {hasEvents && totalPages > 1 && (

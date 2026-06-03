@@ -27,7 +27,7 @@ export class EventMapper {
                 postal_code: dto.address.postal_code,
             },
             status: dto.status,
-            user: dto.user,
+            organizer_id: dto.organizer_id,
         };
     }
 
@@ -76,7 +76,7 @@ export class EventMapper {
                 },
             },
             status: dto.status,
-            user: dto.user,
+            organizer_id: dto.organizer_id,
         };
     }
 }
