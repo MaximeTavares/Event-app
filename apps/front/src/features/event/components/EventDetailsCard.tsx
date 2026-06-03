@@ -23,7 +23,6 @@ import type { MissionCreationFormValues } from '../../mission/validation/Mission
 import { useCreateMission } from '../../mission/hooks/use_mission.service';
 import { AddIcon } from '../../../shared/components/UI/icons/icons';
 import { useMe } from '../../auth/hooks/use_auth.service';
-import { ModalContent } from '../../../shared/layout/ModalContent';
 import { Card } from '../../../shared/layout/Card';
 
 interface EventDetailsProps {
@@ -203,13 +202,11 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
                 onClose={() => setIsCreateMissionModalOpen(false)}
             >
                 <Card title="Création de mission" size="full">
-                    <ModalContent>
-                        <MissionCreationForm
-                            onSubmit={handleMissionSubmit}
-                            isSubmitting={createMissionMutation.isPending}
-                            error={missionErrorMessage}
-                        />
-                    </ModalContent>
+                    <MissionCreationForm
+                        onSubmit={handleMissionSubmit}
+                        isSubmitting={createMissionMutation.isPending}
+                        error={missionErrorMessage}
+                    />
                 </Card>
             </Modal2>
 

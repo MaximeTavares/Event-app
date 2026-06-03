@@ -25,7 +25,6 @@ export function FormLayout({
     return (
         <fieldset
             className={`
-                border-2
                 fieldset
                 bg-base-200
                 border-base-300

@@ -34,17 +34,15 @@ function axiosClient(): AxiosInstance {
             if (error.response?.status === 429) {
                 const retryAfter = error.response.headers['retry-after'];
                 const seconds = retryAfter ? Number.parseInt(retryAfter, 10) : 60;
-                throw new Error(
-                    `Trop de tentatives. Réessayez dans ${seconds} secondes.`,
-                );
+                throw new Error(`Trop de tentatives. Réessayez dans ${seconds} secondes.`);
             }
 
-            // ❌ DO NOT HANDLE AUTH ROUTES
+            // DO NOT HANDLE AUTH ROUTES
             if (isAuthRoute(originalRequest?.url)) {
                 throw error;
             }
 
-            // ❌ NO ACCESS TOKEN = NO REFRESH
+            // NO ACCESS TOKEN = NO REFRESH
             const { accessToken } = useAuthStore.getState();
             if (!accessToken) {
                 throw error;
@@ -54,29 +52,25 @@ function axiosClient(): AxiosInstance {
             if (error.response?.status === 401 && !originalRequest._retry) {
                 originalRequest._retry = true;
 
-                try {
-                    refreshPromise ??= AuthApi.refresh()
-                        .then((data) => {
-                            useAuthStore.getState().setAccessToken(data.accessToken);
-                            return data.accessToken;
-                        })
-                        .catch((err) => {
-                            useAuthStore.getState().clearAuth();
-                            globalThis.location.href = '/auth/signin';
-                            throw err;
-                        })
-                        .finally(() => {
-                            refreshPromise = null;
-                        });
+                refreshPromise ??= AuthApi.refresh()
+                    .then((data) => {
+                        useAuthStore.getState().setAccessToken(data.accessToken);
+                        return data.accessToken;
+                    })
+                    .catch((err) => {
+                        useAuthStore.getState().clearAuth();
+                        globalThis.location.href = '/auth/signin';
+                        throw err;
+                    })
+                    .finally(() => {
+                        refreshPromise = null;
+                    });
 
-                    const accessToken = await refreshPromise;
+                const accessToken = await refreshPromise;
 
-                    originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
-                    return api(originalRequest);
-                } catch (err) {
-                    throw err;
-                }
+                return api(originalRequest);
             }
 
             throw error;
