@@ -2,7 +2,7 @@
 
 A full-stack event management platform designed to organize events, missions, and time slots while managing user availability and participation.
 
-The application is currently deployed and accessible here:
+The application is currently deployed in staging state and accessible here:
 
 👉 https://staging-mt-event-app.duckdns.org/
 
@@ -24,6 +24,24 @@ The goal is to solve real scheduling and coordination problems (volunteers, team
 
 ---
 
+## 👥 Team-based / real-world simulation context
+
+This project was not built as a simple personal side project.
+
+It was developed in a **real-world simulation context**, following a **team-based and project management approach**, as if working inside a software company.
+
+The goal was to reproduce professional conditions, including:
+
+- Feature planning and task breakdown
+- Structured development workflow
+- Architectural decision-making under constraints
+- Collaboration mindset (even in solo execution)
+- Production-oriented thinking (scalability, deployment, maintainability)
+
+This approach allowed me to work on the project as an **end-to-end product builder**, not just as a solo developer.
+
+---
+
 ## 🧱 Architecture overview
 
 ### Backend
@@ -32,7 +50,6 @@ The goal is to solve real scheduling and coordination problems (volunteers, team
 - TypeScript
 - REST API
 - Clean Architecture principles
-- Dependency Injection (NestJS)
 
 ### Frontend
 - React (TypeScript)
@@ -40,6 +57,7 @@ The goal is to solve real scheduling and coordination problems (volunteers, team
 - Modern hooks-based architecture
 
 ### Database
+- **MySql**
 - **MongoDB**
 - Document-based modeling adapted for event-driven structures
 - Designed for scalability and future microservices split
@@ -59,7 +77,7 @@ The application is fully deployed in a staging environment:
 - Containerized services (Docker-based deployment)
 - Reverse proxy routing (Nginx)
 - Environment separation (dev / staging / future prod-ready setup)
-- CI/CD-ready architecture (GitHub Actions compatible)
+- CI/CD-ready architecture
 
 ---
 
@@ -89,8 +107,8 @@ Communication strategy:
 ## 🔮 Future features
 
 ### ⚡ Real-time communication
-- WebSockets for live slot updates
-- Server-Sent Events (SSE) for lightweight event streaming
+- WebSockets
+- Server-Sent Events (SSE)
 
 ### 🤖 Intelligent matching system
 - Matching user availability with slots
@@ -105,17 +123,12 @@ Communication strategy:
   - availability
 - Prepare system for AI-assisted scheduling
 
-### 📡 Event-driven evolution
-- Transition toward asynchronous architecture
-- Internal event bus (NATS / Kafka-ready design)
-
 ---
 
 ## 🧠 Design principles
 
 - Clean modular architecture (NestJS best practices)
 - Separation of domain logic
-- Strong relational integrity (MongoDB schema design aware)
 - Scalability-first approach
 - Migration-ready toward microservices
 - Future-proof communication patterns (REST → events → real-time)
@@ -128,17 +141,16 @@ Communication strategy:
 - Node.js
 - NestJS
 - TypeScript
+- MySql
 - MongoDB
 
 ### Frontend
 - React
-- TypeScript
 - FullCalendar
 
 ### Infrastructure
 - Docker
 - Nginx reverse proxy
-- DuckDNS deployment
 - CI/CD ready (GitHub Actions)
 
 ---
@@ -151,8 +163,8 @@ This project highlights:
 - Ability to build a full-stack production-ready application
 - Understanding of scalable backend architecture
 - Transition mindset from monolith → microservices
-- Deployment and infrastructure awareness
-- Modern TypeScript ecosystem mastery
+- Deployment and infrastructure
+- Modern TypeScript ecosystem
 
 ---
 
