@@ -1,0 +1,73 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      compose-directory:
+        required: true
+        type: string
+
+      compose-service:
+        required: true
+        type: string
+
+      image-name:
+        required: true
+        type: string
+
+      network:
+        required: false
+        type: string
+        default: ""
+
+      run-migrations:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+
+          script: |
+            set -e
+
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+
+            cd ${{ inputs.compose-directory }}
+
+            IMAGE=ghcr.io/${OWNER}/${{ inputs.image-name }}:${{ github.sha }}
+
+            echo "Pulling image..."
+            docker pull $IMAGE
+
+            # =========================
+            # OPTIONAL: MIGRATIONS
+            # =========================
+            if [ "${{ inputs.run-migrations }}" = "true" ]; then
+              echo "Running migrations..."
+
+              docker run --rm \
+                --network ${{ inputs.network }} \
+                -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+                $IMAGE \
+                npx prisma migrate deploy
+            fi
+
+            # =========================
+            # DEPLOY
+            # =========================
+            echo "Deploying container..."
+            IMAGE_TAG=${{ github.sha }} docker compose up -d ${{ inputs.compose-service }} --remove-orphans
+
+            echo "Cleanup images..."
+            docker image prune -f

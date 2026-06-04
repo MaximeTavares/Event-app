@@ -16,10 +16,6 @@ on:
 
 
 jobs:
-
-  # =====================================================
-  # QUALITY (SONARCLOUD)
-  # =====================================================
   quality:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -45,26 +41,19 @@ jobs:
       - name: Lint
         run: npm run lint
 
-    #   - name: Cypress test e2e
-    #     run: npm run test:e2e
-
-      - name: SonarCloud Scan (Quality Gate)
+      - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.projectKey=${{ vars.SONAR_FRONT_PROJECT_KEY }}
+            -Dsonar.organization=${{ vars.SONAR_ORG }}
             -Dsonar.qualitygate.wait=true
 
-
-  # =====================================================
-  # BUILD + PUSH (STAGING + PROD DANS LE MÊME JOB)
-  # =====================================================
-  build:
-    if: github.event_name != 'pull_request'
+  build-staging:
+    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
 
     permissions:
@@ -72,74 +61,83 @@ jobs:
       packages: write
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set variables
+      - name: Set owner
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           echo "OWNER=$OWNER" >> $GITHUB_ENV
 
-      - name: Set up Docker Buildx
+      - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GHCR
+      - name: Login GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # =====================================================
-      # BUILD STAGING
-      # =====================================================
-      - name: Build & Push Front STAGING
-        if: github.ref == 'refs/heads/develop'
+      - name: Build & Push STAGING Front
         uses: docker/build-push-action@v6
         with:
           context: ./apps/front
-
           push: true
 
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL_STAGING }}
-            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID}}
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
 
           tags: |
-            ghcr.io/${{ env.OWNER }}/front:staging
+            ghcr.io/${{ env.OWNER }}/front:${{ github.sha }}
 
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
-      # =====================================================
-      # BUILD PROD
-      # =====================================================
-      - name: Build & Push Front PROD
-        if: github.ref == 'refs/heads/main'
+
+  build-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set owner
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "OWNER=$OWNER" >> $GITHUB_ENV
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push PROD Front
         uses: docker/build-push-action@v6
         with:
           context: ./apps/front
-
           push: true
 
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
-            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID}}
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
 
           tags: |
-            ghcr.io/${{ env.OWNER }}/front:prod
-
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ghcr.io/${{ env.OWNER }}/front:${{ github.sha }}
 
 
-  # =====================================================
-  # DEPLOY STAGING
-  # =====================================================
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: build
+    needs: build-staging
     runs-on: ubuntu-latest
 
     steps:
@@ -152,27 +150,26 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
 
           script: |
+            set -e
+
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             cd /opt/event-app/staging
 
-            echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull staging-front
+            IMAGE=ghcr.io/${OWNER}/front:${{ github.sha }}
 
-            echo "Starting container..."
+            echo "Pulling image..."
+            docker pull $IMAGE
+
+            echo "Deploying front..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d staging-front --remove-orphans
 
-            # echo "⏳ Waiting for service..."
-            # sleep 10
-
-            # echo "🩺 Healthcheck..."
-            # curl -f http://localhost
+            echo "Cleanup..."
+            docker image prune -f
 
 
-  # =====================================================
-  # DEPLOY PROD
-  # =====================================================
   deploy-prod:
     if: github.ref == 'refs/heads/main'
-    needs: build
+    needs: build-prod
     runs-on: ubuntu-latest
 
     steps:
@@ -185,16 +182,18 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
 
           script: |
+            set -e
+
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             cd /opt/event-app/prod
 
-            echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull prod-front
+            IMAGE=ghcr.io/${OWNER}/front:${{ github.sha }}
 
-            echo "Starting container..."
+            echo "Pulling image..."
+            docker pull $IMAGE
+
+            echo "Deploying front..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d prod-front --remove-orphans
 
-            # echo "⏳ Waiting for service..."
-            # sleep 10
-
-            # echo "🩺 Healthcheck..."
-            # curl -f http://localhost
+            echo "Cleanup..."
+            docker image prune -f

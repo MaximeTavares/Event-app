@@ -12,176 +12,35 @@ on:
 
 jobs:
 
-  # =====================================================
-  # QUALITY (SONARCLOUD)
-  # =====================================================
   quality:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./services/ms-auth
+    uses: ./.github/workflows/quality.yml
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    with:
+      working-directory: services/ms-auth
+      sonar-project-key: ${{ vars.SONAR_MS_AUTH_PROJECT_KEY }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: services/ms-auth/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Test
-        run: npm run test -- --passWithNoTests
-
-      - name: SonarCloud Scan (Quality Gate)
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.organization=${{ secrets.SONAR_ORG }}
-            -Dsonar.qualitygate.wait=true
-
-  # =====================================================
-  # BUILD + PUSH (COMMON)
-  # =====================================================
   build:
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      packages: write
+    uses: ./.github/workflows/docker-build.yml
 
-    outputs:
-      image_tag: ${{ github.sha }}
+    with:
+      context: services/ms-auth
+      image-name: ms-auth
 
-    steps:
-
-      # -------------------------
-      # CHECKOUT
-      # -------------------------
-      - name: Checkout
-        uses: actions/checkout@v4
-
-
-      # -------------------------
-      # SET VARIABLES
-      # -------------------------
-      - name: Set variables
-        run: |
-          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          echo "OWNER=$OWNER" >> $GITHUB_ENV
-
-
-      # -------------------------
-      # SETUP BUILDX
-      # -------------------------
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-
-      # -------------------------
-      # LOGIN GHCR
-      # -------------------------
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-
-      # -------------------------
-      # BUILD & PUSH
-      # -------------------------
-      - name: Build & Push ms-auth
-        uses: docker/build-push-action@v6
-        with:
-          context: ./services/ms-auth
-
-          push: true
-
-          tags: |
-            ghcr.io/${{ env.OWNER }}/ms-auth:${{ github.sha }}
-            ghcr.io/${{ env.OWNER }}/ms-auth:latest
-
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-
-  # =====================================================
-  # STAGING DEPLOY (AUTO)
-  # =====================================================
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
+
     needs: build
-    runs-on: ubuntu-latest
-    environment: staging
 
-    steps:
-      - name: Deploy STAGING
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
+    uses: ./.github/workflows/deploy.yml
 
-          script: |
-            cd /opt/event-app/staging
+    with:
+      compose-directory: /opt/event-app/staging
+      compose-service: staging-ms-auth
+      image-name: ms-auth
+      run-migrations: false
 
-            echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull staging-ms-auth
 
-            echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d staging-ms-auth --remove-orphans
-
-            # echo "⏳ Waiting for service..."
-            # sleep 10
-
-            # echo "🩺 Healthcheck..."
-            # curl -f http://localhost:3000/health
-
-  # =====================================================
-  # PROD DEPLOY (MANUAL)
-  # =====================================================
-  deploy-prod:
-    if: github.ref == 'refs/heads/main'
-    needs: build
-    runs-on: ubuntu-latest
-    environment: production
-
-    steps:
-      - name: Deploy PROD
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
-
-          script: |
-            cd /opt/event-app/prod
-
-            echo "Pulling image..."
-            IMAGE_TAG=${{ github.sha }} docker compose pull prod-ms-auth
-
-            echo "Starting container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d prod-ms-auth --remove-orphans
-
-            # echo "⏳ Waiting for service..."
-            # sleep 10
-
-            # echo "🩺 Healthcheck..."
-            # curl -f http://localhost:3000/health
