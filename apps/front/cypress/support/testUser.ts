@@ -1,5 +1,5 @@
 export const testUser = {
     email: 'UserForTest@test.com',
-    password: 'Password123!!**',
+    password: process.env.TEST_USER_PASSWORD,
     role: 'USER',
 };

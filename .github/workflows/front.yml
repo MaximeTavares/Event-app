@@ -49,6 +49,7 @@ jobs:
           args: >
             -Dsonar.projectKey=${{ vars.SONAR_FRONT_PROJECT_KEY }}
             -Dsonar.organization=${{ vars.SONAR_ORG }}
+            -Dsonar.sources=apps/front
             -Dsonar.qualitygate.wait=true
 
   build-staging:
