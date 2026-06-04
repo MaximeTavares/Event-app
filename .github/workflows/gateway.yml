@@ -45,6 +45,7 @@ jobs:
     with:
       compose-directory: /opt/event-app/staging
       compose-service: staging-gateway
+      environment: staging
       image-name: gateway
       network: nginx-staging
       run-migrations: true

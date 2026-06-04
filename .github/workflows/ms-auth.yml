@@ -43,6 +43,7 @@ jobs:
     with:
       compose-directory: /opt/event-app/staging
       compose-service: staging-ms-auth
+      environment: staging
       image-name: ms-auth
       run-migrations: false
 

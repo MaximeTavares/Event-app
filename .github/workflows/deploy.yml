@@ -25,9 +25,14 @@ on:
         type: boolean
         default: false
 
+      environment:
+        required: true
+        type: string
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment}}
 
     steps:
       - name: Deploy via SSH
