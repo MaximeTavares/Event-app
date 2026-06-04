@@ -2,17 +2,16 @@ name: Front - CI/CD
 
 on:
   push:
-    branches:
-      - develop
+    branches: [develop]
     paths:
       - "apps/front/**"
 
   workflow_dispatch:
 
   pull_request:
-    branches:
-      - develop
-      - main
+    branches: [develop, main]
+    paths:
+      - "apps/front/**"
 
 
 jobs:
