@@ -8,7 +8,7 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { CreateAddressDto } from 'src/address/dto/create-address.dto';
-import { WEEK_DAYS, type WeekDay } from './me-settings.dto';
+import { type WeekDay } from './me-settings.dto';
 
 export class PatchProfileDto {
     @IsOptional()
