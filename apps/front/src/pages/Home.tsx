@@ -2,12 +2,10 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useGetEvents } from '../features/event/hooks/use_event.service';
-import { useGetCurrentUserWithProfileAndAddress } from '../features/user_profile/hooks/use_user_profile.service';
 import type { EventFilters } from '../shared/components/UI/filter/eventsFilters.interface';
 import HomeFilters, { type LocationState } from '../shared/components/UI/filter/HomeFilters';
 import { toEventMapPoints } from '../shared/components/UI/map/map-data';
-import { useUserMapOrigin } from '../shared/components/UI/map/useUserMapOrigin';
-import { geocodeCity } from '../shared/utils/map/GeocodeGeoapify';
+import { geocodeCity, type Coordinates } from '../shared/utils/map/GeocodeGeoapify';
 import {
     buildListStatusMessage,
     buildMapStatusMessage,
@@ -18,6 +16,7 @@ import HomeEventsList from '../features/event/components/HomeEventsList';
 import type { EventStatus } from '../features/event/types/event.type';
 import { PageContainer } from '../shared/layout/PageContainer';
 import { Section } from '../shared/layout/Section';
+import { useSettings } from '../features/settings/hooks/use_settings.service';
 
 const statusOptions: { label: string; value: EventStatus }[] = [
     { label: 'Ouvert', value: 'OPEN' },
@@ -40,12 +39,21 @@ export default function Home() {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 12;
 
+    //* OLD
+    // const {
+    //     data: currentUser,
+    //     isLoading: isUserLoading,
+    //     isError: isUserError,
+    //     error: userError,
+    // } = useGetCurrentUserWithProfileAndAddress();
+
+    //* NEW
     const {
         data: currentUser,
         isLoading: isUserLoading,
         isError: isUserError,
         error: userError,
-    } = useGetCurrentUserWithProfileAndAddress();
+    } = useSettings();
 
     // État derive pour savoir si une ville a ete renseignée.
     const hasCityFilter = location.city.trim().length > 0;
@@ -58,7 +66,9 @@ export default function Home() {
     });
 
     // Origine géographique et paramètres spatiaux utilisés pour la carte et le filtrage par rayon.
-    const userOrigin = useUserMapOrigin(currentUser);
+    // const userOrigin = useUserMapOrigin(currentUser);
+    const userOrigin: Coordinates | null | undefined = currentUser?.profile.address.coordinates;
+
     const effectiveOrigin = cityCoordinates ?? userOrigin;
 
     // Filtres paginés utilisés pour la liste affichée dans la Home.
@@ -94,6 +104,7 @@ export default function Home() {
     } = useGetEvents(filters);
 
     const events = data?.items;
+    const openEvents = events?.filter((e) => e.status === 'OPEN');
     const total = data?.total ?? 0;
     const limit = data?.limit ?? pageSize;
 
@@ -103,9 +114,9 @@ export default function Home() {
 
     // Données dérivées pour la carte et la pagination de la liste.
     const eventMapPoints = useMemo(() => {
-        if (!events) return [];
-        return toEventMapPoints(events);
-    }, [events]);
+        if (!openEvents) return [];
+        return toEventMapPoints(openEvents);
+    }, [openEvents]);
 
     // Messages dérivés affichés dans la carte et la liste.
     const mapStatusMessage = useMemo(() => {
@@ -136,11 +147,11 @@ export default function Home() {
             isEventsLoading,
             isEventsError,
             eventsErrorMessage: eventsError?.message,
-            displayedEventsCount: events?.length ?? 0,
+            displayedEventsCount: openEvents?.length ?? 0,
             radiusMeters: location.distanceKm * 1000,
             showRadiusEmptyMessage: Boolean(location.distanceKm),
         });
-    }, [events, isEventsLoading, isEventsError, eventsError, location.distanceKm]);
+    }, [openEvents, isEventsLoading, isEventsError, eventsError, location.distanceKm]);
 
     return (
         <PageContainer>
@@ -185,7 +196,7 @@ export default function Home() {
 
                 <HomeEventsList
                     listStatusMessage={listStatusMessage}
-                    events={events ?? []}
+                    events={openEvents ?? []}
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={setCurrentPage}
