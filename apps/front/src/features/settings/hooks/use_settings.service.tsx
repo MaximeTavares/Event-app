@@ -1,23 +1,132 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { SettingsApi } from '../api/settings.api';
-import type { ChangePasswordPayload, MeSettings, PatchSettingsPayload } from '../types/types';
+import type {
+    ChangePasswordPayload,
+    MeSettings,
+    UpdateAvailabilityPayload,
+    UpdateNotificationsPayload,
+    UpdatePreferencesPayload,
+    UpdateProfilePayload,
+    UpdateSecurityPayload,
+} from '../types/types';
+import { useAuthStore } from '../../auth/store/auth.store';
 
 export function useSettings() {
+    const { accessToken } = useAuthStore();
+
     return useQuery({
         queryKey: ['settings'],
         queryFn: () => SettingsApi.get(),
+        retry: false,
+        staleTime: 5 * 60 * 1000,
+        enabled: !!accessToken,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
     });
 }
 
-export function usePatchSettings() {
+export function useUpdateProfile() {
     const queryClient = useQueryClient();
 
-    return useMutation<MeSettings, Error, PatchSettingsPayload>({
-        mutationFn: (payload) => SettingsApi.patch(payload),
-        onSuccess: (next) => {
-            queryClient.setQueryData(['settings'], next);
-            toast.success('Paramètres enregistrés.');
+    return useMutation<UpdateProfilePayload, Error, UpdateProfilePayload>({
+        mutationFn: (payload) => SettingsApi.updateProfile(payload),
+        onSuccess: (updatedProfile) => {
+            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    ...updatedProfile,
+                };
+            });
+            toast.success('Profil mis à jour');
+        },
+        onError: () => {
+            toast.error("Impossible d'enregistrer les paramètres.");
+        },
+    });
+}
+
+export function useUpdateAvailability() {
+    const queryClient = useQueryClient();
+
+    return useMutation<UpdateAvailabilityPayload, Error, UpdateAvailabilityPayload>({
+        mutationFn: (payload) => SettingsApi.updateAvailability(payload),
+        onSuccess: (updatedAvailability) => {
+            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    availability: {
+                        ...old.availability,
+                        ...updatedAvailability,
+                    },
+                };
+            });
+            toast.success('Disponibilités misent à jour');
+        },
+        onError: () => {
+            toast.error("Impossible d'enregistrer les paramètres.");
+        },
+    });
+}
+
+export function useUpdateNotifications() {
+    const queryClient = useQueryClient();
+
+    return useMutation<UpdateNotificationsPayload, Error, UpdateNotificationsPayload>({
+        mutationFn: (payload) => SettingsApi.updateNotifications(payload),
+        onSuccess: (updatedNotifications) => {
+            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    ...updatedNotifications,
+                };
+            });
+            toast.success('Notifications misent à jour');
+        },
+        onError: () => {
+            toast.error("Impossible d'enregistrer les paramètres.");
+        },
+    });
+}
+
+export function useUpdatePreferences() {
+    const queryClient = useQueryClient();
+
+    return useMutation<UpdatePreferencesPayload, Error, UpdatePreferencesPayload>({
+        mutationFn: (payload) => SettingsApi.updatePreferences(payload),
+        onSuccess: (updatedPreferences) => {
+            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    ...updatedPreferences,
+                };
+            });
+            toast.success('Preferences misent à jour');
+        },
+        onError: () => {
+            toast.error("Impossible d'enregistrer les paramètres.");
+        },
+    });
+}
+
+export function useUpdateSecurity() {
+    const queryClient = useQueryClient();
+
+    return useMutation<UpdateSecurityPayload, Error, UpdateSecurityPayload>({
+        mutationFn: (payload) => SettingsApi.updateSecurity(payload),
+        onSuccess: (updatedSecurity) => {
+            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    ...updatedSecurity,
+                };
+            });
+            toast.success('Securité mis à jour');
         },
         onError: () => {
             toast.error("Impossible d'enregistrer les paramètres.");
