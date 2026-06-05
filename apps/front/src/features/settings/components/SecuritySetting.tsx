@@ -4,8 +4,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormField } from '../../../shared/components/UI/formField/FormField';
 import Button from '../../../shared/components/UI/Button';
 import { changePasswordSchema, securityPreferencesSchema } from '../validation/security.schema';
-import { useChangePassword, usePatchSettings, useSettings } from '../hooks/use_settings.service';
-import { mergeMeSettings, type MeSettings } from '../types/types';
+import { useChangePassword, useSettings, useUpdateSecurity } from '../hooks/use_settings.service';
+import { type MeSettings } from '../types/types';
 
 type PasswordForm = {
     currentPassword: string;
@@ -17,9 +17,8 @@ type SecurityPrefsForm = Pick<MeSettings['security'], 'twoFactorEnabled'>;
 
 export default function SecuritySettings() {
     const { data, isPending, isError, refetch } = useSettings();
-    const patch = usePatchSettings();
+    const updateSecurity = useUpdateSecurity();
     const changePassword = useChangePassword();
-    const merged = mergeMeSettings(data);
 
     const passwordForm = useForm<PasswordForm>({
         resolver: yupResolver(changePasswordSchema),
@@ -30,18 +29,16 @@ export default function SecuritySettings() {
         },
     });
 
-    const {
-        register: registerSecurity,
-        handleSubmit: submitSecurity,
-        reset: resetSecurity,
-    } = useForm<SecurityPrefsForm>({
+    const { register, handleSubmit, reset } = useForm<SecurityPrefsForm>({
         resolver: yupResolver(securityPreferencesSchema),
-        defaultValues: merged.security,
+        defaultValues: data?.security,
     });
 
     useEffect(() => {
-        resetSecurity(mergeMeSettings(data).security);
-    }, [data, resetSecurity]);
+        if (data?.security) {
+            reset(data.security);
+        }
+    }, [data, reset]);
 
     if (isPending) {
         return <p className="text-base-content/70">Chargement…</p>;
@@ -109,18 +106,18 @@ export default function SecuritySettings() {
                 <h2 className="text-xl font-semibold">Authentification à deux facteurs (2FA)</h2>
                 <form
                     className="flex flex-col gap-4"
-                    onSubmit={submitSecurity((values) => patch.mutate({ security: values }))}
+                    onSubmit={handleSubmit((values) => updateSecurity.mutate(values))}
                 >
                     <label className="flex cursor-pointer items-center gap-3">
                         <input
                             type="checkbox"
                             className="toggle toggle-primary"
-                            {...registerSecurity('twoFactorEnabled')}
+                            {...register('twoFactorEnabled')}
                         />
                         <span>Activer l’A2F sur mon compte</span>
                     </label>
-                    <Button type="submit" disabled={patch.isPending}>
-                        {patch.isPending ? 'Enregistrement…' : 'Enregistrer'}
+                    <Button type="submit" disabled={updateSecurity.isPending}>
+                        {updateSecurity.isPending ? 'Enregistrement…' : 'Enregistrer'}
                     </Button>
                 </form>
             </section>

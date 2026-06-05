@@ -4,15 +4,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormField } from '../../../shared/components/UI/formField/FormField';
 import Button from '../../../shared/components/UI/Button';
 import { preferencesSchema } from '../validation/preferences.schema';
-import { usePatchSettings, useSettings } from '../hooks/use_settings.service';
-import { mergeMeSettings, type MeSettings } from '../types/types';
+import { useSettings, useUpdatePreferences } from '../hooks/use_settings.service';
+import { type MeSettings } from '../types/types';
 
 type PreferencesForm = MeSettings['preferences'];
 
 export default function PreferencesSetting() {
     const { data, isPending, isError, refetch } = useSettings();
-    const patch = usePatchSettings();
-    const merged = mergeMeSettings(data);
+    const updatePreferences = useUpdatePreferences();
 
     const {
         register,
@@ -21,11 +20,13 @@ export default function PreferencesSetting() {
         formState: { errors },
     } = useForm<PreferencesForm>({
         resolver: yupResolver(preferencesSchema),
-        defaultValues: merged.preferences,
+        defaultValues: data?.preferences,
     });
 
     useEffect(() => {
-        reset(mergeMeSettings(data).preferences);
+        if (data?.preferences) {
+            reset(data.preferences);
+        }
     }, [data, reset]);
 
     if (isPending) {
@@ -50,7 +51,7 @@ export default function PreferencesSetting() {
     return (
         <form
             className="flex max-w-xl flex-col gap-4"
-            onSubmit={handleSubmit((values) => patch.mutate({ preferences: values }))}
+            onSubmit={handleSubmit((values) => updatePreferences.mutate(values))}
         >
             <h2 className="text-xl font-semibold">Préférences</h2>
 
@@ -167,8 +168,8 @@ export default function PreferencesSetting() {
                 {...register('defaultSearchCity')}
             />
 
-            <Button type="submit" disabled={patch.isPending}>
-                {patch.isPending ? 'Enregistrement…' : 'Sauvegarder'}
+            <Button type="submit" disabled={updatePreferences.isPending}>
+                {updatePreferences.isPending ? 'Enregistrement…' : 'Sauvegarder'}
             </Button>
         </form>
     );

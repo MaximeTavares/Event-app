@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Button from '../../../shared/components/UI/Button';
 import { notifySchema } from '../validation/notify.schema';
-import { usePatchSettings, useSettings } from '../hooks/use_settings.service';
-import { mergeMeSettings, type MeSettings } from '../types/types';
+import { useSettings, useUpdateNotifications } from '../hooks/use_settings.service';
+import { type MeSettings } from '../types/types';
 
 type NotifyForm = MeSettings['notifications'];
 
@@ -24,16 +24,17 @@ const rows: { key: keyof NotifyForm; label: string; description?: string }[] = [
 
 export default function NotifySetting() {
     const { data, isPending, isError, refetch } = useSettings();
-    const patch = usePatchSettings();
-    const merged = mergeMeSettings(data);
+    const updateNotifications = useUpdateNotifications();
 
     const { register, handleSubmit, reset } = useForm<NotifyForm>({
         resolver: yupResolver(notifySchema),
-        defaultValues: merged.notifications,
+        defaultValues: data?.notifications,
     });
 
     useEffect(() => {
-        reset(mergeMeSettings(data).notifications);
+        if (data?.notifications) {
+            reset(data.notifications);
+        }
     }, [data, reset]);
 
     if (isPending) {
@@ -58,7 +59,7 @@ export default function NotifySetting() {
     return (
         <form
             className="flex max-w-xl flex-col gap-6"
-            onSubmit={handleSubmit((values) => patch.mutate({ notifications: values }))}
+            onSubmit={handleSubmit((values) => updateNotifications.mutate(values))}
         >
             <h2 className="text-xl font-semibold">Notifications</h2>
 
@@ -87,8 +88,8 @@ export default function NotifySetting() {
                 ))}
             </ul>
 
-            <Button type="submit" disabled={patch.isPending}>
-                {patch.isPending ? 'Enregistrement…' : 'Sauvegarder'}
+            <Button type="submit" disabled={updateNotifications.isPending}>
+                {updateNotifications.isPending ? 'Enregistrement…' : 'Sauvegarder'}
             </Button>
         </form>
     );

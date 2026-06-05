@@ -1,31 +1,34 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { FormField } from '../../../shared/components/UI/formField/FormField';
 import Button from '../../../shared/components/UI/Button';
-import { profileSchema } from '../validation/profile.schema';
-import { usePatchSettings, useSettings } from '../hooks/use_settings.service';
-import { mergeMeSettings, type MeSettings } from '../types/types';
-
-type ProfileForm = MeSettings['profile'];
+import {
+    profileSchema,
+    type ProfileInputValues,
+    type ProfileOutputValues,
+} from '../validation/profile.schema';
+import { useSettings, useUpdateProfile } from '../hooks/use_settings.service';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export default function ProfilSetting() {
     const { data, isPending, isError, refetch } = useSettings();
-    const patch = usePatchSettings();
-    const merged = mergeMeSettings(data);
+    const updateProfile = useUpdateProfile();
 
     const {
         register,
         handleSubmit,
         reset,
         formState: { errors },
-    } = useForm<ProfileForm>({
-        resolver: yupResolver(profileSchema),
-        defaultValues: merged.profile,
+    } = useForm<ProfileInputValues, unknown, ProfileOutputValues>({
+        resolver: zodResolver(profileSchema),
+        mode: 'onChange',
+        defaultValues: data?.profile,
     });
 
     useEffect(() => {
-        reset(mergeMeSettings(data).profile);
+        if (data?.profile) {
+            reset(data.profile);
+        }
     }, [data, reset]);
 
     if (isPending) {
@@ -47,21 +50,18 @@ export default function ProfilSetting() {
         );
     }
 
-    const coordinates = merged.profile.address.coordinates;
+    // const coordinates = data?.profile.address.coordinates;
 
     return (
         <form
             className="flex max-w-xl flex-col gap-4"
             onSubmit={handleSubmit((values) => {
-                const { coordinates: _coords, ...address } = values.address;
-                patch.mutate({
-                    profile: {
-                        firstName: values.firstName,
-                        lastName: values.lastName,
-                        email: values.email,
-                        skills: values.skills,
-                        address,
-                    },
+                updateProfile.mutate({
+                    firstName: values.firstName,
+                    lastName: values.lastName,
+                    email: values.email,
+                    skills: values.skills,
+                    address: values.address,
                 });
             })}
         >
@@ -123,11 +123,11 @@ export default function ProfilSetting() {
                     {...register('address.country')}
                 />
 
-                {coordinates ? (
+                {/* {coordinates ? (
                     <p className="text-xs text-base-content/60">
                         Coordonnées : {coordinates.lat.toFixed(5)}, {coordinates.lon.toFixed(5)}
                     </p>
-                ) : null}
+                ) : null} */}
             </fieldset>
 
             <FormField
@@ -138,8 +138,8 @@ export default function ProfilSetting() {
                 {...register('skills')}
             />
 
-            <Button type="submit" disabled={patch.isPending}>
-                {patch.isPending ? 'Enregistrement…' : 'Enregistrer'}
+            <Button type="submit" disabled={updateProfile.isPending}>
+                {updateProfile.isPending ? 'Enregistrement…' : 'Enregistrer'}
             </Button>
         </form>
     );

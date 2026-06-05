@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Button from '../../../shared/components/UI/Button';
 import { availabilitySchema, type AvailabilityForm } from '../validation/availability.schema';
-import { usePatchSettings, useSettings } from '../hooks/use_settings.service';
-import { mergeMeSettings, WEEK_DAYS, type WeekDay } from '../types/types';
+import { useSettings, useUpdateAvailability } from '../hooks/use_settings.service';
+import { WEEK_DAYS, type WeekDay } from '../types/types';
 
 const DAY_LABELS: Record<WeekDay, string> = {
     monday: 'Lundi',
@@ -18,16 +18,17 @@ const DAY_LABELS: Record<WeekDay, string> = {
 
 export default function AvailabilitySetting() {
     const { data, isPending, isError, refetch } = useSettings();
-    const patch = usePatchSettings();
-    const merged = mergeMeSettings(data);
+    const updateAvailability = useUpdateAvailability();
 
     const { register, handleSubmit, reset } = useForm<AvailabilityForm>({
         resolver: yupResolver(availabilitySchema),
-        defaultValues: merged.availability,
+        defaultValues: data?.availability,
     });
 
     useEffect(() => {
-        reset(mergeMeSettings(data).availability);
+        if (data?.availability) {
+            reset(data.availability);
+        }
     }, [data, reset]);
 
     if (isPending) {
@@ -52,7 +53,7 @@ export default function AvailabilitySetting() {
     return (
         <form
             className="flex max-w-xl flex-col gap-4"
-            onSubmit={handleSubmit((values) => patch.mutate({ availability: values }))}
+            onSubmit={handleSubmit((values) => updateAvailability.mutate(values))}
         >
             <h2 className="text-xl font-semibold">Mes disponibilités</h2>
             <p className="text-sm text-base-content/70">
@@ -74,8 +75,8 @@ export default function AvailabilitySetting() {
                 ))}
             </ul>
 
-            <Button type="submit" disabled={patch.isPending}>
-                {patch.isPending ? 'Enregistrement…' : 'Enregistrer'}
+            <Button type="submit" disabled={updateAvailability.isPending}>
+                {updateAvailability.isPending ? 'Enregistrement…' : 'Enregistrer'}
             </Button>
         </form>
     );
