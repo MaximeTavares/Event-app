@@ -11,7 +11,7 @@ export class SettingsController {
     constructor(private readonly settingsService: SettingsService) {}
 
     @Get()
-    async get(@User('id') userId: number): Promise<IResponse<MeSettingsDto>> {
+    async get(@User('id') userId: string): Promise<IResponse<MeSettingsDto>> {
         const data = await this.settingsService.getForUser(userId);
         return {
             data,
@@ -22,7 +22,7 @@ export class SettingsController {
 
     @Patch()
     async patch(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Body() body: PatchSettingsDto,
     ): Promise<IResponse<MeSettingsDto>> {
         const data = await this.settingsService.patchForUser(userId, body);
@@ -35,7 +35,7 @@ export class SettingsController {
 
     @Post('password')
     async changePassword(
-        @User('id') userId: number,
+        @User('id') userId: string,
         @Body() body: ChangePasswordDto,
     ): Promise<void> {
         await this.settingsService.changePassword(userId, body);

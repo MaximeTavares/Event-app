@@ -1,4 +1,4 @@
-import { Address, User, User_profile } from 'prisma/generated/prisma/client';
+import { Address, User, User_profile } from '@prisma/client';
 import {
     defaultMeSettings,
     type MeSettingsDto,

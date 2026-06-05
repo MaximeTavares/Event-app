@@ -1,4 +1,4 @@
-import { Availability } from 'prisma/generated/prisma/client';
+import { Availability } from '@prisma/client';
 import {
     defaultMeSettings,
     WEEK_DAYS,
@@ -36,7 +36,10 @@ export function isTemplateAvailability(startAt: Date): boolean {
     return year === 2024 && month === 0 && date >= 1 && date <= 7;
 }
 
-export function templateSlotRange(day: WeekDay): { start_at: Date; end_at: Date } {
+export function templateSlotRange(day: WeekDay): {
+    start_at: Date;
+    end_at: Date;
+} {
     const dayMs = 24 * 60 * 60 * 1000;
     const start_at = new Date(
         REFERENCE_WEEK_START_UTC + DAY_OFFSET[day] * dayMs,
@@ -64,7 +67,7 @@ export function normalizeAvailabilityPatch(
     const base = { ...defaultMeSettings().availability };
     for (const day of WEEK_DAYS) {
         if (typeof patch[day] === 'boolean') {
-            base[day] = patch[day] as boolean;
+            base[day] = patch[day];
         }
     }
     return base;

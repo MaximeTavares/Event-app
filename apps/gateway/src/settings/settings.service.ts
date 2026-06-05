@@ -4,8 +4,6 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { CreateAddressDto } from 'src/address/dto/create-address.dto';
-import { PrismaService } from 'prisma/prisma.service';
-import { AuthService } from 'src/auth/auth.service';
 import { UserProfileService } from 'src/user-profile/user-profile.service';
 import { UserService } from 'src/user/user.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -17,6 +15,8 @@ import {
     normalizeAvailabilityPatch,
     templateSlotRange,
 } from './utils/availability.util';
+import { PrismaService } from '../../prisma/prisma.service';
+import { AuthService } from 'src/ms-auth/auth.service';
 
 @Injectable()
 export class SettingsService {
@@ -27,7 +27,7 @@ export class SettingsService {
         private readonly authService: AuthService,
     ) {}
 
-    async getForUser(userId: number): Promise<MeSettingsDto> {
+    async getForUser(userId: string): Promise<MeSettingsDto> {
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             include: {
@@ -50,7 +50,7 @@ export class SettingsService {
     }
 
     async patchForUser(
-        userId: number,
+        userId: string,
         patch: PatchSettingsDto,
     ): Promise<MeSettingsDto> {
         if (patch.profile) {
@@ -68,7 +68,7 @@ export class SettingsService {
     }
 
     async changePassword(
-        userId: number,
+        userId: string,
         dto: ChangePasswordDto,
     ): Promise<void> {
         const user = await this.prisma.user.findUnique({
@@ -94,7 +94,7 @@ export class SettingsService {
     }
 
     private async applyProfilePatch(
-        userId: number,
+        userId: string,
         profile: PatchProfileDto,
     ): Promise<void> {
         if (profile.email) {
@@ -153,7 +153,7 @@ export class SettingsService {
     }
 
     private async applyAvailabilityPatch(
-        userId: number,
+        userId: string,
         availability: MeSettingsDto['availability'],
     ): Promise<void> {
         const existing = await this.prisma.availability.findMany({
