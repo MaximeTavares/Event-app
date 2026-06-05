@@ -179,6 +179,39 @@ export class AuthService {
         };
     }
 
+    async changePassword(
+        userId: string,
+        currentPassword: string,
+        newPassword: string,
+    ): Promise<void> {
+        console.log('Appel du ms changePassword');
+
+        // Get user if he exist
+        const user = await this.userService.findById(userId);
+        if (!user)
+            throw new RpcException({
+                statusCode: 400,
+                message: 'Email ou mot de passe incorrect',
+            });
+
+        if (!user.password)
+            throw new RpcException({
+                statusCode: 403,
+                message: "Vous n'avez pas accès au changement de mot de passe",
+            });
+
+        // Compose passwords
+        const isValid = await compare(currentPassword, user.password);
+        if (!isValid)
+            throw new RpcException({
+                statusCode: 400,
+                message: 'Email ou mot de passe incorrect',
+            });
+
+        const hashed = await hash(newPassword);
+        await this.userService.update(userId, { password: hashed });
+    }
+
     async signout(userId: string) {
         await this.refreshTokenService.revoke(userId);
     }
