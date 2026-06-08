@@ -1,5 +1,5 @@
 {
-  "name": "back",
+  "name": "gateway",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -9,7 +9,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"src/**/*.ts\"",
@@ -37,6 +37,7 @@
     "class-validator": "^0.14.4",
     "cookie-parser": "^1.4.7",
     "date-fns": "^4.1.0",
+    "jsonwebtoken": "^9.0.3",
     "nats": "^2.29.3",
     "pg": "^8.21.0",
     "prisma": "^5.22.0",
