@@ -5,7 +5,7 @@ import { RpcException } from '@nestjs/microservices';
 import { compare, hash } from 'src/utils/password.util';
 import { UserService } from 'src/users/user.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
-import { GoogleAuthService } from '../../google/google-auth.service';
+import { GoogleAuthService } from 'src/google/google-auth.service';
 
 @Injectable()
 export class AuthService {
