@@ -32,7 +32,8 @@
     "tailwindcss": "^4.2.1",
     "yup": "^1.7.1",
     "zod": "^4.3.6",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.11",
+    "@app/contracts": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
