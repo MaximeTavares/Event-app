@@ -6,6 +6,7 @@ import { UserPreferences } from './userPreference.schema';
 import { UserProfile } from './userProfile.schema';
 import { UserProviders } from './userProvider.schema';
 import { UserSecurity } from './userSecurity.schema';
+import { UserAvailability } from './userAvailability.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -43,6 +44,12 @@ export class User {
         default: {},
     })
     notifications: UserNotifications;
+
+    @Prop({
+        type: UserAvailability,
+        default: {},
+    })
+    availability: UserAvailability;
 
     @Prop({
         type: UserSecurity,

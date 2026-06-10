@@ -6,6 +6,7 @@ import { compare, hash } from 'src/utils/password.util';
 import { UserService } from 'src/users/user.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
 import { GoogleAuthService } from 'src/google/google-auth.service';
+import { LoginResponseDto } from '@app/contracts';
 
 @Injectable()
 export class AuthService {
@@ -112,7 +113,7 @@ export class AuthService {
         };
     }
 
-    async refresh(refreshToken: string) {
+    async refresh(refreshToken: string): Promise<LoginResponseDto> {
         // 1. Verify refresh token (JWT)
         let payload: { sub: string };
 
@@ -171,11 +172,11 @@ export class AuthService {
         return {
             accessToken,
             refreshToken: newRefreshToken,
-            user: {
-                id: user.id,
-                email: user.email,
-                role: user.role,
-            },
+            // user: {
+            //     id: user.id,
+            //     email: user.email,
+            //     role: user.role,
+            // },
         };
     }
 
@@ -209,7 +210,7 @@ export class AuthService {
             });
 
         const hashed = await hash(newPassword);
-        await this.userService.update(userId, { password: hashed });
+        await this.userService.updateById(userId, { password: hashed });
     }
 
     async signout(userId: string) {

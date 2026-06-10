@@ -1,8 +1,14 @@
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { type SigninDto, type SignupDto } from 'src/dto/auth.dto';
 import { UserService } from 'src/users/user.service';
+import {
+    AUTH_SUBJECTS,
+    LoginRequestDto,
+    LoginResponseDto,
+    SETTINGS_SUBJECTS,
+    SignupRequestDto,
+} from '@app/contracts';
 
 @Controller()
 export class AuthController {
@@ -11,46 +17,44 @@ export class AuthController {
         private readonly userService: UserService,
     ) {}
 
-    @MessagePattern('auth.signup')
-    signup(data: SignupDto) {
+    @MessagePattern(AUTH_SUBJECTS.SIGNUP)
+    signup(data: SignupRequestDto) {
         return this.authService.signup(data);
     }
 
-    @MessagePattern('auth.signin')
-    signin(data: SigninDto) {
+    @MessagePattern(AUTH_SUBJECTS.SIGNIN)
+    signin(data: LoginRequestDto) {
         return this.authService.signin(data);
     }
 
-    @MessagePattern('auth.google')
+    @MessagePattern(AUTH_SUBJECTS.AUTH_GOOGLE)
     googleSignin(@Payload() data: { idToken: string }) {
         return this.authService.googleSignin(data.idToken);
     }
 
-    @MessagePattern('auth.refresh')
-    refresh(data: { refreshToken: string }) {
-        return this.authService.refresh(data.refreshToken);
-    }
-
-    @MessagePattern('users.getAll')
-    getUsers() {
-        return this.userService.findAll();
-    }
-
-    @MessagePattern('users.profiles')
-    getProfiles(data: { userIds: string[] }) {
-        return this.userService.findManyByIds(data.userIds);
-    }
-
-    @MessagePattern('user.validate')
-    validateUser(data: { userId: string }) {
-        return this.userService.findById(data.userId);
-    }
-
-    @MessagePattern('auth.signout')
+    @MessagePattern(AUTH_SUBJECTS.SIGNOUT)
     async logout(data: { userId: string }) {
         await this.authService.signout(data.userId);
         return {
             success: true,
         };
+    }
+
+    @MessagePattern(AUTH_SUBJECTS.REFRESH_TOKEN)
+    refresh(data: { refreshToken: string }): Promise<LoginResponseDto> {
+        return this.authService.refresh(data.refreshToken);
+    }
+
+    @MessagePattern(SETTINGS_SUBJECTS.CHANGE_PASSWORD)
+    changePassword(data: {
+        userId: string;
+        currendPassword: string;
+        newPassword: string;
+    }) {
+        return this.authService.changePassword(
+            data.userId,
+            data.currendPassword,
+            data.newPassword,
+        );
     }
 }
