@@ -67,7 +67,7 @@ export default function Home() {
 
     // Origine géographique et paramètres spatiaux utilisés pour la carte et le filtrage par rayon.
     // const userOrigin = useUserMapOrigin(currentUser);
-    const userOrigin: Coordinates | null | undefined = currentUser?.profile.address.coordinates;
+    const userOrigin: Coordinates | null | undefined = currentUser?.profile.address;
 
     const effectiveOrigin = cityCoordinates ?? userOrigin;
 

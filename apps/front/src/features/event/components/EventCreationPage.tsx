@@ -25,7 +25,7 @@ export function EventCreationPage() {
     const handleSubmit = async (data: EventCreationFormValues) => {
         const promise = createMutation.mutateAsync(EventMapper.toCreateEvent(data));
 
-        toast.promise(promise, {
+        await toast.promise(promise, {
             loading: 'Chargement...',
             success: 'Événement créé avec succès',
             error: (err: AxiosError<ApiError>) => {
@@ -35,7 +35,7 @@ export function EventCreationPage() {
 
         try {
             await promise;
-            navigate('/me/events');
+            await navigate('/me/events');
         } catch (err) {
             const error = err as AxiosError<ApiError>;
             const message = error.response?.data.message ?? 'Erreur lors de la création.';
