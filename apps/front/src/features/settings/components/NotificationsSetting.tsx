@@ -1,14 +1,11 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import Button from '../../../shared/components/UI/Button';
-import { notifySchema } from '../validation/notify.schema';
 import { useSettings, useUpdateNotifications } from '../hooks/use_settings.service';
-import { type MeSettings } from '../types/types';
+import { NotificationsDto, notificationsSchema } from '@app/contracts';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-type NotifyForm = MeSettings['notifications'];
-
-const rows: { key: keyof NotifyForm; label: string; description?: string }[] = [
+const rows: { key: keyof NotificationsDto; label: string; description?: string }[] = [
     {
         key: 'enabled',
         label: 'Activer les notifications',
@@ -22,12 +19,12 @@ const rows: { key: keyof NotifyForm; label: string; description?: string }[] = [
     { key: 'judgments', label: 'Retours et évaluations reçus' },
 ];
 
-export default function NotifySetting() {
+export default function NotificationsSetting() {
     const { data, isPending, isError, refetch } = useSettings();
     const updateNotifications = useUpdateNotifications();
 
-    const { register, handleSubmit, reset } = useForm<NotifyForm>({
-        resolver: yupResolver(notifySchema),
+    const { register, handleSubmit, reset } = useForm<NotificationsDto>({
+        resolver: zodResolver(notificationsSchema),
         defaultValues: data?.notifications,
     });
 

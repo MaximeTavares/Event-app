@@ -25,7 +25,7 @@ export function SlotDetails({ slot }: Readonly<SlotDetailsProps>) {
         canEdit,
         handleDelete,
         handleUpdate,
-        useUpdate,
+        updateSlotMutation,
     } = useSlotDetails(slot);
 
     const onUpdate = async (data: SlotCreationOutputValues) => {
@@ -89,8 +89,8 @@ export function SlotDetails({ slot }: Readonly<SlotDetailsProps>) {
                 <Card title="Modification de créneau" size="full">
                     <SlotCreationForm
                         onSubmit={onUpdate}
-                        isSubmitting={useUpdate.isPending}
-                        error={useUpdate.isError}
+                        isSubmitting={updateSlotMutation.isPending}
+                        error={updateSlotMutation.isError}
                         defaultValues={SlotMapper.toDefaultValues(slot)}
                     />
                 </Card>

@@ -1,13 +1,10 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { FormField } from '../../../shared/components/UI/formField/FormField';
 import Button from '../../../shared/components/UI/Button';
-import { preferencesSchema } from '../validation/preferences.schema';
 import { useSettings, useUpdatePreferences } from '../hooks/use_settings.service';
-import { type MeSettings } from '../types/types';
-
-type PreferencesForm = MeSettings['preferences'];
+import { PreferencesDto, preferencesSchema } from '@app/contracts';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export default function PreferencesSetting() {
     const { data, isPending, isError, refetch } = useSettings();
@@ -18,8 +15,8 @@ export default function PreferencesSetting() {
         handleSubmit,
         reset,
         formState: { errors },
-    } = useForm<PreferencesForm>({
-        resolver: yupResolver(preferencesSchema),
+    } = useForm<PreferencesDto>({
+        resolver: zodResolver(preferencesSchema),
         defaultValues: data?.preferences,
     });
 

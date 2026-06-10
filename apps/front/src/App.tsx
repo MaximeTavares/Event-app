@@ -21,11 +21,11 @@ import { SlotDetailsPage } from './pages/Slot/SlotDetailsPage';
 import { useAuthStore } from './features/auth/store/auth.store';
 import { useEffect } from 'react';
 import AvailabilitySetting from './features/settings/components/AvailabilitySetting';
-import NotifySetting from './features/settings/components/NotifySetting';
 import PreferencesSetting from './features/settings/components/PreferencesSetting';
 import ProfilSetting from './features/settings/components/ProfilSetting';
 import SecuritySettings from './features/settings/components/SecuritySetting';
 import SettingsPage from './pages/SettingsPage';
+import NotificationsSetting from './features/settings/components/NotificationsSetting';
 
 function useAuthBootstrap() {
     const accessToken = useAuthStore((s) => s.accessToken);
@@ -89,7 +89,7 @@ function App() {
                             <Route path="profil" element={<ProfilSetting />} />
                             <Route path="disponibilites" element={<AvailabilitySetting />} />
                             <Route path="securite" element={<SecuritySettings />} />
-                            <Route path="notifications" element={<NotifySetting />} />
+                            <Route path="notifications" element={<NotificationsSetting />} />
                             <Route path="preferences" element={<PreferencesSetting />} />
                         </Route>
                     </Route>

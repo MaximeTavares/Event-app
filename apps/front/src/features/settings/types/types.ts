@@ -12,6 +12,23 @@ export type WeekDay = (typeof WEEK_DAYS)[number];
 
 export type ProfileVisibility = 'public' | 'events_only' | 'organizers_only';
 
+export interface UserProfile {
+    firstName?: string;
+    lastName?: string;
+    avatarUrl?: string;
+    phone?: string;
+    bio?: string;
+
+    address?: {
+        streetNumber?: string;
+        streetName?: string;
+        addressLine2?: string;
+        city?: string;
+        postalCode?: string;
+        country?: string;
+    };
+}
+
 export type SettingsAddress = {
     street_number?: string;
     street_name?: string;
@@ -29,9 +46,10 @@ export interface MeSettings {
     profile: {
         firstName: string;
         lastName: string;
-        email: string;
+        avatarUrl: string;
+        phone: string;
+        bio: string;
         address: SettingsAddress;
-        skills: string;
     };
     security: {
         twoFactorEnabled: boolean;

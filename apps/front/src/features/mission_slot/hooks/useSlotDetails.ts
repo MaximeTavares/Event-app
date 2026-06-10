@@ -22,9 +22,9 @@ export function useSlotDetails(slot: SlotDetailsApiResponse) {
     const canEdit = user?.id === slot.organizer_id;
 
     // Handle slot update
-    const useUpdate = useUpdateSlot();
+    const updateSlotMutation = useUpdateSlot();
     const handleUpdate = async (data: SlotCreationOutputValues) => {
-        await toastMutation(useUpdate.mutateAsync({ slotId: slot.id, slot: data }), {
+        await toastMutation(updateSlotMutation.mutateAsync({ slotId: slot.id, slot: data }), {
             loading: 'Chargement...',
             success: 'Créneau modifié avec succès',
             error: 'Erreur lors de la modification',
@@ -32,9 +32,9 @@ export function useSlotDetails(slot: SlotDetailsApiResponse) {
     };
 
     // Handle slot delete
-    const useDelete = useDeleteSlot();
+    const deleteSlotMutation = useDeleteSlot();
     const handleDelete = async () => {
-        await toastMutation(useDelete.mutateAsync({ id: slot.id }), {
+        await toastMutation(deleteSlotMutation.mutateAsync({ id: slot.id }), {
             loading: 'Chargement...',
             success: 'Créneau supprimé avec succès',
             error: 'Erreur lors de la suppression',
@@ -53,6 +53,6 @@ export function useSlotDetails(slot: SlotDetailsApiResponse) {
         handleUpdate,
         handleDelete,
         // State
-        useUpdate,
+        updateSlotMutation,
     };
 }

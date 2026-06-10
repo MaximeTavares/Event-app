@@ -4,13 +4,12 @@ import { SettingsApi } from '../api/settings.api';
 import type {
     ChangePasswordPayload,
     MeSettings,
-    UpdateAvailabilityPayload,
     UpdateNotificationsPayload,
     UpdatePreferencesPayload,
-    UpdateProfilePayload,
     UpdateSecurityPayload,
 } from '../types/types';
 import { useAuthStore } from '../../auth/store/auth.store';
+import { AvailabilityDto, MeSettingsDto, ProfileDto } from '@app/contracts';
 
 export function useSettings() {
     const { accessToken } = useAuthStore();
@@ -29,20 +28,19 @@ export function useSettings() {
 export function useUpdateProfile() {
     const queryClient = useQueryClient();
 
-    return useMutation<UpdateProfilePayload, Error, UpdateProfilePayload>({
-        mutationFn: (payload) => SettingsApi.updateProfile(payload),
+    return useMutation({
+        mutationFn: (payload: ProfileDto) => SettingsApi.updateProfile(payload),
         onSuccess: (updatedProfile) => {
-            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+            queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
                 return {
                     ...old,
-                    ...updatedProfile,
+                    profile: {
+                        ...old.profile,
+                        ...updatedProfile,
+                    },
                 };
             });
-            toast.success('Profil mis à jour');
-        },
-        onError: () => {
-            toast.error("Impossible d'enregistrer les paramètres.");
         },
     });
 }
@@ -50,23 +48,18 @@ export function useUpdateProfile() {
 export function useUpdateAvailability() {
     const queryClient = useQueryClient();
 
-    return useMutation<UpdateAvailabilityPayload, Error, UpdateAvailabilityPayload>({
-        mutationFn: (payload) => SettingsApi.updateAvailability(payload),
+    return useMutation({
+        mutationFn: (payload: AvailabilityDto) => SettingsApi.updateAvailability(payload),
+
         onSuccess: (updatedAvailability) => {
-            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+            queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
+
                 return {
                     ...old,
-                    availability: {
-                        ...old.availability,
-                        ...updatedAvailability,
-                    },
+                    availability: updatedAvailability,
                 };
             });
-            toast.success('Disponibilités misent à jour');
-        },
-        onError: () => {
-            toast.error("Impossible d'enregistrer les paramètres.");
         },
     });
 }
