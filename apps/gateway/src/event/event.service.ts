@@ -22,6 +22,7 @@ import { UserService } from '../user/user.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Event_status, Prisma } from '@prisma/client';
 import { NatsService } from 'src/nats/nats.service';
+import { USER_SUBJECTS } from '@app/contracts';
 
 @Injectable()
 export class EventService {
@@ -36,7 +37,7 @@ export class EventService {
         createEventDto: CreateEventDto,
         userId: string,
     ): Promise<EventWithUserAndAddressDTO> {
-        await this.natsService.send('user.validate', { userId });
+        await this.natsService.send(USER_SUBJECTS.GET_USER, { userId });
 
         const hasConflict = await this.hasEventConflict(
             userId,
@@ -340,7 +341,7 @@ export class EventService {
     async findAllMyEvents(
         userId: string,
     ): Promise<EventWithUserAndAddressDTO[]> {
-        await this.natsService.send('user.validate', { userId });
+        await this.natsService.send(USER_SUBJECTS.GET_USER, { userId });
 
         const events = await this.prisma.event.findMany({
             where: { organizer_id: userId },
@@ -426,7 +427,7 @@ export class EventService {
         userId: string,
     ): Promise<EventWithUserAndAddressDTO> {
         const existingEvent = await this.findOwnedEventOrFail(id, userId);
-        await this.natsService.send('user.validate', {
+        await this.natsService.send(USER_SUBJECTS.GET_USER, {
             userId,
         });
 

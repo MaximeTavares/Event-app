@@ -1,7 +1,7 @@
 import { AddressDTO } from 'src/address/dto/address.dto';
 import { UserDTO } from 'src/user/dto/user.dto';
 
-export type UserProfileDTO = {
+export interface UserProfileDTO {
     first_name?: string | null;
     last_name?: string | null;
     phone_number?: string | null;
@@ -13,10 +13,10 @@ export type UserProfileDTO = {
     //Données calculées
     full_name?: string | null;
     age?: number | null;
-};
+}
 
-export type UserWithProfileAndAddressDTO = {
+export interface UserWithProfileAndAddressDTO {
     user: UserDTO;
     profile: UserProfileDTO | null;
     address: AddressDTO | null;
-};
+}

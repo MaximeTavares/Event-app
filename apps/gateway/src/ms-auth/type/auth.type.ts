@@ -1,26 +1,26 @@
 /**
  * Permet de gérer la structure du token
  */
-export type JwtPayload = {
+export interface JwtPayload {
     sub: number;
     email: string;
     role: string;
     iat?: number;
     exp?: number;
-};
+}
 
-export type SigninResponse = {
+export interface SigninResponse {
     accessToken: string;
     refreshToken: string;
-};
+}
 
 /**
  * Structure du payload tel qu'on la retrouve dans la `request.user` après
  * que le `AuthGard` a décodé le token
  */
-export type AuthUser = {
+export interface AuthUser {
     id: number;
-};
+}
 
 export interface CurrentUserData {
     id: string;

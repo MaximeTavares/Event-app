@@ -1,36 +1,46 @@
 import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
-import type { IResponse } from 'src/utils/interface/response.interface';
-import { User } from 'src/user/decorators/user.decorator';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import type { MeSettingsDto } from './dto/me-settings.dto';
-import { PatchSettingsDto } from './dto/patch-settings.dto';
-import { SettingsService } from './settings.service';
+import { NatsService } from '../nats/nats.service';
+import { User } from '../user/decorators/user.decorator';
+import {
+    AvailabilityDto,
+    ChangePasswordDto,
+    ProfileDto,
+    profileSchema,
+    SETTINGS_SUBJECTS,
+} from '@app/contracts';
+import { ZodValidationPipe } from 'src/utils/zod-validation.pipe';
 
-@Controller('me/settings')
+@Controller('me')
 export class SettingsController {
-    constructor(private readonly settingsService: SettingsService) {}
+    constructor(private readonly natsService: NatsService) {}
 
-    @Get()
-    async get(@User('id') userId: string): Promise<IResponse<MeSettingsDto>> {
-        const data = await this.settingsService.getForUser(userId);
-        return {
-            data,
-            timeStamp: new Date(),
-            url: 'me/settings',
-        };
+    @Get('settings')
+    async get(@User('id') userId: string) {
+        return this.natsService.send(SETTINGS_SUBJECTS.GET_SETTINGS, {
+            userId,
+        });
     }
 
-    @Patch()
-    async patch(
+    @Patch('profile')
+    async updateProfile(
         @User('id') userId: string,
-        @Body() body: PatchSettingsDto,
-    ): Promise<IResponse<MeSettingsDto>> {
-        const data = await this.settingsService.patchForUser(userId, body);
-        return {
-            data,
-            timeStamp: new Date(),
-            url: 'me/settings',
-        };
+        @Body(ZodValidationPipe(profileSchema)) body: ProfileDto,
+    ) {
+        return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_PROFILE, {
+            userId,
+            body,
+        });
+    }
+
+    @Patch('availability')
+    async updateAvailability(
+        @User('id') userId: string,
+        @Body() body: AvailabilityDto,
+    ) {
+        return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_AVAILABILITY, {
+            userId,
+            body,
+        });
     }
 
     @Post('password')
@@ -38,6 +48,10 @@ export class SettingsController {
         @User('id') userId: string,
         @Body() body: ChangePasswordDto,
     ): Promise<void> {
-        await this.settingsService.changePassword(userId, body);
+        await this.natsService.send(SETTINGS_SUBJECTS.CHANGE_PASSWORD, {
+            userId,
+            currentPassword: body.currentPassword,
+            newPassword: body.newPassword,
+        });
     }
 }

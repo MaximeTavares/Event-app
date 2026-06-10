@@ -1,6 +1,6 @@
 import { Participation_status } from '@prisma/client';
 
-export type ParticipationDTO = {
+export interface ParticipationDTO {
     id: number;
     user_id: string;
     slot_id: number;
@@ -9,4 +9,4 @@ export type ParticipationDTO = {
     cancelled_at: Date | null;
     created_at: Date;
     updated_at: Date | null;
-};
+}

@@ -9,7 +9,7 @@ export type WeekDay =
 
 export type ProfileVisibility = 'public' | 'events_only' | 'organizers_only';
 
-export type SettingsAddressDto = {
+export interface SettingsAddressDto {
     street_number: string;
     street_name: string;
     address_line_2?: string;
@@ -20,9 +20,9 @@ export type SettingsAddressDto = {
         lat: number;
         lon: number;
     };
-};
+}
 
-export type MeSettingsDto = {
+export interface MeSettingsDto {
     profile: {
         firstName: string;
         lastName: string;
@@ -56,7 +56,7 @@ export type MeSettingsDto = {
         defaultSearchCity: string;
     };
     availability: Record<WeekDay, boolean>;
-};
+}
 
 export const WEEK_DAYS: WeekDay[] = [
     'monday',
