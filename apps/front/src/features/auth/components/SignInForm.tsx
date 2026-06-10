@@ -1,16 +1,9 @@
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { Link, useNavigate } from 'react-router';
-import { loginSchema } from '../validation/Signin.schema';
+import { Link } from 'react-router';
 import { FormField } from '../../../shared/components/UI/formField/FormField';
-import { useSignin } from '../hooks/use_auth.service';
-import type { SigninData } from '../types/types';
-import { useQueryClient } from '@tanstack/react-query';
-
-type Inputs = {
-    email: string;
-    password: string;
-};
+import { zodResolver } from '@hookform/resolvers/zod';
+import { LoginRequestDto, LoginRequestSchema } from '@app/contracts';
+import { useSigninHandler } from '../hooks/useSigninHandler';
 
 export function SignInForm() {
     const {
@@ -18,25 +11,16 @@ export function SignInForm() {
         handleSubmit,
         setError,
         formState: { errors },
-    } = useForm<Inputs>({
-        resolver: yupResolver(loginSchema),
+    } = useForm<LoginRequestDto>({
+        resolver: zodResolver(LoginRequestSchema),
         mode: 'onChange',
     });
 
-    const navigate = useNavigate();
-    const signin = useSignin();
-    const queryClient = useQueryClient();
-
-    const onSubmit = async (data: SigninData) => {
+    const signinHandler = useSigninHandler();
+    const onSubmit = async (data: LoginRequestDto) => {
         try {
-            await signin.mutateAsync(data);
-            await queryClient.invalidateQueries({
-                queryKey: ['me'],
-            });
-            navigate('/');
-        } catch (error) {
-            console.log('🚀 ~ onSubmit ~ error:', error);
-
+            await signinHandler(data);
+        } catch {
             setError('password', {
                 message: 'Email ou mot de passe incorrect',
             });
