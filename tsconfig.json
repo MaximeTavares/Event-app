@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./apps/gateway" },
+    { "path": "./apps/front" },
     { "path": "./services/ms-auth" },
     { "path": "./packages/contracts" }
   ]

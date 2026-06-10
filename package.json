@@ -16,5 +16,8 @@
     "turbo": "^2.9.16",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.60.1"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   }
 }
