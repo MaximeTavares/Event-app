@@ -16,7 +16,8 @@ export class SettingsApi {
     }
 
     static async updateProfile(body: UpdateProfilePayload): Promise<UpdateProfilePayload> {
-        const { data } = await api.patch('me/settings/profile', body);
+        console.log('🚀 ~ SettingsApi ~ updateProfile ~ body:', body);
+        const { data } = await api.patch('me/profile', body);
         return data;
     }
 
