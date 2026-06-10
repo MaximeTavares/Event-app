@@ -1,17 +1,21 @@
 export const AUTH_SUBJECTS = {
-    //AUTH
-    SIGNIN: 'auth.signin',
-    SIGNUP: 'auth.signup',
-    SIGNOUT: 'auth.singout',
-    AUTH_GOOGLE: 'auth.google',
-    REFRESH_TOKEN: 'refresh_token',
+	SIGNIN: "auth.signin",
+	SIGNUP: "auth.signup",
+	SIGNOUT: "auth.singout",
+	AUTH_GOOGLE: "auth.google",
+	REFRESH_TOKEN: "refresh_token",
+} as const;
 
-    // USER
-    GET_USER: 'users.get',
+export const USER_SUBJECTS = {
+	GET_USER: "user.get",
+} as const;
 
-    // SETTINGS
-    GET_SETTINGS: 'user.settings.get',
-    UPDATE_PROFILE: 'user.update.profile',
-    CHANGE_PASSWORD: 'user.change.password',
-
+export const SETTINGS_SUBJECTS = {
+	GET_SETTINGS: "user.settings.get",
+	UPDATE_PROFILE: "user.update.profile",
+	UPDATE_PREFERENCES: "user.update.preferences",
+	UPDATE_NOTIFICATIONS: "user.update.notifications",
+	UPDATE_SECURITY: "user.update.security",
+	UPDATE_AVAILABILITY: "user.update.availability",
+	CHANGE_PASSWORD: "user.change.password",
 } as const;

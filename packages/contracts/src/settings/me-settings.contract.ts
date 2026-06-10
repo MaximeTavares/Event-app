@@ -2,6 +2,7 @@ import { z } from "zod";
 import { availabilitySchema } from "./availability.contract";
 import { notificationsSchema } from "./notification.contract";
 import { preferencesSchema } from "./preferences.contract";
+import { addressSchema } from "./profile.contract";
 
 export const meSettingsSchema = z.object({
 	profile: z.object({
@@ -10,7 +11,7 @@ export const meSettingsSchema = z.object({
 		avatarUrl: z.string(),
 		phone: z.string(),
 		bio: z.string(),
-		address: z.any(), // ou schema dédié
+		address: addressSchema, // ou schema dédié
 	}),
 
 	security: z.object({

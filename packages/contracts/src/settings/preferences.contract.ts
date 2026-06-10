@@ -24,4 +24,4 @@ export const preferencesSchema = z.object({
     defaultSearchCity: z.string().default(''),
 });
 
-export type PreferencesForm = z.infer<typeof preferencesSchema>;
+export type PreferencesDto = z.infer<typeof preferencesSchema>;

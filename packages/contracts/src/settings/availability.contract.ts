@@ -10,4 +10,4 @@ export const availabilitySchema = z.object({
     sunday: z.boolean(),
 });
 
-export type AvailabilityFormDto = z.infer<typeof availabilitySchema>;
+export type AvailabilityDto = z.infer<typeof availabilitySchema>;
