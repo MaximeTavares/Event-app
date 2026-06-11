@@ -55,22 +55,23 @@ jobs:
 
       - name: Generate Prisma Client
         if: inputs.prisma-generate
-        run: pnpm --filter ${{ inputs.package}} prisma generate
+        run: pnpm --filter ${{ inputs.package }} exec prisma generate
 
       - name: Lint
-        run: pnpm --filter ${{ inputs.package}} lint
+        run: pnpm --filter ${{ inputs.package }} lint
 
     #   - name: Test
     #     run: pnpm run test -- --passWithNoTests
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=${{ inputs.sonar-project-key }}
-            -Dsonar.organization=${{ vars.SONAR_ORG }}
-            -Dsonar.sources=${{ inputs.sonar-source }}
-            -Dsonar.qualitygate.wait=true
+              -Dsonar.projectKey=${{ inputs.sonar-project-key }}
+              -Dsonar.organization=${{ vars.SONAR_ORG }}
+              -Dsonar.sources=${{ inputs.sonar-source }}
+              -Dsonar.qualitygate.wait=true
+              -Dsonar.verbose=true
