@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
     AvailabilityDto,
+    PreferencesDto,
     ProfileDto,
     SETTINGS_SUBJECTS,
     USER_SUBJECTS,
@@ -53,9 +54,17 @@ export class UserController {
             data.userId,
             data.body,
         );
-        console.log(
-            '🚀 ~ UserController ~ updateAvailability ~ result:',
-            result,
+
+        return result ?? { ok: true };
+    }
+
+    @MessagePattern(SETTINGS_SUBJECTS.UPDATE_PREFERENCES)
+    async updatePreferences(
+        @Payload() data: { userId: string; body: PreferencesDto },
+    ) {
+        const result = await this.userService.updatePreferences(
+            data.userId,
+            data.body,
         );
 
         return result ?? { ok: true };

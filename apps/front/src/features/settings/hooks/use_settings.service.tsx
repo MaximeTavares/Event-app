@@ -5,11 +5,10 @@ import type {
     ChangePasswordPayload,
     MeSettings,
     UpdateNotificationsPayload,
-    UpdatePreferencesPayload,
     UpdateSecurityPayload,
 } from '../types/types';
 import { useAuthStore } from '../../auth/store/auth.store';
-import { AvailabilityDto, MeSettingsDto, ProfileDto } from '@app/contracts';
+import { AvailabilityDto, MeSettingsDto, PreferencesDto, ProfileDto } from '@app/contracts';
 
 export function useSettings() {
     const { accessToken } = useAuthStore();
@@ -88,20 +87,19 @@ export function useUpdateNotifications() {
 export function useUpdatePreferences() {
     const queryClient = useQueryClient();
 
-    return useMutation<UpdatePreferencesPayload, Error, UpdatePreferencesPayload>({
-        mutationFn: (payload) => SettingsApi.updatePreferences(payload),
+    return useMutation({
+        mutationFn: (payload: PreferencesDto) => SettingsApi.updatePreferences(payload),
         onSuccess: (updatedPreferences) => {
-            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+            queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
                 return {
                     ...old,
-                    ...updatedPreferences,
+                    preferences: {
+                        ...old.preferences,
+                        ...updatedPreferences,
+                    },
                 };
             });
-            toast.success('Preferences misent à jour');
-        },
-        onError: () => {
-            toast.error("Impossible d'enregistrer les paramètres.");
         },
     });
 }

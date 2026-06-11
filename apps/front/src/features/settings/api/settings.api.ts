@@ -1,9 +1,8 @@
-import { AvailabilityDto, MeSettingsDto, ProfileDto } from '@app/contracts';
+import { AvailabilityDto, MeSettingsDto, PreferencesDto, ProfileDto } from '@app/contracts';
 import { api } from '../../../shared/utils/axios-client';
 import type {
     ChangePasswordPayload,
     UpdateNotificationsPayload,
-    UpdatePreferencesPayload,
     UpdateSecurityPayload,
 } from '../types/types';
 
@@ -18,10 +17,8 @@ export class SettingsApi {
         return data;
     }
 
-    static async updatePreferences(
-        body: UpdatePreferencesPayload,
-    ): Promise<UpdatePreferencesPayload> {
-        const { data } = await api.patch('me/preferences', body);
+    static async updatePreferences(body: PreferencesDto) {
+        const { data } = await api.patch<PreferencesDto>('me/preferences', body);
         return data;
     }
 

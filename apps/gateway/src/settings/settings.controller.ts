@@ -4,6 +4,7 @@ import { User } from '../user/decorators/user.decorator';
 import {
     AvailabilityDto,
     ChangePasswordDto,
+    PreferencesDto,
     ProfileDto,
     profileSchema,
     SETTINGS_SUBJECTS,
@@ -38,6 +39,17 @@ export class SettingsController {
         @Body() body: AvailabilityDto,
     ) {
         return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_AVAILABILITY, {
+            userId,
+            body,
+        });
+    }
+
+    @Patch('preferences')
+    async updatePreferences(
+        @User('id') userId: string,
+        @Body() body: PreferencesDto,
+    ) {
+        return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_PREFERENCES, {
             userId,
             body,
         });

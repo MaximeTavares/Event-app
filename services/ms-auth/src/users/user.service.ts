@@ -4,7 +4,7 @@ import { User } from './schema/user.schema';
 import { Model, UpdateQuery } from 'mongoose';
 import { RpcException } from '@nestjs/microservices';
 import { UpdateProfileDomain } from './domain/update-profile.domain';
-import { AvailabilityDto } from '@app/contracts';
+import { AvailabilityDto, PreferencesDto } from '@app/contracts';
 
 @Injectable()
 export class UserService {
@@ -103,6 +103,17 @@ export class UserService {
 
         await this.updateById(userId, {
             availability: data,
+        });
+    }
+
+    async updatePreferences(
+        userId: string,
+        data: PreferencesDto,
+    ): Promise<void> {
+        if (!data) throw new RpcException('Error');
+
+        await this.updateById(userId, {
+            preferences: data,
         });
     }
 
