@@ -21,6 +21,7 @@ jobs:
     if: github.event_name == 'pull_request'
 
     uses: ./.github/workflows/quality.yml
+    secrets: inherit
     with:
       prisma-generate: true
       sonar-source: apps/gateway
