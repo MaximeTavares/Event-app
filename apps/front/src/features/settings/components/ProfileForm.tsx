@@ -1,4 +1,4 @@
-import { ProfileDto, profileSchema } from '@app/contracts';
+import { ProfileDto, ProfileFormValues, profileSchema } from '@app/contracts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import Button from '../../../shared/components/UI/Button';
@@ -21,7 +21,7 @@ export function ProfileForm({
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<ProfileDto>({
+    } = useForm<ProfileFormValues>({
         resolver: zodResolver(profileSchema),
         defaultValues,
     });

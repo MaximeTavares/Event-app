@@ -6,7 +6,7 @@ import { compare, hash } from 'src/utils/password.util';
 import { UserService } from 'src/users/user.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
 import { GoogleAuthService } from 'src/google/google-auth.service';
-import { LoginResponseDto } from '@app/contracts';
+import { ChangePasswordDto, LoginResponseDto } from '@app/contracts';
 
 @Injectable()
 export class AuthService {
@@ -182,8 +182,7 @@ export class AuthService {
 
     async changePassword(
         userId: string,
-        currentPassword: string,
-        newPassword: string,
+        data: ChangePasswordDto,
     ): Promise<void> {
         console.log('Appel du ms changePassword');
 
@@ -202,14 +201,14 @@ export class AuthService {
             });
 
         // Compose passwords
-        const isValid = await compare(currentPassword, user.password);
+        const isValid = await compare(data.currentPassword, user.password);
         if (!isValid)
             throw new RpcException({
                 statusCode: 400,
-                message: 'Email ou mot de passe incorrect',
+                message: 'Mot de passe incorrect',
             });
 
-        const hashed = await hash(newPassword);
+        const hashed = await hash(data.newPassword);
         await this.userService.updateById(userId, { password: hashed });
     }
 

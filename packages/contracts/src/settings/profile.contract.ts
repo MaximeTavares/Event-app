@@ -22,7 +22,7 @@ export const profileSchema = z
 			.regex(/^[0-9+().\s-]{6,20}$/, "Numéro invalide")
 			.optional(),
 
-		bio: z.string().max(1000, "La biographie est trop longue.").optional().default(""),
+		bio: z.string().max(1000, "La biographie est trop longue.").optional(),
 
 		address: addressSchema.optional(),
 	})
@@ -54,4 +54,6 @@ export const profileSchema = z
 		}
 	});
 
-export type ProfileDto = z.input<typeof profileSchema>;
+export type ProfileFormValues = z.input<typeof profileSchema>
+export type ProfileDto = z.infer<typeof profileSchema>;
+

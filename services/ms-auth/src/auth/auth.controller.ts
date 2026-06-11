@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { UserService } from 'src/users/user.service';
 import {
     AUTH_SUBJECTS,
+    ChangePasswordDto,
     LoginRequestDto,
     LoginResponseDto,
     SETTINGS_SUBJECTS,
@@ -46,15 +47,10 @@ export class AuthController {
     }
 
     @MessagePattern(SETTINGS_SUBJECTS.CHANGE_PASSWORD)
-    changePassword(data: {
-        userId: string;
-        currendPassword: string;
-        newPassword: string;
-    }) {
-        return this.authService.changePassword(
-            data.userId,
-            data.currendPassword,
-            data.newPassword,
-        );
+    async changePassword(data: { userId: string; body: ChangePasswordDto }) {
+        await this.authService.changePassword(data.userId, data.body);
+        return {
+            success: true,
+        };
     }
 }

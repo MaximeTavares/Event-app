@@ -11,7 +11,7 @@ export const meSettingsSchema = z.object({
 		avatarUrl: z.string(),
 		phone: z.string(),
 		bio: z.string(),
-		address: addressSchema, // ou schema dédié
+		address: addressSchema,
 	}),
 
 	security: z.object({

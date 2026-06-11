@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 import { SettingsApi } from '../api/settings.api';
-import type { ChangePasswordPayload, MeSettings, UpdateSecurityPayload } from '../types/types';
 import { useAuthStore } from '../../auth/store/auth.store';
 import {
     AvailabilityDto,
+    ChangePasswordDto,
     MeSettingsDto,
     NotificationsDto,
     PreferencesDto,
     ProfileDto,
+    SecurityDto,
 } from '@app/contracts';
 
 export function useSettings() {
@@ -107,32 +107,26 @@ export function useUpdatePreferences() {
 export function useUpdateSecurity() {
     const queryClient = useQueryClient();
 
-    return useMutation<UpdateSecurityPayload, Error, UpdateSecurityPayload>({
-        mutationFn: (payload) => SettingsApi.updateSecurity(payload),
+    return useMutation({
+        mutationFn: (payload: SecurityDto) => SettingsApi.updateSecurity(payload),
         onSuccess: (updatedSecurity) => {
-            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+            queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
                 return {
                     ...old,
-                    ...updatedSecurity,
+                    security: {
+                        ...old.security,
+                        ...updatedSecurity,
+                    },
                 };
             });
-            toast.success('Securité mis à jour');
-        },
-        onError: () => {
-            toast.error("Impossible d'enregistrer les paramètres.");
         },
     });
 }
 
 export function useChangePassword() {
-    return useMutation<void, Error, ChangePasswordPayload>({
-        mutationFn: (payload) => SettingsApi.changePassword(payload),
-        onSuccess: () => {
-            toast.success('Mot de passe mis à jour.');
-        },
-        onError: () => {
-            toast.error('Impossible de mettre à jour le mot de passe.');
-        },
+    return useMutation({
+        mutationFn: (payload: ChangePasswordDto) => SettingsApi.changePassword(payload),
+        retry: false,
     });
 }

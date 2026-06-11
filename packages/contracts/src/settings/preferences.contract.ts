@@ -28,7 +28,7 @@ export const preferencesSchema = z.object({
 
 	defaultCalendarView: z.string(),
 
-	defaultSearchCity: z.string().default(""),
+	defaultSearchCity: z.string(),
 });
 
 export type PreferencesDto = z.infer<typeof preferencesSchema>;

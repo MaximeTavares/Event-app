@@ -5,6 +5,7 @@ import {
     NotificationsDto,
     PreferencesDto,
     ProfileDto,
+    SecurityDto,
     SETTINGS_SUBJECTS,
     USER_SUBJECTS,
 } from '@app/contracts';
@@ -76,6 +77,18 @@ export class UserController {
         @Payload() data: { userId: string; body: NotificationsDto },
     ) {
         const result = await this.userService.updateNotifications(
+            data.userId,
+            data.body,
+        );
+
+        return result ?? { ok: true };
+    }
+
+    @MessagePattern(SETTINGS_SUBJECTS.UPDATE_SECURITY)
+    async updateSecurity(
+        @Payload() data: { userId: string; body: SecurityDto },
+    ) {
+        const result = await this.userService.updateSecurity(
             data.userId,
             data.body,
         );

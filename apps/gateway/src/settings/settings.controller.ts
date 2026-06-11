@@ -5,12 +5,15 @@ import {
     AvailabilityDto,
     availabilitySchema,
     ChangePasswordDto,
+    ChangePasswordSchema,
     NotificationsDto,
     notificationsSchema,
     PreferencesDto,
     preferencesSchema,
     ProfileDto,
     profileSchema,
+    SecurityDto,
+    SecuritySchema,
     SETTINGS_SUBJECTS,
 } from '@app/contracts';
 import { ZodValidationPipe } from 'src/utils/zod-validation.pipe';
@@ -70,15 +73,25 @@ export class SettingsController {
         });
     }
 
+    @Patch('security')
+    async updateSecurity(
+        @User('id') userId: string,
+        @Body(ZodValidationPipe(SecuritySchema)) body: SecurityDto,
+    ) {
+        return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_SECURITY, {
+            userId,
+            body,
+        });
+    }
+
     @Post('password')
     async changePassword(
         @User('id') userId: string,
-        @Body() body: ChangePasswordDto,
+        @Body(ZodValidationPipe(ChangePasswordSchema)) body: ChangePasswordDto,
     ): Promise<void> {
         await this.natsService.send(SETTINGS_SUBJECTS.CHANGE_PASSWORD, {
             userId,
-            currentPassword: body.currentPassword,
-            newPassword: body.newPassword,
+            body,
         });
     }
 }

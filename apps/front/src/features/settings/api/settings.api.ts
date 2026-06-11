@@ -1,12 +1,13 @@
 import {
     AvailabilityDto,
+    ChangePasswordDto,
     MeSettingsDto,
     NotificationsDto,
     PreferencesDto,
     ProfileDto,
+    SecurityDto,
 } from '@app/contracts';
 import { api } from '../../../shared/utils/axios-client';
-import type { ChangePasswordPayload, UpdateSecurityPayload } from '../types/types';
 
 export class SettingsApi {
     static async get() {
@@ -29,8 +30,8 @@ export class SettingsApi {
         return data;
     }
 
-    static async updateSecurity(body: UpdateSecurityPayload): Promise<UpdateSecurityPayload> {
-        const { data } = await api.patch('me/security', body);
+    static async updateSecurity(body: SecurityDto) {
+        const { data } = await api.patch<SecurityDto>('me/security', body);
         return data;
     }
 
@@ -39,7 +40,7 @@ export class SettingsApi {
         return data;
     }
 
-    static async changePassword(body: ChangePasswordPayload): Promise<void> {
-        await api.post('me/settings/password', body);
+    static async changePassword(body: ChangePasswordDto): Promise<void> {
+        await api.post('me/password', body);
     }
 }

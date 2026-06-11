@@ -8,6 +8,7 @@ import {
     AvailabilityDto,
     NotificationsDto,
     PreferencesDto,
+    SecurityDto,
 } from '@app/contracts';
 
 @Injectable()
@@ -129,6 +130,14 @@ export class UserService {
 
         await this.updateById(userId, {
             notifications: data,
+        });
+    }
+
+    async updateSecurity(userId: string, data: SecurityDto): Promise<void> {
+        if (!data) throw new RpcException('Error');
+
+        await this.updateById(userId, {
+            security: data,
         });
     }
 

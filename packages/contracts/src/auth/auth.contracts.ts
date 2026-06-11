@@ -15,10 +15,21 @@ export const PasswordSchema = z
 		message: "Le mot de passe doit contenir au moins 2 caractères spéciaux",
 	});
 
-export const ChangePasswordSchema = z.object({
-	currentPassword: PasswordSchema,
-	newPassword: PasswordSchema,
-});
+export const ChangePasswordSchema = z
+	.object({
+		currentPassword: PasswordSchema,
+		newPassword: PasswordSchema,
+		confirmPassword: z.string(),
+	})
+	.superRefine((data, ctx) => {
+		if (data.newPassword !== data.confirmPassword) {
+			ctx.addIssue({
+				path: ["confirmPassword"],
+				code: z.ZodIssueCode.custom,
+				message: "Les mots de passe ne correspondent pas",
+			});
+		}
+	});
 
 export type ChangePasswordDto = z.infer<typeof ChangePasswordSchema>;
 
