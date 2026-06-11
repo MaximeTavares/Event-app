@@ -5,6 +5,7 @@ on:
     branches: [develop]
     paths:
       - "apps/front/**"
+      - "packages/contracts/**"
 
   workflow_dispatch:
 
@@ -12,33 +13,49 @@ on:
     branches: [develop, main]
     paths:
       - "apps/front/**"
-
+      - "packages/contracts/**"
 
 jobs:
   quality:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./apps/front
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: apps/front/package-lock.json
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: npm run lint
+      - name: Lint (front only)
+        run: pnpm --filter front lint
+
+    #   - name: Test (front only)
+    #     run: pnpm --filter front test -- --passWithNoTests
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -82,13 +99,15 @@ jobs:
       - name: Build & Push STAGING Front
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/front
+          context: .
+          file: apps/front/Dockerfile
+
           push: true
 
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL_STAGING }}
             VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
-            VITE_GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY}}
+            VITE_GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
           tags: |
             ghcr.io/${{ env.OWNER }}/front:${{ github.sha }}
@@ -125,13 +144,15 @@ jobs:
       - name: Build & Push PROD Front
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/front
+          context: .
+          file: apps/front/Dockerfile
+
           push: true
 
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
             VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
-            VITE_GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY}}
+            VITE_GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
           tags: |
             ghcr.io/${{ env.OWNER }}/front:${{ github.sha }}

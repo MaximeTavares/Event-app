@@ -5,6 +5,7 @@ on:
     branches: [develop]
     paths:
       - "apps/gateway/**"
+      - "packages/contracts/**"
 
   workflow_dispatch:
 
@@ -12,6 +13,7 @@ on:
     branches: [develop, main]
     paths:
       - "apps/gateway/**"
+      - "packages/contracts/**"
 
 jobs:
 
@@ -19,29 +21,26 @@ jobs:
     if: github.event_name == 'pull_request'
 
     uses: ./.github/workflows/quality.yml
-
     with:
-      working-directory: apps/gateway
       prisma-generate: true
       sonar-source: apps/gateway
       sonar-project-key: ${{ vars.SONAR_GATEWAY_PROJECT_KEY }}
+      working-directory: apps/gateway
 
   build:
     if: github.event_name != 'pull_request'
 
     uses: ./.github/workflows/docker-build.yml
-
     with:
-      context: apps/gateway
+      context: .
       image-name: gateway
+      file: apps/gateway/Dockerfile
 
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
-
     needs: build
 
     uses: ./.github/workflows/deploy.yml
-
     with:
       compose-directory: /opt/event-app/staging
       compose-service: staging-gateway

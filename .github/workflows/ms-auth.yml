@@ -5,12 +5,15 @@ on:
     branches: [develop]
     paths:
       - "services/ms-auth/**"
+      - "packages/contracts/**"
+
   workflow_dispatch:
+
   pull_request:
     branches: [develop, main]
     paths:
       - "services/ms-auth/**"
-
+      - "packages/contracts/**"
 
 jobs:
 
@@ -18,7 +21,6 @@ jobs:
     if: github.event_name == 'pull_request'
 
     uses: ./.github/workflows/quality.yml
-
     with:
       working-directory: services/ms-auth
       sonar-source: services/ms-auth
@@ -28,23 +30,19 @@ jobs:
     if: github.event_name != 'pull_request'
 
     uses: ./.github/workflows/docker-build.yml
-
     with:
-      context: services/ms-auth
+      context: .
       image-name: ms-auth
+      file: services/ms-auth/Dockerfile
 
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
-
     needs: build
 
     uses: ./.github/workflows/deploy.yml
-
     with:
       compose-directory: /opt/event-app/staging
       compose-service: staging-ms-auth
       environment: staging
       image-name: ms-auth
       run-migrations: false
-
-
