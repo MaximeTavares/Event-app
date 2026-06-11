@@ -9,12 +9,13 @@ RUN corepack enable
 
 
 # -------------------------
-# DEPENDENCIES (MONOREPO ROOT)
+# DEPENDENCIES
 # -------------------------
 FROM base AS deps
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
+# workspace packages nécessaires
 COPY services/ms-auth/package.json services/ms-auth/package.json
 COPY packages/contracts/package.json packages/contracts/package.json
 

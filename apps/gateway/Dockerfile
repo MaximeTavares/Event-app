@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 
 # -------------------------
-# DEPENDENCIES (MONOREPO ROOT)
+# DEPENDENCIES
 # -------------------------
 FROM base AS deps
 
@@ -38,10 +38,9 @@ COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
-# Prisma generate (workspace-safe)
 RUN pnpm --filter gateway prisma generate
 
-# Build gateway uniquement
+
 RUN pnpm --filter gateway build
 
 
@@ -58,10 +57,8 @@ RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# install prod deps workspace-aware
 RUN pnpm install --prod --frozen-lockfile
 
-# app build
 COPY --from=builder /app/apps/gateway/dist ./apps/gateway/dist
 
 # prisma runtime

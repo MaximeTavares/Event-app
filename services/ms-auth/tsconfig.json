@@ -2,10 +2,14 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "types": ["node", "jest"],
+    "types": ["node"],
     "baseUrl": ".",
-    "composite": true
+    "rootDir": ".",
+    "composite": true,
+    "declaration": true,
   },
+  "references": [{ "path": "../../packages/contracts"}],
+
   "include": ["**/*.ts"],
   "exclude": ["dist", "node_modules"]
 }

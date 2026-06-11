@@ -9,14 +9,14 @@ RUN corepack enable
 
 
 # -------------------------
-# DEPENDENCIES (MONOREPO ROOT)
+# DEPENDENCIES
 # -------------------------
 FROM base AS deps
 
 # Copie uniquement les fichiers de résolution monorepo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Copie packages nécessaires au lock resolution
+# workspace packages nécessaires
 COPY apps/front/package.json apps/front/package.json
 COPY packages/contracts/package.json packages/contracts/package.json
 
@@ -32,7 +32,7 @@ RUN corepack enable
 
 COPY --from=deps /app/node_modules ./node_modules
 
-# On copie tout le monorepo (nécessaire pour build workspace)
+# On copie tout le monorepo
 COPY . .
 
 ARG VITE_API_URL
@@ -44,7 +44,6 @@ ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 ARG VITE_GEOAPIFY_API_KEY
 ENV VITE_GEOAPIFY_API_KEY=$VITE_GEOAPIFY_API_KEY
 
-# Build uniquement le front (workspace aware)
 RUN pnpm --filter front build
 
 
