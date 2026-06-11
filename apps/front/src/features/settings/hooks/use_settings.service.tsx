@@ -30,7 +30,7 @@ export function useUpdateProfile() {
 
     return useMutation({
         mutationFn: (payload: ProfileDto) => SettingsApi.updateProfile(payload),
-        onSuccess: (updatedProfile) => {
+        onSuccess: async (updatedProfile) => {
             queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
                 return {
@@ -40,6 +40,10 @@ export function useUpdateProfile() {
                         ...updatedProfile,
                     },
                 };
+            });
+            await queryClient.invalidateQueries({
+                queryKey: ['settings'],
+                refetchType: 'inactive',
             });
         },
     });
@@ -51,7 +55,7 @@ export function useUpdateAvailability() {
     return useMutation({
         mutationFn: (payload: AvailabilityDto) => SettingsApi.updateAvailability(payload),
 
-        onSuccess: (updatedAvailability) => {
+        onSuccess: async (updatedAvailability) => {
             queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
 
@@ -59,6 +63,10 @@ export function useUpdateAvailability() {
                     ...old,
                     availability: updatedAvailability,
                 };
+            });
+            await queryClient.invalidateQueries({
+                queryKey: ['settings'],
+                refetchType: 'inactive',
             });
         },
     });
@@ -69,9 +77,10 @@ export function useUpdateNotifications() {
 
     return useMutation({
         mutationFn: (payload: NotificationsDto) => SettingsApi.updateNotifications(payload),
-        onSuccess: (updatedNotifications) => {
+        onSuccess: async (updatedNotifications) => {
             queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
+
                 return {
                     ...old,
                     notifications: {
@@ -79,6 +88,11 @@ export function useUpdateNotifications() {
                         ...updatedNotifications,
                     },
                 };
+            });
+
+            await queryClient.invalidateQueries({
+                queryKey: ['settings'],
+                refetchType: 'inactive',
             });
         },
     });
@@ -89,7 +103,7 @@ export function useUpdatePreferences() {
 
     return useMutation({
         mutationFn: (payload: PreferencesDto) => SettingsApi.updatePreferences(payload),
-        onSuccess: (updatedPreferences) => {
+        onSuccess: async (updatedPreferences) => {
             queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
                 return {
@@ -100,6 +114,10 @@ export function useUpdatePreferences() {
                     },
                 };
             });
+            await queryClient.invalidateQueries({
+                queryKey: ['settings'],
+                refetchType: 'inactive',
+            });
         },
     });
 }
@@ -109,7 +127,7 @@ export function useUpdateSecurity() {
 
     return useMutation({
         mutationFn: (payload: SecurityDto) => SettingsApi.updateSecurity(payload),
-        onSuccess: (updatedSecurity) => {
+        onSuccess: async (updatedSecurity) => {
             queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
                 return {
@@ -119,6 +137,10 @@ export function useUpdateSecurity() {
                         ...updatedSecurity,
                     },
                 };
+            });
+            await queryClient.invalidateQueries({
+                queryKey: ['settings'],
+                refetchType: 'inactive',
             });
         },
     });
