@@ -11,7 +11,7 @@ export class MissionApi {
         eventId: number,
         mission: MissionCreationFormValues,
     ): Promise<BaseMission> {
-        const { data } = await api.post(`events/${eventId}/missions`, mission);
+        const { data } = await api.post<BaseMission>(`events/${eventId}/missions`, mission);
         return data;
     }
 
@@ -21,7 +21,7 @@ export class MissionApi {
     }
 
     static async updateMission(id: number, mission: UpdateMissionInput): Promise<BaseMission> {
-        const { data } = await api.patch(`/missions/${id}`, mission);
+        const { data } = await api.patch<BaseMission>(`/missions/${id}`, mission);
         return data;
     }
 

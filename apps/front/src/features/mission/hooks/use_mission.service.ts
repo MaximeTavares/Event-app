@@ -30,8 +30,8 @@ export function useCreateMission(): UseMutationResult<
 
     return useMutation({
         mutationFn: (variables) => MissionApi.createMission(variables.eventId, variables.mission),
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['events', variables.eventId] });
+        onSuccess: async (_data, variables) => {
+            await queryClient.invalidateQueries({ queryKey: ['events', variables.eventId] });
         },
         onError: (error) => {
             console.error('Échec de la création :', error.message);
@@ -48,8 +48,8 @@ export function useUpdateMission(): UseMutationResult<
 
     return useMutation({
         mutationFn: (variables) => MissionApi.updateMission(variables.id, variables.data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['mission'] });
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['mission'] });
         },
         onError: (error) => {
             console.error('Échec de la mise à jour :', error.message);
@@ -62,8 +62,8 @@ export function useDeleteMission(): UseMutationResult<void, Error, { id: number 
 
     return useMutation({
         mutationFn: (variables) => MissionApi.deleteMission(variables.id),
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['mission'] });
+        onSuccess: async (_data, variables) => {
+            await queryClient.invalidateQueries({ queryKey: ['mission'] });
             queryClient.removeQueries({ queryKey: ['mission', variables.id] });
         },
         onError: (error) => {

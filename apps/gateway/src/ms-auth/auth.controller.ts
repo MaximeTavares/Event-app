@@ -45,7 +45,7 @@ export class AuthController {
     async googleSignin(
         @Body() body: { idToken: string },
         @Res({ passthrough: true }) response: Response,
-    ) {
+    ): Promise<Omit<LoginResponseDto, 'refreshToken'>> {
         const result = await this.natsService.send<
             LoginResponseDto,
             { idToken: string }
@@ -67,7 +67,7 @@ export class AuthController {
     async signin(
         @Body(ZodValidationPipe(LoginRequestSchema)) dto: LoginRequestDto,
         @Res({ passthrough: true }) response: Response,
-    ): Promise<LoginResponseDto> {
+    ): Promise<Omit<LoginResponseDto, 'refreshToken'>> {
         const result = await this.natsService.send<
             LoginResponseDto,
             LoginRequestDto
@@ -81,7 +81,6 @@ export class AuthController {
 
         return {
             accessToken: result.accessToken,
-            refreshToken: result.refreshToken,
         };
     }
 
@@ -90,7 +89,7 @@ export class AuthController {
     async refresh(
         @Req() request: Request,
         @Res({ passthrough: true }) response: Response,
-    ) {
+    ): Promise<{ accessToken: string }> {
         const cookies: Record<string, string> = request.cookies;
         const refreshToken = cookies.refresh_token;
 

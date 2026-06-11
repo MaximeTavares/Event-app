@@ -1,18 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AuthApi } from '../api/auth.api';
-import type { AuthResponse, MeResponse, SigninData, SignupData } from '../types/types';
 import { useAuthStore } from '../store/auth.store';
+import { LoginRequestDto, SignupRequestDto } from '@app/contracts';
 
 export function useSignin() {
     const { setAccessToken } = useAuthStore();
     const queryClient = useQueryClient();
 
-    return useMutation<AuthResponse, Error, SigninData>({
-        mutationFn: (payload) => AuthApi.signin(payload),
+    return useMutation({
+        mutationFn: (payload: LoginRequestDto) => AuthApi.signin(payload),
         onSuccess: async (res) => {
             setAccessToken(res.accessToken);
-            queryClient.setQueryData(['me'], res.user);
-            queryClient.invalidateQueries({ queryKey: ['me'] });
+            await queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 }
@@ -21,12 +20,11 @@ export function useGoogleSignin() {
     const { setAccessToken } = useAuthStore();
     const queryClient = useQueryClient();
 
-    return useMutation<AuthResponse, Error, { idToken: string }>({
-        mutationFn: (payload) => AuthApi.googleSignin(payload.idToken),
+    return useMutation({
+        mutationFn: (payload: { idToken: string }) => AuthApi.googleSignin(payload.idToken),
         onSuccess: async (res) => {
             setAccessToken(res.accessToken);
-            queryClient.setQueryData(['me'], res.user);
-            queryClient.invalidateQueries({ queryKey: ['me'] });
+            await queryClient.invalidateQueries({ queryKey: ['me'] });
         },
     });
 }
@@ -36,15 +34,19 @@ export function useMe() {
 
     return useQuery({
         queryKey: ['me'],
-        queryFn: AuthApi.me,
+        queryFn: () => AuthApi.me(),
         retry: false,
         enabled: initialized && !!accessToken,
+
+        staleTime: 5 * 60 * 1000, // 5 min
+        gcTime: 30 * 60 * 1000,
+        refetchOnWindowFocus: false,
     });
 }
 
 export function useSignup() {
-    return useMutation<MeResponse, Error, SignupData>({
-        mutationFn: (payload) => AuthApi.signup(payload),
+    return useMutation({
+        mutationFn: (payload: SignupRequestDto) => AuthApi.signup(payload),
     });
 }
 
@@ -67,7 +69,6 @@ export function useSignout() {
 
 export function useRefreshToken() {
     const { setAccessToken, accessToken, initialized } = useAuthStore();
-    const queryClient = useQueryClient();
 
     return useQuery({
         queryKey: ['refresh_token'],
@@ -75,10 +76,6 @@ export function useRefreshToken() {
             const res = await AuthApi.refresh();
 
             setAccessToken(res.accessToken);
-
-            if (res.user) {
-                queryClient.setQueryData(['me'], res.user);
-            }
 
             return res;
         },

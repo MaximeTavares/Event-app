@@ -18,7 +18,7 @@ export function useGoogleAuth() {
             queryKey: ['me'],
         });
 
-        navigate('/');
+        await navigate('/');
     };
 
     return {

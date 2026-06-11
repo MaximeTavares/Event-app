@@ -24,7 +24,7 @@ export function useGetEvents(filters?: EventFilters): UseQueryResult<PaginatedEv
             const res = await getEvents(filters);
 
             return {
-                items: res.items.map(EventMapper.toEvent),
+                items: res.items.map((e) => EventMapper.toEvent(e)),
                 total: res.total,
                 page: res.page,
                 limit: res.limit,
@@ -47,8 +47,8 @@ export function useCreateEvent(): UseMutationResult<BaseEvent, Error, CreateEven
 
     return useMutation({
         mutationFn: createEvent,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['events'] });
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['events'] });
         },
         onError: (error) => {
             console.error('Échec de la création :', error.message);
@@ -65,8 +65,8 @@ export function useUpdateEvent(): UseMutationResult<
 
     return useMutation({
         mutationFn: (variables) => updateEvent(variables.id, variables.data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['events'] });
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['events'] });
         },
         onError: (error) => {
             console.error('Échec de la mise à jour :', error.message);
@@ -79,8 +79,8 @@ export function useDeleteEvent(): UseMutationResult<void, Error, { id: number }>
 
     return useMutation({
         mutationFn: (variables) => deleteEvent(variables.id),
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['events'] });
+        onSuccess: async (_data, variables) => {
+            await queryClient.invalidateQueries({ queryKey: ['events'] });
             queryClient.removeQueries({ queryKey: ['events', variables.id] });
         },
         onError: (error) => {

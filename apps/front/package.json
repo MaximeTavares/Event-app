@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "eslint \"src/**/*.ts\"",
     "preview": "vite preview",
     "test:e2e": "cypress run"

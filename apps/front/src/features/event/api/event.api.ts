@@ -22,13 +22,13 @@ export async function getEventById(id: number): Promise<EventDetailsApiResponse>
 }
 
 export async function createEvent(event: CreateEventInput): Promise<BaseEvent> {
-    const { data } = await api.post(`/events`, event);
+    const { data } = await api.post<BaseEvent>(`/events`, event);
 
     return data;
 }
 
 export async function updateEvent(id: number, event: UpdateEventInput): Promise<BaseEvent> {
-    const { data } = await api.patch(`/events/${id}`, event);
+    const { data } = await api.patch<BaseEvent>(`/events/${id}`, event);
 
     return data;
 }

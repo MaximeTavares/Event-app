@@ -22,7 +22,7 @@ export function useMissionDetails(mission: MissionDetailsApiResponse) {
             success: 'Mission supprimée avec succés',
             error: 'Erreur lors de la suppréssion.',
         });
-        navigate(`/events/${mission.event_id}`);
+        await navigate(`/events/${mission.event_id}`);
     };
 
     // Handle Mission update
