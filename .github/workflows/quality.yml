@@ -58,7 +58,7 @@ jobs:
         run: pnpm --filter ${{ inputs.package}} prisma generate
 
       - name: Lint
-        run: pnpm --filter ${{ inputs.package}} run lint
+        run: pnpm --filter ${{ inputs.package}} lint
 
     #   - name: Test
     #     run: pnpm run test -- --passWithNoTests
