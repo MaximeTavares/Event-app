@@ -1,14 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { SettingsApi } from '../api/settings.api';
-import type {
-    ChangePasswordPayload,
-    MeSettings,
-    UpdateNotificationsPayload,
-    UpdateSecurityPayload,
-} from '../types/types';
+import type { ChangePasswordPayload, MeSettings, UpdateSecurityPayload } from '../types/types';
 import { useAuthStore } from '../../auth/store/auth.store';
-import { AvailabilityDto, MeSettingsDto, PreferencesDto, ProfileDto } from '@app/contracts';
+import {
+    AvailabilityDto,
+    MeSettingsDto,
+    NotificationsDto,
+    PreferencesDto,
+    ProfileDto,
+} from '@app/contracts';
 
 export function useSettings() {
     const { accessToken } = useAuthStore();
@@ -66,20 +67,19 @@ export function useUpdateAvailability() {
 export function useUpdateNotifications() {
     const queryClient = useQueryClient();
 
-    return useMutation<UpdateNotificationsPayload, Error, UpdateNotificationsPayload>({
-        mutationFn: (payload) => SettingsApi.updateNotifications(payload),
+    return useMutation({
+        mutationFn: (payload: NotificationsDto) => SettingsApi.updateNotifications(payload),
         onSuccess: (updatedNotifications) => {
-            queryClient.setQueryData(['settings'], (old: MeSettings | undefined) => {
+            queryClient.setQueryData<MeSettingsDto>(['settings'], (old) => {
                 if (!old) return old;
                 return {
                     ...old,
-                    ...updatedNotifications,
+                    notifications: {
+                        ...old.notifications,
+                        ...updatedNotifications,
+                    },
                 };
             });
-            toast.success('Notifications misent à jour');
-        },
-        onError: () => {
-            toast.error("Impossible d'enregistrer les paramètres.");
         },
     });
 }

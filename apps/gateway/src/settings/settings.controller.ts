@@ -3,8 +3,12 @@ import { NatsService } from '../nats/nats.service';
 import { User } from '../user/decorators/user.decorator';
 import {
     AvailabilityDto,
+    availabilitySchema,
     ChangePasswordDto,
+    NotificationsDto,
+    notificationsSchema,
     PreferencesDto,
+    preferencesSchema,
     ProfileDto,
     profileSchema,
     SETTINGS_SUBJECTS,
@@ -36,7 +40,7 @@ export class SettingsController {
     @Patch('availability')
     async updateAvailability(
         @User('id') userId: string,
-        @Body() body: AvailabilityDto,
+        @Body(ZodValidationPipe(availabilitySchema)) body: AvailabilityDto,
     ) {
         return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_AVAILABILITY, {
             userId,
@@ -47,9 +51,20 @@ export class SettingsController {
     @Patch('preferences')
     async updatePreferences(
         @User('id') userId: string,
-        @Body() body: PreferencesDto,
+        @Body(ZodValidationPipe(preferencesSchema)) body: PreferencesDto,
     ) {
         return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_PREFERENCES, {
+            userId,
+            body,
+        });
+    }
+
+    @Patch('notifications')
+    async updateNotifications(
+        @User('id') userId: string,
+        @Body(ZodValidationPipe(notificationsSchema)) body: NotificationsDto,
+    ) {
+        return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_NOTIFICATIONS, {
             userId,
             body,
         });

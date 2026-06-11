@@ -16,4 +16,10 @@ export class UserNotifications {
 
     @Prop({ default: true })
     deadlines: boolean;
+
+    @Prop({ default: true })
+    nearbyEvents: boolean;
+
+    @Prop({ default: true })
+    judgments: boolean;
 }
