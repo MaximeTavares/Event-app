@@ -22,7 +22,7 @@ jobs:
 
     uses: ./.github/workflows/quality.yml
     with:
-      working-directory: services/ms-auth
+      package: ms-auth
       sonar-source: services/ms-auth
       sonar-project-key: ${{ vars.SONAR_MS_AUTH_PROJECT_KEY }}
 

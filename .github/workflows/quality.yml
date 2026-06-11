@@ -3,7 +3,7 @@ name: Quality
 on:
   workflow_call:
     inputs:
-      working-directory:
+      package:
         required: true
         type: string
 
@@ -23,10 +23,6 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ${{ inputs.working-directory }}
 
     steps:
       - name: Checkout
@@ -55,14 +51,14 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm  install --frozen-lockfile
 
       - name: Generate Prisma Client
         if: inputs.prisma-generate
-        run: pnpm prisma generate
+        run: pnpm --filter ${{ inputs.package}} prisma generate
 
       - name: Lint
-        run: pnpm run lint
+        run: pnpm --filter ${{ inputs.package}} run lint
 
     #   - name: Test
     #     run: pnpm run test -- --passWithNoTests

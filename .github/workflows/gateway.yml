@@ -25,7 +25,7 @@ jobs:
       prisma-generate: true
       sonar-source: apps/gateway
       sonar-project-key: ${{ vars.SONAR_GATEWAY_PROJECT_KEY }}
-      working-directory: apps/gateway
+      package: gateway
 
   build:
     if: github.event_name != 'pull_request'
