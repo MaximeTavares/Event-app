@@ -23,6 +23,8 @@
 
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "verbatimModuleSyntax": false,
+    "importsNotUsedAsValues": "remove",
   }
 }
