@@ -14,13 +14,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 
 # -------------------------
-# DEPENDENCIES
+# DEPS
 # -------------------------
 FROM base AS deps
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# IMPORTANT: tout le workspace nécessaire pour résolution TS + pnpm
 COPY apps ./apps
 COPY packages ./packages
 
@@ -32,13 +31,10 @@ RUN pnpm install --frozen-lockfile
 # -------------------------
 FROM base AS builder
 
-RUN corepack enable
+WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app ./
 
-COPY . .
-
-# sécurité monorepo
 RUN pnpm --filter gateway exec prisma generate
 
 RUN pnpm --filter gateway exec nest build
