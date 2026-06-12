@@ -70,7 +70,7 @@ export class EventWithRelations {
     }[];
 }
 
-export type EventDetailsDTO = {
+export interface EventDetailsDTO {
     id: number;
     organizer_id: string;
     title: string;
@@ -83,7 +83,7 @@ export type EventDetailsDTO = {
     created_at: Date;
     updated_at: Date | null;
     missions: MissionWithSlotDTO[];
-};
+}
 
 export class PaginatedEventsDTO {
     items: EventDTO[];

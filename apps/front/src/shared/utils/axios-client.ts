@@ -1,6 +1,10 @@
-import axios, { type AxiosInstance } from 'axios';
+import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { AuthApi } from '../../features/auth/api/auth.api';
 import { useAuthStore } from '../../features/auth/store/auth.store';
+
+type RetryAxiosRequest = InternalAxiosRequestConfig & {
+    _retry?: boolean;
+};
 
 function axiosClient(): AxiosInstance {
     const api = axios.create({
@@ -10,47 +14,66 @@ function axiosClient(): AxiosInstance {
 
     let refreshPromise: Promise<string> | null = null;
 
-    const isAuthRoute = (url?: string) => {
-        if (!url) return false;
-        return url.includes('/auth/');
+    const isAuthRoute = (url?: string): boolean => {
+        return typeof url === 'string' && url.includes('/auth/');
     };
 
-    api.interceptors.request.use((config) => {
+    // =========================
+    // REQUEST INTERCEPTOR
+    // =========================
+    api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
         const { accessToken } = useAuthStore.getState();
 
         if (accessToken) {
+            config.headers = config.headers ?? {};
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
 
         return config;
     });
 
+    // =========================
+    // RESPONSE INTERCEPTOR
+    // =========================
     api.interceptors.response.use(
-        (res) => res,
-        async (error) => {
+        (response) => response,
+        async (error: AxiosError) => {
             const originalRequest = error.config;
 
-            // 429 - Rate limit
-            if (error.response?.status === 429) {
-                const retryAfter = error.response.headers['retry-after'];
-                const seconds = retryAfter ? Number.parseInt(retryAfter, 10) : 60;
-                throw new Error(`Trop de tentatives. Réessayez dans ${seconds} secondes.`);
-            }
-
-            // DO NOT HANDLE AUTH ROUTES
-            if (isAuthRoute(originalRequest?.url)) {
+            if (!originalRequest) {
                 throw error;
             }
 
-            // NO ACCESS TOKEN = NO REFRESH
+            const request = originalRequest as RetryAxiosRequest;
+
+            // =========================
+            // RATE LIMIT (429)
+            // =========================
+            if (error.response?.status === 429) {
+                const retryAfter = error.response?.headers?.['retry-after'];
+                const seconds = retryAfter ? Number.parseInt(String(retryAfter), 10) : 60;
+
+                throw new Error(`Trop de tentatives. Réessayez dans ${seconds} secondes.`);
+            }
+
+            // =========================
+            // DO NOT HANDLE AUTH ROUTES
+            // =========================
+            if (isAuthRoute(request.url)) {
+                throw error;
+            }
+
             const { accessToken } = useAuthStore.getState();
+
             if (!accessToken) {
                 throw error;
             }
 
-            // 401 - Token expired
-            if (error.response?.status === 401 && !originalRequest._retry) {
-                originalRequest._retry = true;
+            // =========================
+            // REFRESH TOKEN FLOW
+            // =========================
+            if (error.response?.status === 401 && !request._retry) {
+                request._retry = true;
 
                 refreshPromise ??= AuthApi.refresh()
                     .then((data) => {
@@ -66,11 +89,12 @@ function axiosClient(): AxiosInstance {
                         refreshPromise = null;
                     });
 
-                const accessToken = await refreshPromise;
+                const newAccessToken = await refreshPromise;
 
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                request.headers = request.headers ?? {};
+                request.headers.Authorization = `Bearer ${newAccessToken}`;
 
-                return api(originalRequest);
+                return api(request);
             }
 
             throw error;

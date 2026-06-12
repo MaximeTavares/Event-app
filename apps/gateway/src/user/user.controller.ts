@@ -64,7 +64,7 @@
 //     ) {
 //         //Check if the User exist
 
-//         await this.natsService.send('user.validate', { id });
+//         await this.natsService.send(AUTH_SUBJECTS.GET_USER, { id });
 
 //         if (updateUserDto.email)
 //             //Check if the email is already used

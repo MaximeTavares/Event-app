@@ -73,7 +73,6 @@ Cypress.Commands.add('loginByApi', () => {
             password: testUser.password,
         },
     }).then((res) => {
-        console.log('LOGIN RESPONSE:', res.body);
 
         const accessToken = res.body.accessToken ?? res.body.data?.accessToken;
 

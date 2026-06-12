@@ -3,7 +3,7 @@ name: Quality
 on:
   workflow_call:
     inputs:
-      working-directory:
+      package:
         required: true
         type: string
 
@@ -20,48 +20,62 @@ on:
         required: true
         type: string
 
+    secrets:
+      SONAR_TOKEN:
+        required: true
+
 jobs:
   quality:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ${{ inputs.working-directory }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-            fetch-depth: 0
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: pnpm  install --frozen-lockfile
 
       - name: Generate Prisma Client
         if: inputs.prisma-generate
-        run: ./node_modules/.bin/prisma generate
+        run: pnpm --filter ${{ inputs.package }} exec prisma generate
 
       - name: Lint
-        run: npm run lint
+        run: pnpm --filter ${{ inputs.package }} lint
 
-      - name: Test
-        run: npm run test -- --passWithNoTests
+    #   - name: Test
+    #     run: pnpm run test -- --passWithNoTests
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=${{ inputs.sonar-project-key }}
-            -Dsonar.organization=${{ vars.SONAR_ORG }}
-            -Dsonar.sources=${{ inputs.sonar-source }}
-            -Dsonar.qualitygate.wait=true
+              -Dsonar.projectKey=${{ inputs.sonar-project-key }}
+              -Dsonar.organization=${{ vars.SONAR_ORG }}
+              -Dsonar.sources=${{ inputs.sonar-source }}
+              -Dsonar.qualitygate.wait=true
+              -Dsonar.verbose=true

@@ -6,7 +6,6 @@ import { useUpdateSlot, useDeleteSlot } from './use_slot.service';
 import { useMe } from '../../auth/hooks/use_auth.service';
 
 export function useSlotDetails(slot: SlotDetailsApiResponse) {
-    console.log('🚀 ~ useSlotDetails ~ slot:', slot.participants);
     const { data: user } = useMe();
 
     const navigate = useNavigate();
@@ -23,25 +22,25 @@ export function useSlotDetails(slot: SlotDetailsApiResponse) {
     const canEdit = user?.id === slot.organizer_id;
 
     // Handle slot update
-    const useUpdate = useUpdateSlot();
+    const updateSlotMutation = useUpdateSlot();
     const handleUpdate = async (data: SlotCreationOutputValues) => {
-        await toastMutation(useUpdate.mutateAsync({ slotId: slot.id, slot: data }), {
+        await toastMutation(updateSlotMutation.mutateAsync({ slotId: slot.id, slot: data }), {
             loading: 'Chargement...',
-            success: 'Créneau modifié avec succés',
+            success: 'Créneau modifié avec succès',
             error: 'Erreur lors de la modification',
         });
     };
 
     // Handle slot delete
-    const useDelete = useDeleteSlot();
+    const deleteSlotMutation = useDeleteSlot();
     const handleDelete = async () => {
-        await toastMutation(useDelete.mutateAsync({ id: slot.id }), {
+        await toastMutation(deleteSlotMutation.mutateAsync({ id: slot.id }), {
             loading: 'Chargement...',
-            success: 'Créneau supprimé avec succés',
+            success: 'Créneau supprimé avec succès',
             error: 'Erreur lors de la suppression',
         });
 
-        navigate(-1);
+        await navigate(-1);
     };
 
     return {
@@ -54,6 +53,6 @@ export function useSlotDetails(slot: SlotDetailsApiResponse) {
         handleUpdate,
         handleDelete,
         // State
-        useUpdate,
+        updateSlotMutation,
     };
 }

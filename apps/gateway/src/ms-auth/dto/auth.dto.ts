@@ -7,7 +7,7 @@ export class SignupDto {
     password: string;
 }
 
-export type SigninDto = {
+export interface SigninDto {
     email: string;
     password: string;
-};
+}

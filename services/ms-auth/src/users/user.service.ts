@@ -1,7 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './user.schema';
-import { Model } from 'mongoose';
+import { User } from './schema/user.schema';
+import { Model, UpdateQuery } from 'mongoose';
+import { RpcException } from '@nestjs/microservices';
+import { UpdateProfileDomain } from './domain/update-profile.domain';
+import {
+    AvailabilityDto,
+    NotificationsDto,
+    PreferencesDto,
+    SecurityDto,
+} from '@app/contracts';
 
 @Injectable()
 export class UserService {
@@ -14,7 +22,15 @@ export class UserService {
     }
 
     async findById(id: string) {
-        return this.userModel.findById(id);
+        const user = await this.userModel.findById(id);
+
+        if (!user)
+            throw new RpcException({
+                message: "Cette utilisateur n'existe pas ",
+                code: 404,
+            });
+
+        return user;
     }
 
     async findManyByIds(userIds: string[]) {
@@ -71,5 +87,68 @@ export class UserService {
             return newUser;
         }
         return user;
+    }
+
+    async updateProfile(
+        userId: string,
+        data: UpdateProfileDomain,
+    ): Promise<void> {
+        if (!data.profile) throw new RpcException('Error');
+
+        await this.updateById(userId, {
+            profile: data.profile,
+        });
+    }
+
+    async updateAvailability(
+        userId: string,
+        data: AvailabilityDto,
+    ): Promise<void> {
+        if (!data) throw new RpcException('Error');
+
+        await this.updateById(userId, {
+            availability: data,
+        });
+    }
+
+    async updatePreferences(
+        userId: string,
+        data: PreferencesDto,
+    ): Promise<void> {
+        if (!data) throw new RpcException('Error');
+
+        await this.updateById(userId, {
+            preferences: data,
+        });
+    }
+
+    async updateNotifications(
+        userId: string,
+        data: NotificationsDto,
+    ): Promise<void> {
+        if (!data) throw new RpcException('Error');
+
+        await this.updateById(userId, {
+            notifications: data,
+        });
+    }
+
+    async updateSecurity(userId: string, data: SecurityDto): Promise<void> {
+        if (!data) throw new RpcException('Error');
+
+        await this.updateById(userId, {
+            security: data,
+        });
+    }
+
+    async updateById(userId: string, update: UpdateQuery<User>) {
+        return this.userModel.findByIdAndUpdate(
+            userId,
+            { $set: update },
+            {
+                returnDocument: 'after',
+                runValidators: true,
+            },
+        );
     }
 }

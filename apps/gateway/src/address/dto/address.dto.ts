@@ -1,4 +1,4 @@
-export type AddressDTO = {
+export interface AddressDTO {
     id: number;
     street_number: string;
     street_name: string;
@@ -7,4 +7,4 @@ export type AddressDTO = {
     postal_code: string;
     country: string;
     coordinates?: { lat: number; lon: number };
-};
+}

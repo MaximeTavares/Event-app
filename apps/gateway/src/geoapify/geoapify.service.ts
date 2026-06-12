@@ -33,7 +33,7 @@ function queryAddress(address: GeocodeDto): string {
 export class GeoapifyService {
     private readonly apiKey: string;
 
-    constructor(private configService: ConfigService) {
+    constructor(private readonly configService: ConfigService) {
         /**
          * Configuration via ConfigService (recommandé avec NestJS)
          *
@@ -133,7 +133,9 @@ export class GeoapifyService {
                 throw error;
             }
 
-            throw new Error("Impossible de géocoder l'adresse sélectionnée.");
+            throw new Error("Impossible de géocoder l'adresse sélectionnée.", {
+                cause: error,
+            });
         }
     }
 }

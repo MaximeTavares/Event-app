@@ -13,12 +13,12 @@ export interface Coordinates {
  * - chaque résultat contient directement lat/lon
  * - utilisé pour les cas de géocodage classiques (forward geocoding)
  */
-export type GeoapifyResponse = {
+export interface GeoapifyResponse {
     results: {
         lat: number;
         lon: number;
     }[];
-};
+}
 
 /**
  * Réponse Geoapify - format "GeoJSON (features)"
@@ -33,10 +33,10 @@ export type GeoapifyResponse = {
  * - geometry.coordinates contient [lon, lat]
  *   ⚠️ attention : ordre inversé par rapport à "results"
  */
-export type GeoapifyGeoResponse = {
+export interface GeoapifyGeoResponse {
     features?: {
         geometry?: {
             coordinates?: [number, number];
         };
     }[];
-};
+}

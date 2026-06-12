@@ -1,9 +1,9 @@
-export type SignupDto = {
+export interface SignupDto {
     email: string;
     password: string;
-};
+}
 
-export type SigninDto = {
+export interface SigninDto {
     email: string;
     password: string;
-};
+}

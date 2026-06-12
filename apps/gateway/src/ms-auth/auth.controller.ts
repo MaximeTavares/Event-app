@@ -1,11 +1,19 @@
 import { Body, Controller, Post, Res, Req, Get } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { SigninResponse, type CurrentUserData } from './type/auth.type';
 import { AuthService } from './auth.service';
-import { type SigninDto, SignupDto } from './dto/auth.dto';
 import { User } from '../user/decorators/user.decorator';
 import { NatsService } from '../nats/nats.service';
 import { Public } from '../user/decorators/public.decorator';
+import {
+    AUTH_SUBJECTS,
+    CurrentUserData,
+    LoginRequestDto,
+    LoginRequestSchema,
+    LoginResponseDto,
+    SignupRequestDto,
+    SignupRequestSchema,
+} from '@app/contracts';
+import { ZodValidationPipe } from 'src/utils/zod-validation.pipe';
 
 @Controller('ms/auth')
 export class AuthController {
@@ -26,8 +34,10 @@ export class AuthController {
 
     @Public()
     @Post('signup')
-    async signup(@Body() dto: SignupDto) {
-        return this.natsService.send('auth.signup', dto);
+    async signup(
+        @Body(ZodValidationPipe(SignupRequestSchema)) dto: SignupRequestDto,
+    ) {
+        return this.natsService.send(AUTH_SUBJECTS.SIGNUP, dto);
     }
 
     @Public()
@@ -35,11 +45,11 @@ export class AuthController {
     async googleSignin(
         @Body() body: { idToken: string },
         @Res({ passthrough: true }) response: Response,
-    ) {
+    ): Promise<Omit<LoginResponseDto, 'refreshToken'>> {
         const result = await this.natsService.send<
-            SigninResponse,
+            LoginResponseDto,
             { idToken: string }
-        >('auth.google', body);
+        >(AUTH_SUBJECTS.AUTH_GOOGLE, body);
 
         this.authService.insertIntoCookies(
             'refresh_token',
@@ -55,13 +65,13 @@ export class AuthController {
     @Public()
     @Post('signin')
     async signin(
-        @Body() dto: SigninDto,
+        @Body(ZodValidationPipe(LoginRequestSchema)) dto: LoginRequestDto,
         @Res({ passthrough: true }) response: Response,
-    ) {
-        const result = await this.natsService.send<SigninResponse, SigninDto>(
-            'auth.signin',
-            dto,
-        );
+    ): Promise<Omit<LoginResponseDto, 'refreshToken'>> {
+        const result = await this.natsService.send<
+            LoginResponseDto,
+            LoginRequestDto
+        >(AUTH_SUBJECTS.SIGNIN, dto);
 
         this.authService.insertIntoCookies(
             'refresh_token',
@@ -71,7 +81,6 @@ export class AuthController {
 
         return {
             accessToken: result.accessToken,
-            refreshToken: result.refreshToken,
         };
     }
 
@@ -80,14 +89,14 @@ export class AuthController {
     async refresh(
         @Req() request: Request,
         @Res({ passthrough: true }) response: Response,
-    ) {
+    ): Promise<{ accessToken: string }> {
         const cookies: Record<string, string> = request.cookies;
-        const refreshToken = cookies['refresh_token'];
+        const refreshToken = cookies.refresh_token;
 
         const result = await this.natsService.send<
-            SigninResponse,
+            LoginResponseDto,
             { refreshToken: string }
-        >('auth.refresh', {
+        >(AUTH_SUBJECTS.REFRESH_TOKEN, {
             refreshToken,
         });
 
@@ -107,7 +116,7 @@ export class AuthController {
         @User() user: CurrentUserData,
         @Res({ passthrough: true }) response: Response,
     ) {
-        const result = await this.natsService.send('auth.signout', {
+        const result = await this.natsService.send(AUTH_SUBJECTS.SIGNOUT, {
             userId: user.id,
         });
 

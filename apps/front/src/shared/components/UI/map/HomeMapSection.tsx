@@ -8,7 +8,7 @@ type HomeMapSectionProps = {
     isEventsLoading: boolean;
     isEventsError: boolean;
     mapStatusMessage: string | null;
-    effectiveOrigin: UserOrigin | null;
+    effectiveOrigin: UserOrigin | null | undefined;
     eventMapPoints: EventMapPoint[];
     radiusMeters: number;
 };
@@ -22,7 +22,7 @@ export default function HomeMapSection({
     effectiveOrigin,
     eventMapPoints,
     radiusMeters,
-}: HomeMapSectionProps) {
+}: Readonly<HomeMapSectionProps>) {
     return (
         <>
             {mapWarningMessage ? <div>{mapWarningMessage}</div> : null}

@@ -1,20 +1,25 @@
 import type { AxiosError } from 'axios';
-import toast from 'react-hot-toast';
+import toast, { ToastOptions } from 'react-hot-toast';
 import type { ApiError } from '../../features/event/components/EventCreationPage';
 
 export async function toastMutation<T>(
     promise: Promise<T>,
-    options: {
+    message: {
         loading: string;
         success: string;
         error?: string;
     },
+    options?: ToastOptions,
 ) {
-    return toast.promise(promise, {
-        loading: options.loading,
-        success: options.success,
-        error: (err: AxiosError<ApiError>) => {
-            return err.response?.data.message || options.error || 'Erreur';
+    return toast.promise(
+        promise,
+        {
+            loading: message.loading,
+            success: message.success,
+            error: (err: AxiosError<ApiError>) => {
+                return err.response?.data.message || message.error || 'Erreur';
+            },
         },
-    });
+        options,
+    );
 }

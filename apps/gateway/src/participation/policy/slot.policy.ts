@@ -1,11 +1,11 @@
 import { Slot_status } from '@prisma/client';
 
-type SlotPolicy = {
+interface SlotPolicy {
     canJoin: {
         allowed: boolean;
         errorMessage?: string;
     };
-};
+}
 
 export const SLOT_POLICY: Record<Slot_status, SlotPolicy> = {
     FULL: {

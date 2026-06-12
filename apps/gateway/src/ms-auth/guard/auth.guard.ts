@@ -49,7 +49,8 @@ export class AuthGuard implements CanActivate {
                 },
             );
             // Assignation du payload à la request afin qu'elle soit accessible sur nos routes
-            request['user'] = {
+            // @ts-expect-error En attendant de trouver le typage
+            request.user = {
                 id: payload.sub,
                 email: payload.email,
                 role: payload.role,

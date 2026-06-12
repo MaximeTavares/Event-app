@@ -1,16 +1,10 @@
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { Link, useNavigate } from 'react-router';
-import { passwordRules, registerSchema } from '../validation/Signup.schema';
 import { FormField } from '../../../shared/components/UI/formField/FormField';
 import { useSignup } from '../hooks/use_auth.service';
-import type { SignupFormData } from '../types/types';
-
-type Inputs = {
-    email: string;
-    password: string;
-    confirmPassword: string;
-};
+import { zodResolver } from '@hookform/resolvers/zod';
+import { passwordRules, SignupFormDto, SignupFormSchema } from '@app/contracts';
+import { toastMutation } from '../../../shared/utils/useToastMutation';
 
 export function SignUpForm() {
     const {
@@ -18,24 +12,27 @@ export function SignUpForm() {
         handleSubmit,
         watch,
         formState: { errors },
-    } = useForm<Inputs>({
-        resolver: yupResolver(registerSchema),
+    } = useForm<SignupFormDto>({
+        resolver: zodResolver(SignupFormSchema),
         mode: 'onChange',
     });
 
     const password = watch('password', '');
     const navigate = useNavigate();
     const signup = useSignup();
-
     const rules = passwordRules(password);
 
-    const onSubmit = async (data: SignupFormData) => {
+    const onSubmit = async (data: SignupFormDto) => {
         if (data.password === data.confirmPassword) {
-            await signup.mutateAsync({
-                email: data.email,
-                password: data.password,
-            });
-            navigate('/auth/signin');
+            await toastMutation(
+                signup.mutateAsync({ email: data.email, password: data.password }),
+                {
+                    loading: 'Création du compte en cours...',
+                    success: 'Compte créé avec succès, vous pouvez vous connecter.',
+                    error: 'Erreur lors de la création du compte',
+                },
+            );
+            await navigate('/auth/signin');
         }
     };
 

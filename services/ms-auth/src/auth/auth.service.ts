@@ -5,7 +5,8 @@ import { RpcException } from '@nestjs/microservices';
 import { compare, hash } from 'src/utils/password.util';
 import { UserService } from 'src/users/user.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
-import { GoogleAuthService } from '../../google/google-auth.service';
+import { GoogleAuthService } from 'src/google/google-auth.service';
+import { ChangePasswordDto, LoginResponseDto } from '@app/contracts';
 
 @Injectable()
 export class AuthService {
@@ -112,7 +113,7 @@ export class AuthService {
         };
     }
 
-    async refresh(refreshToken: string) {
+    async refresh(refreshToken: string): Promise<LoginResponseDto> {
         // 1. Verify refresh token (JWT)
         let payload: { sub: string };
 
@@ -171,12 +172,44 @@ export class AuthService {
         return {
             accessToken,
             refreshToken: newRefreshToken,
-            user: {
-                id: user.id,
-                email: user.email,
-                role: user.role,
-            },
+            // user: {
+            //     id: user.id,
+            //     email: user.email,
+            //     role: user.role,
+            // },
         };
+    }
+
+    async changePassword(
+        userId: string,
+        data: ChangePasswordDto,
+    ): Promise<void> {
+        console.log('Appel du ms changePassword');
+
+        // Get user if he exist
+        const user = await this.userService.findById(userId);
+        if (!user)
+            throw new RpcException({
+                statusCode: 400,
+                message: 'Email ou mot de passe incorrect',
+            });
+
+        if (!user.password)
+            throw new RpcException({
+                statusCode: 403,
+                message: "Vous n'avez pas accès au changement de mot de passe",
+            });
+
+        // Compose passwords
+        const isValid = await compare(data.currentPassword, user.password);
+        if (!isValid)
+            throw new RpcException({
+                statusCode: 400,
+                message: 'Mot de passe incorrect',
+            });
+
+        const hashed = await hash(data.newPassword);
+        await this.userService.updateById(userId, { password: hashed });
     }
 
     async signout(userId: string) {

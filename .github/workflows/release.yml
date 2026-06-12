@@ -1,0 +1,168 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+
+##########################
+## DETECT CHANGES
+##########################
+  detect-changes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      gateway: ${{ steps.filter.outputs.gateway }}
+      auth: ${{ steps.filter.outputs.auth }}
+      front: ${{ steps.filter.outputs.front }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            gateway:
+              - 'apps/gateway/**'
+              - 'packages/contracts/**'
+
+            auth:
+              - 'services/ms-auth/**'
+              - 'packages/contracts/**'
+
+            front:
+              - 'apps/front/**'
+              - 'packages/contracts/**'
+
+##########################
+## BUILDS
+##########################
+
+  build-gateway:
+    needs: detect-changes
+
+    if: needs.detect-changes.outputs.gateway == 'true'
+
+    permissions:
+      contents: read
+      packages: write
+
+    uses: ./.github/workflows/docker-build.yml
+
+    with:
+      context: .
+      image-name: gateway
+      file: apps/gateway/Dockerfile
+
+  build-auth:
+    needs: detect-changes
+
+    if: needs.detect-changes.outputs.auth == 'true'
+
+    permissions:
+      contents: read
+      packages: write
+
+    uses: ./.github/workflows/docker-build.yml
+
+    with:
+      context: .
+      image-name: ms-auth
+      file: services/ms-auth/Dockerfile
+
+  build-front:
+    needs: detect-changes
+
+    if: needs.detect-changes.outputs.front == 'true'
+
+    permissions:
+      contents: read
+      packages: write
+
+    uses: ./.github/workflows/docker-build.yml
+
+    with:
+      context: .
+      image-name: front
+      file: apps/front/Dockerfile
+      build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL_STAGING }}
+            VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}
+            VITE_GEOAPIFY_API_KEY=${{ vars.GEOAPIFY_API_KEY }}
+
+##########################
+## DEPLOYS
+##########################
+
+  deploy-gateway:
+    needs:
+      - detect-changes
+      - build-gateway
+      - build-auth
+      - build-front
+
+    if: |
+      always() &&
+      needs.detect-changes.outputs.gateway == 'true' &&
+      needs.build-gateway.result == 'success' &&
+      needs.build-auth.result != 'failure' &&
+      needs.build-front.result != 'failure'
+
+    uses: ./.github/workflows/deploy.yml
+
+    with:
+      compose-directory: /opt/event-app/staging
+      compose-service: staging-gateway
+      environment: staging
+      image-name: gateway
+      network: nginx-staging
+      run-migrations: true
+
+  deploy-auth:
+    needs:
+      - detect-changes
+      - build-gateway
+      - build-auth
+      - build-front
+
+    if: |
+      always() &&
+      needs.detect-changes.outputs.auth == 'true' &&
+      needs.build-auth.result == 'success' &&
+      needs.build-gateway.result != 'failure' &&
+      needs.build-front.result != 'failure'
+
+    uses: ./.github/workflows/deploy.yml
+
+    with:
+      compose-directory: /opt/event-app/staging
+      compose-service: staging-ms-auth
+      environment: staging
+      image-name: ms-auth
+      network: nginx-staging
+
+  deploy-front:
+    needs:
+      - detect-changes
+      - build-gateway
+      - build-auth
+      - build-front
+
+    if: |
+      always() &&
+      needs.detect-changes.outputs.front == 'true' &&
+      needs.build-front.result == 'success' &&
+      needs.build-gateway.result != 'failure' &&
+      needs.build-auth.result != 'failure'
+
+    uses: ./.github/workflows/deploy.yml
+
+    with:
+      compose-directory: /opt/event-app/staging
+      compose-service: staging-front
+      environment: staging
+      image-name: front
+      network: nginx-staging

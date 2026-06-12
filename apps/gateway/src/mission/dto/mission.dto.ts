@@ -5,7 +5,7 @@ import {
 } from '@prisma/client';
 import { SlotDTO } from 'src/slot/dto/slot.dto';
 
-export type MissionDTO = {
+export interface MissionDTO {
     id: number;
     event_id: number;
     title: string;
@@ -13,17 +13,17 @@ export type MissionDTO = {
     status: Mission_status;
     created_at: Date;
     updated_at?: Date | null;
-};
+}
 
-export type MissionWithSlotDTO = {
+export interface MissionWithSlotDTO {
     id: number;
     title: string;
     description: string;
     status: Mission_status;
     slots: SlotDTO[];
-};
+}
 
-export type MissionWithDetails = {
+export interface MissionWithDetails {
     id: number;
     event_id: number;
     organizer_id: string;
@@ -31,9 +31,9 @@ export type MissionWithDetails = {
     description: string;
     status: Mission_status;
     slots: SlotDTO[];
-};
+}
 
-export type MissionWithRelation = {
+export interface MissionWithRelation {
     id: number;
     event_id: number;
     title: string;
@@ -61,4 +61,4 @@ export type MissionWithRelation = {
             // };
         }[];
     }[];
-};
+}

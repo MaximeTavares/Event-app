@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "services/**/*.ts",
+    "services/**/*.tsx"
+  ],
+  "references": [
+    { "path": "./apps/front" },
+    { "path": "./apps/gateway" },
+    { "path": "./services/ms-auth" }
+  ]
+}

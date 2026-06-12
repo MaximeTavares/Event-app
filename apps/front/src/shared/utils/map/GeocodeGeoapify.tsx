@@ -73,6 +73,6 @@ export async function geocodeCity(city: string): Promise<Coordinates | null> {
             throw error;
         }
 
-        throw new Error('Impossible de géocoder la ville sélectionnée.');
+        throw new Error('Impossible de géocoder la ville sélectionnée.', { cause: error });
     }
 }

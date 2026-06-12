@@ -1,6 +1,6 @@
 import { Participation_status, Slot_status } from '@prisma/client';
 
-export type SlotDTO = {
+export interface SlotDTO {
     id: number;
     start_at: Date;
     end_at: Date;
@@ -8,9 +8,9 @@ export type SlotDTO = {
     current_participants: number;
     available_place: number;
     status: Slot_status;
-};
+}
 
-export type SlotWithParticipations = {
+export interface SlotWithParticipations {
     id: number;
     mission_id: number;
     status: Slot_status;
@@ -27,9 +27,9 @@ export type SlotWithParticipations = {
         status: Participation_status;
         user_id: string;
     }[];
-};
+}
 
-export type SlotWithParticipationDto = {
+export interface SlotWithParticipationDto {
     id: number;
     organizer_id: string;
     start_at: Date;
@@ -47,4 +47,4 @@ export type SlotWithParticipationDto = {
         avatar_url: string | null;
         participation_status: Participation_status;
     }[];
-};
+}

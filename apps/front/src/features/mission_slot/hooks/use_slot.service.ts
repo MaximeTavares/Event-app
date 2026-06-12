@@ -26,8 +26,8 @@ export function useCreateSlot(): UseMutationResult<
 
     return useMutation({
         mutationFn: (variables) => SlotApi.createSlot(variables.missionId, variables.slot),
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['mission', variables.missionId] });
+        onSuccess: async (_data, variables) => {
+            await queryClient.invalidateQueries({ queryKey: ['mission', variables.missionId] });
         },
         onError: (error) => {
             console.error('Échec de la création :', error.message);
@@ -44,8 +44,8 @@ export function useUpdateSlot(): UseMutationResult<
 
     return useMutation({
         mutationFn: (variables) => SlotApi.updateSlot(variables.slotId, variables.slot),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['slot'] });
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['slot'] });
         },
         onError: (error) => {
             console.error('Échec de la mise à jour :', error.message);
@@ -58,8 +58,8 @@ export function useDeleteSlot(): UseMutationResult<void, Error, { id: number }> 
 
     return useMutation({
         mutationFn: (variables) => SlotApi.deleteSlot(variables.id),
-        onSuccess: (_data, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['slot'] });
+        onSuccess: async (_data, variables) => {
+            await queryClient.invalidateQueries({ queryKey: ['slot'] });
             queryClient.removeQueries({ queryKey: ['slot', variables.id] });
         },
         onError: (error) => {

@@ -23,13 +23,13 @@ export interface ParticipantWithProfile {
     last_name: string | null;
     avatar_url: string | null;
 }
-export type UserProfileResponse = {
+export interface UserProfileResponse {
     id: string;
     email: string;
     first_name: string;
     last_name: string;
     avatar_url: string;
-};
+}
 
 @Injectable()
 export class SlotService {

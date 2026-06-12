@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ca-certificates \
   openssl \
   && update-ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && corepack enable
 
 
 # -------------------------
@@ -17,8 +18,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # -------------------------
 FROM base AS deps
 
-COPY package*.json ./
-RUN npm ci --ignore-scripts
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# workspace packages nécessaires
+COPY apps/gateway/package.json apps/gateway/package.json
+COPY packages/contracts/package.json packages/contracts/package.json
+
+RUN pnpm install --frozen-lockfile
 
 
 # -------------------------
@@ -26,15 +32,16 @@ RUN npm ci --ignore-scripts
 # -------------------------
 FROM base AS builder
 
+RUN corepack enable
+
 COPY --from=deps /app/node_modules ./node_modules
-
-COPY prisma ./prisma
-
-RUN npx prisma generate
 
 COPY . .
 
-RUN npm run build
+RUN pnpm --filter gateway prisma generate
+
+
+RUN pnpm --filter gateway build
 
 
 # -------------------------
@@ -46,17 +53,19 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN corepack enable
 
-# app build
-COPY --from=builder /app/dist ./dist
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+RUN pnpm install --prod --frozen-lockfile
+
+COPY --from=builder /app/apps/gateway/dist ./apps/gateway/dist
 
 # prisma runtime
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/apps/gateway/prisma ./apps/gateway/prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 3000
 
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "apps/gateway/dist/src/main.js"]

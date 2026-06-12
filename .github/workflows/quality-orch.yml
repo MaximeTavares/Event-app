@@ -1,0 +1,78 @@
+name: Quality
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      gateway: ${{ steps.filter.outputs.gateway }}
+      auth: ${{ steps.filter.outputs.auth }}
+      front: ${{ steps.filter.outputs.front }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            gateway:
+              - 'apps/gateway/**'
+              - 'packages/contracts/**'
+
+            auth:
+              - 'services/ms-auth/**'
+              - 'packages/contracts/**'
+
+            front:
+              - 'apps/front/**'
+              - 'packages/contracts/**'
+
+  gateway-quality:
+    needs: detect-changes
+
+    if: needs.detect-changes.outputs.gateway == 'true'
+
+    uses: ./.github/workflows/quality.yml
+
+    secrets: inherit
+
+    with:
+      package: gateway
+      prisma-generate: true
+      sonar-source: apps/gateway
+      sonar-project-key: ${{ vars.SONAR_GATEWAY_PROJECT_KEY }}
+
+  auth-quality:
+    needs: detect-changes
+
+    if: needs.detect-changes.outputs.auth == 'true'
+
+    uses: ./.github/workflows/quality.yml
+
+    secrets: inherit
+
+    with:
+      package: ms-auth
+      sonar-source: services/ms-auth
+      sonar-project-key: ${{ vars.SONAR_MS_AUTH_PROJECT_KEY }}
+
+  front-quality:
+    needs: detect-changes
+
+    if: needs.detect-changes.outputs.front == 'true'
+
+    uses: ./.github/workflows/quality.yml
+
+    secrets: inherit
+
+    with:
+      sonar-source: apps/front
+      sonar-project-key: ${{ vars.SONAR_FRONT_PROJECT_KEY }}
+      package: front

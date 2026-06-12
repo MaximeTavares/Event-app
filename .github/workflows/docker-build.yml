@@ -11,6 +11,14 @@ on:
         required: true
         type: string
 
+      file:
+        required: true
+        type: string
+
+      build-args:
+        required: false
+        type: string
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -42,8 +50,11 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ inputs.context }}
+          file: ${{ inputs.file}}
 
           push: true
+
+          build-args: ${{ inputs.build-args}}
 
           tags: |
             ghcr.io/${{ env.OWNER }}/${{ inputs.image-name }}:${{ github.sha }}

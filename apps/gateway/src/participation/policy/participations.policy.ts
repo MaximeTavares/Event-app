@@ -2,10 +2,10 @@ import { ParticipationPolicyService } from './participationPolicy.service.';
 import { ParticipationWithStatusAndOrganizer } from '../type/participation.types';
 import { Participation_status } from '@prisma/client';
 
-type ParticipationPolicy = {
+interface ParticipationPolicy {
     CanBeCancelByUser: { allowed: boolean; errorMessage?: string };
     CanBeValidateByOrganizer: { allowed: boolean; errorMessage?: string };
-};
+}
 
 export const PARTICIPATION_POLICY: Record<
     Participation_status,
