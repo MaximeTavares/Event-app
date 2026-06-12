@@ -11,6 +11,3 @@ export * from "./settings/notification.contract";
 export * from "./settings/preferences.contract";
 export * from "./settings/me-settings.contract"
 export * from "./settings/security.contract"
-
-
-console.log("CONTRACTS LOADED");

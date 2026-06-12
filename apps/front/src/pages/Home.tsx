@@ -49,7 +49,7 @@ export default function Home() {
 
     //* NEW
     const {
-        data: currentUser,
+        // data: currentUser,
         isLoading: isUserLoading,
         isError: isUserError,
         error: userError,
@@ -67,7 +67,10 @@ export default function Home() {
 
     // Origine géographique et paramètres spatiaux utilisés pour la carte et le filtrage par rayon.
     // const userOrigin = useUserMapOrigin(currentUser);
-    const userOrigin: Coordinates | null | undefined = currentUser?.profile.address;
+    const userOrigin: Coordinates | null | undefined = {
+        lat: 123,
+        lon: 123,
+    }; /* currentUser?.profile.address. */
 
     const effectiveOrigin = cityCoordinates ?? userOrigin;
 
