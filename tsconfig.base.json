@@ -4,6 +4,7 @@
     "moduleResolution": "nodenext",
     "target": "ES2023",
 
+    "baseUrl": ".",
     "paths": {
         "@app/contracts": ["packages/contracts/src/index.ts"]
     },
@@ -21,6 +22,7 @@
     "skipLibCheck": true,
 
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
   }
 }

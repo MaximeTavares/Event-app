@@ -12,7 +12,6 @@ export class AuthApi {
             'ms/auth/signin',
             body,
         );
-        console.log('🚀 ~ AuthApi ~ signin ~ data:', data);
 
         return data;
     }
@@ -21,7 +20,6 @@ export class AuthApi {
         const { data } = await api.post<Omit<LoginResponseDto, 'refreshToken'>>('ms/auth/google', {
             idToken,
         });
-        console.log('🚀 ~ AuthApi ~ googleSignin ~ data:', data);
 
         return data;
     }
@@ -32,7 +30,6 @@ export class AuthApi {
 
     static async me() {
         const { data } = await api.get<CurrentUserData>('ms/auth/me');
-        console.log('🚀 ~ AuthApi ~ me ~ data:', data);
         return data;
     }
 
@@ -40,7 +37,6 @@ export class AuthApi {
         const { data } = await api.post<{ accessToken: string }>(`ms/auth/refresh_token`, {
             withCredentials: true,
         });
-        console.log('🚀 ~ AuthApi ~ refresh ~ data:', data);
         return data;
     }
 
