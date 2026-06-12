@@ -33,6 +33,8 @@ COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
+RUN pnpm install --frozen-lockfile
+
 RUN pnpm --filter ms-auth build
 
 

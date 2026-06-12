@@ -38,8 +38,9 @@ COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
-RUN pnpm --filter gateway prisma generate
+RUN pnpm install --frozen-lockfile
 
+RUN pnpm --filter gateway exec prisma generate
 
 RUN pnpm --filter gateway build
 

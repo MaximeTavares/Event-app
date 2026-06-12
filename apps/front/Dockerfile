@@ -35,6 +35,8 @@ COPY --from=deps /app/node_modules ./node_modules
 # On copie tout le monorepo
 COPY . .
 
+RUN pnpm install --frozen-lockfile
+
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
