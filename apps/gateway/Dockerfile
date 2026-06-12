@@ -35,9 +35,9 @@ WORKDIR /app
 
 COPY --from=deps /app ./
 
-RUN pnpm --filter gateway exec prisma generate
+RUN pnpm --filter gateway prisma:generate
 
-RUN pnpm --filter gateway exec nest build
+RUN pnpm --filter gateway build
 
 
 # -------------------------

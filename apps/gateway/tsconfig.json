@@ -6,7 +6,23 @@
     "rootDir": ".",
     "baseUrl": ".",
     "composite": true,
-    "declaration": true
+    "declaration": true,
+
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false,
+    "strictPropertyInitialization": false
     },
   "references": [{ "path": "../../packages/contracts"}],
   "include": [
