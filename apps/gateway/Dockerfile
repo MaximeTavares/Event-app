@@ -20,9 +20,9 @@ FROM base AS deps
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# workspace packages nécessaires
-COPY apps/gateway/package.json apps/gateway/package.json
-COPY packages/contracts/package.json packages/contracts/package.json
+# IMPORTANT: tout le workspace nécessaire pour résolution TS + pnpm
+COPY apps ./apps
+COPY packages ./packages
 
 RUN pnpm install --frozen-lockfile
 
@@ -32,17 +32,16 @@ RUN pnpm install --frozen-lockfile
 # -------------------------
 FROM base AS builder
 
-RUN corepack enable
+WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
-RUN pnpm install --frozen-lockfile
-
+# sécurité monorepo
 RUN pnpm --filter gateway exec prisma generate
 
-RUN pnpm --filter gateway build
+RUN pnpm --filter gateway exec nest build
 
 
 # -------------------------
@@ -60,6 +59,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 RUN pnpm install --prod --frozen-lockfile
 
+# app build
 COPY --from=builder /app/apps/gateway/dist ./apps/gateway/dist
 
 # prisma runtime

@@ -4,6 +4,10 @@
     "moduleResolution": "nodenext",
     "target": "ES2023",
 
+    "paths": {
+        "@app/contracts": ["packages/contracts/src/index.ts"]
+    },
+
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
 
