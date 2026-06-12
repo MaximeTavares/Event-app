@@ -15,6 +15,10 @@ on:
         required: true
         type: string
 
+      build-args:
+        required: false
+        type: string
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -49,6 +53,8 @@ jobs:
           file: ${{ inputs.file}}
 
           push: true
+
+          build-args: ${{ inputs.build-args}}
 
           tags: |
             ghcr.io/${{ env.OWNER }}/${{ inputs.image-name }}:${{ github.sha }}
