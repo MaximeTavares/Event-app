@@ -5,6 +5,13 @@ on:
     branches:
       - develop
 
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "Service à deploy (gateway | auth | front | all)"
+        required: true
+        default: "all"
+
 jobs:
 
 ##########################
@@ -132,8 +139,16 @@ jobs:
     needs: [detect-changes, build-gate]
 
     if: |
-      needs.detect-changes.outputs.gateway == 'true' &&
-      needs.build-gate.result == 'success'
+      (
+        github.event_name == 'push' &&
+        needs.detect-changes.outputs.gateway == 'true' &&
+        needs.build-gate.result == 'success'
+      )
+      ||
+      (
+        github.event_name == 'workflow_dispatch' &&
+        (inputs.service == 'gateway' || inputs.service == 'all')
+      )
 
     uses: ./.github/workflows/deploy.yml
 
@@ -150,8 +165,16 @@ jobs:
     needs: [detect-changes, build-gate]
 
     if: |
-      needs.detect-changes.outputs.auth == 'true' &&
-      needs.build-gate.result == 'success'
+      (
+        github.event_name == 'push' &&
+        needs.detect-changes.outputs.auth == 'true' &&
+        needs.build-gate.result == 'success'
+      )
+      ||
+      (
+        github.event_name == 'workflow_dispatch' &&
+        (inputs.service == 'auth' || inputs.service == 'all')
+      )
 
     uses: ./.github/workflows/deploy.yml
 
@@ -168,8 +191,16 @@ jobs:
     needs: [detect-changes, build-gate]
 
     if: |
-      needs.detect-changes.outputs.front == 'true' &&
-      needs.build-gate.result == 'success'
+      (
+        github.event_name == 'push' &&
+        needs.detect-changes.outputs.front == 'true' &&
+        needs.build-gate.result == 'success'
+      )
+      ||
+      (
+        github.event_name == 'workflow_dispatch' &&
+        (inputs.service == 'front' || inputs.service == 'all')
+      )
 
     uses: ./.github/workflows/deploy.yml
 
