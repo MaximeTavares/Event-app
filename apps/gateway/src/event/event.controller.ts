@@ -18,8 +18,8 @@ import {
     PaginatedEventsDTO,
 } from './dto/event.dto';
 import { EventFiltersDto } from './dto/event-filters.dto';
-import { User } from '../user/decorators/user.decorator';
-import { Public } from '../user/decorators/public.decorator';
+import { User } from '../ms-auth/decorators/user.decorator';
+import { Public } from '../ms-auth/decorators/public.decorator';
 
 @Controller('events')
 export class EventController {

@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@app/db';
 import { eventWithAddressAndUser } from '../prisma/event.select';
 import { EventDetailsDTO, EventDTO, EventWithRelations } from './event.dto';
 

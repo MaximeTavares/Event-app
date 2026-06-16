@@ -1,0 +1,140 @@
+services:
+    # -------------------------
+    # EVENT BUS
+    # -------------------------
+    nats:
+        image: nats:latest
+        container_name: nats-alt
+        ports:
+            - "4222:4222"
+
+    # -------------------------
+    # AUTH DB
+    # -------------------------
+    mongo-auth:
+        image: mongo:latest
+        container_name: mongo-auth
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongo_auth_data:/data/db
+
+    mongo-express-auth:
+        image: mongo-express:latest
+        container_name: mongo-express-auth
+        restart: always
+        ports:
+            - "8084:8081"
+        environment:
+            ME_CONFIG_MONGODB_SERVER: mongo-auth
+            ME_CONFIG_BASICAUTH: false
+        depends_on:
+            - mongo-auth
+
+    # -------------------------
+    # USER DB
+    # -------------------------
+    mongo-user:
+        image: mongo:latest
+        container_name: mongo-user
+        ports:
+            - "27018:27017"
+        volumes:
+            - mongo_user_data:/data/db
+
+    mongo-express-user:
+        image: mongo-express:latest
+        container_name: mongo-express-user
+        restart: always
+        ports:
+            - "8082:8081"
+        environment:
+            ME_CONFIG_MONGODB_SERVER: mongo-user
+            ME_CONFIG_BASICAUTH: false
+        depends_on:
+            - mongo-user
+
+    # -------------------------
+    # DB PRISMA (MYSQL)
+    # -------------------------
+    db:
+        image: mysql:8.0
+        container_name: mysql-db
+        volumes:
+            - db_data:/var/lib/mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: help
+        ports:
+            - "3308:3306"
+
+    phpmyadmin:
+        depends_on:
+            - db
+        image: phpmyadmin
+        restart: always
+        ports:
+            - "8083:80"
+        environment:
+            PMA_HOST: db
+
+    # =========================================================
+    # 🚀 MICROSERVICES (TON AJOUT)
+    # =========================================================
+
+    # -------------------------
+    # GATEWAY (Nest API)
+    # -------------------------
+    gateway:
+        build:
+            context: .
+            dockerfile: apps/gateway/Dockerfile
+        container_name: gateway
+        ports:
+            - "3000:3000"
+        env_file:
+            - .env
+        depends_on:
+            - db
+            - nats
+            - ms-auth
+
+    # -------------------------
+    # MS-AUTH
+    # -------------------------
+    ms-auth:
+        build:
+            context: .
+            dockerfile: apps/ms-auth/Dockerfile
+        container_name: ms-auth
+        ports:
+            - "3001:3001"
+        env_file:
+            - .env
+        depends_on:
+            - mongo-auth
+            - nats
+
+    # -------------------------
+    # FRONTEND (React / Vite)
+    # -------------------------
+    frontend:
+        build:
+            context: .
+            dockerfile: apps/frontend/Dockerfile
+        container_name: frontend
+        ports:
+            - "5173:5173"
+        environment:
+            VITE_API_URL: http://localhost:3000
+        depends_on:
+            - gateway
+
+# -------------------------
+# VOLUMES
+# -------------------------
+volumes:
+    mongo_auth_data:
+    mongo_user_data:
+    db_data:

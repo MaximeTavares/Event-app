@@ -1,9 +1,9 @@
-import { Mission } from '@prisma/client';
 import {
     MissionDTO,
     MissionWithDetails,
     MissionWithRelation,
 } from '../dto/mission.dto';
+import { Mission } from '../types/types';
 
 export function mapMission(mission: Mission): MissionDTO {
     return {

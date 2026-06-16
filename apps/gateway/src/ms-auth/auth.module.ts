@@ -1,5 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { UserModule } from 'src/user/user.module';
+import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './guard/auth.guard';
@@ -18,7 +17,6 @@ import { AuthService } from './auth.service';
     ],
     imports: [
         NatsModule,
-        forwardRef(() => UserModule),
         JwtModule.register({
             global: true,
         }),

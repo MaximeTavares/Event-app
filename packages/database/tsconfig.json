@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
 
     "declaration": true,
@@ -15,8 +15,12 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "composite": true,
 
-    "skipLibCheck": true
+    "allowJs": true,
+    "checkJs": false,
+
+    "skipLibCheck": true,
+    "noEmit": false
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "generated/**/*"],
+  "exclude": ["node_modules", "dist",]
 }

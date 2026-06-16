@@ -1,4 +1,4 @@
-import { Slot_status } from '@prisma/client';
+import { SlotStatus } from 'src/slot/dto/slot.dto';
 
 interface SlotPolicy {
     canJoin: {
@@ -7,7 +7,7 @@ interface SlotPolicy {
     };
 }
 
-export const SLOT_POLICY: Record<Slot_status, SlotPolicy> = {
+export const SLOT_POLICY: Record<SlotStatus, SlotPolicy> = {
     FULL: {
         canJoin: {
             allowed: false,

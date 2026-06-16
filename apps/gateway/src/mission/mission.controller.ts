@@ -14,7 +14,7 @@ import {
 import { MissionService } from './mission.service';
 import { CreateMissionDto } from './dto/create-mission.dto';
 import { UpdateMissionDto } from './dto/update-mission.dto';
-import { User } from 'src/user/decorators/user.decorator';
+import { User } from 'src/ms-auth/decorators/user.decorator';
 import { EventService } from 'src/event/event.service';
 import { MissionDTO, MissionWithSlotDTO } from './dto/mission.dto';
 

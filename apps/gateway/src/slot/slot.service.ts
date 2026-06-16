@@ -8,15 +8,15 @@ import { CreateSlotDto } from './dto/create-slot.dto';
 import { UpdateSlotDto } from './dto/update-slot.dto';
 import { SlotMapper } from './dto/mapper/slot.mapper';
 import { SlotDTO, SlotWithParticipationDto } from './dto/slot.dto';
-import { PrismaService } from '../../prisma/prisma.service';
 import { NatsService } from 'src/nats/nats.service';
-import { Participation_status } from '@prisma/client';
+import { prisma } from '@app/db';
+import { ParticipationStatus } from 'src/participation/dto/participation.dto';
 
 type OwnerShipEntity = 'Mission' | 'Slot';
 
 export interface ParticipantWithProfile {
     participation_id: number;
-    participation_status: Participation_status;
+    participation_status: ParticipationStatus;
     userId: string;
     email: string;
     first_name: string | null;
@@ -33,10 +33,7 @@ export interface UserProfileResponse {
 
 @Injectable()
 export class SlotService {
-    constructor(
-        private readonly prisma: PrismaService,
-        private readonly nastService: NatsService,
-    ) {}
+    constructor(private readonly nastService: NatsService) {}
     async create(
         userId: string,
         missionId: number,
@@ -47,7 +44,7 @@ export class SlotService {
         if (new Date(createSlotDto.start_at) >= new Date(createSlotDto.end_at))
             throw new BadRequestException('Start date must be before end date');
 
-        const slot = await this.prisma.slot.create({
+        const slot = await prisma.slot.create({
             data: {
                 mission_id: missionId,
                 ...createSlotDto,
@@ -88,8 +85,8 @@ export class SlotService {
      */
     async findOneById(slotId: number): Promise<SlotDTO> {
         const [slot, currentParticipants] = await Promise.all([
-            this.prisma.slot.findUnique({ where: { id: slotId } }),
-            this.prisma.participation.count({
+            prisma.slot.findUnique({ where: { id: slotId } }),
+            prisma.participation.count({
                 where: { slot_id: slotId, status: 'ACCEPTED' },
             }),
         ]);
@@ -103,7 +100,7 @@ export class SlotService {
         slotId: number,
     ): Promise<SlotWithParticipationDto> {
         const [slot, currentParticipants] = await Promise.all([
-            this.prisma.slot.findUnique({
+            prisma.slot.findUnique({
                 where: {
                     id: slotId,
                 },
@@ -126,7 +123,7 @@ export class SlotService {
                     },
                 },
             }),
-            this.prisma.participation.count({
+            prisma.participation.count({
                 where: { slot_id: slotId, status: 'ACCEPTED' },
             }),
         ]);
@@ -172,7 +169,7 @@ export class SlotService {
     ): Promise<{ message: string }> {
         await this.checkOwnership('Slot', slotId, userId);
 
-        await this.prisma.slot.update({
+        await prisma.slot.update({
             where: { id: slotId },
             data: updateSlotDto,
         });
@@ -183,7 +180,7 @@ export class SlotService {
     async remove(userId: string, slotId: number): Promise<{ message: string }> {
         await this.checkOwnership('Slot', slotId, userId);
 
-        await this.prisma.slot.delete({ where: { id: slotId } });
+        await prisma.slot.delete({ where: { id: slotId } });
 
         return { message: 'Slot removed successfully' };
     }
@@ -194,7 +191,7 @@ export class SlotService {
         userId: string,
     ) {
         if (entityType === 'Mission') {
-            const mission = await this.prisma.mission.findUnique({
+            const mission = await prisma.mission.findUnique({
                 where: { id },
                 include: { Event: true },
             });
@@ -208,7 +205,7 @@ export class SlotService {
         }
 
         if (entityType === 'Slot') {
-            const slot = await this.prisma.slot.findUnique({
+            const slot = await prisma.slot.findUnique({
                 where: { id },
                 include: {
                     Mission: { include: { Event: true } },

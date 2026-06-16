@@ -1,10 +1,13 @@
-import { Participation_status } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { IsDate, IsEnum, IsOptional } from 'class-validator';
+import {
+    ParticipationStatus,
+    ParticipationStatusEnum,
+} from './participation.dto';
 
 export class UpdateParticipationDto {
-    @IsEnum(Participation_status)
-    status: Participation_status;
+    @IsEnum(ParticipationStatusEnum)
+    status: ParticipationStatus;
 
     @IsOptional()
     @Type(() => Date)

@@ -8,13 +8,12 @@ import { ParticipationPolicyService } from './policy/participationPolicy.service
 import { SlotPolicyService } from './policy/slotPolicy.service';
 import { UpdateParticipationDto } from './dto/update-participation.dto';
 import { PARTICIPATION_ACTION_CONFIG } from './policy/participations.policy';
-import { Mission, Prisma } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
+import { prisma, Prisma } from '@app/db';
+import { Mission } from 'src/mission/types/types';
 
 @Injectable()
 export class ParticipationService {
     constructor(
-        private readonly prisma: PrismaService,
         private readonly participationPolicy: ParticipationPolicyService,
         private readonly slotPolicy: SlotPolicyService,
     ) {}
@@ -38,7 +37,7 @@ export class ParticipationService {
         currentUserId: string,
         slotId: number,
     ): Promise<ParticipationDTO> {
-        return await this.prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx) => {
             //Check if slot exist
             const slot = await this.getSlotOrThrow(tx, slotId);
 
@@ -133,11 +132,11 @@ export class ParticipationService {
     }
 
     async findAll(): Promise<ParticipationDTO[]> {
-        return await this.prisma.participation.findMany();
+        return await prisma.participation.findMany();
     }
 
     async findOne(id: number): Promise<ParticipationDTO> {
-        const participation = await this.prisma.participation.findUnique({
+        const participation = await prisma.participation.findUnique({
             where: { id },
         });
 
@@ -148,7 +147,7 @@ export class ParticipationService {
     }
 
     async getMyParticipations(userId: string): Promise<ParticipationDTO[]> {
-        const participations = await this.prisma.participation.findMany({
+        const participations = await prisma.participation.findMany({
             where: { user_id: userId },
         });
 
@@ -173,7 +172,7 @@ export class ParticipationService {
     
      */
     async getMySlots(userId: string): Promise<SlotDTO[]> {
-        const participations = await this.prisma.participation.findMany({
+        const participations = await prisma.participation.findMany({
             where: { user_id: userId },
             select: {
                 Slot: {
@@ -227,7 +226,7 @@ export class ParticipationService {
          * //   { slot_id: 2, _count: { slot_id: 5 } }
          * // ]
          */
-        const counts = await this.prisma.participation.groupBy({
+        const counts = await prisma.participation.groupBy({
             by: ['slot_id'],
             where: {
                 slot_id: { in: slotIds },
@@ -258,7 +257,7 @@ export class ParticipationService {
     }
 
     async getMyMissions(userId: string): Promise<Mission[]> {
-        const participations = await this.prisma.participation.findMany({
+        const participations = await prisma.participation.findMany({
             where: { user_id: userId },
             select: {
                 Slot: {
@@ -281,7 +280,7 @@ export class ParticipationService {
     async getMyEvents(
         userId: string,
     ): Promise<Omit<EventDTO, 'user' | 'address'>[]> {
-        const participations = await this.prisma.participation.findMany({
+        const participations = await prisma.participation.findMany({
             where: { user_id: userId },
             select: {
                 Slot: {
@@ -309,7 +308,7 @@ export class ParticipationService {
         currentUserId: string,
         participationId: number,
     ): Promise<ParticipationDTO> {
-        return this.prisma.$transaction((tx) =>
+        return prisma.$transaction((tx) =>
             this.updateParticipation(
                 tx,
                 currentUserId,
@@ -323,7 +322,7 @@ export class ParticipationService {
         currentUserId: string,
         participationId: number,
     ): Promise<ParticipationDTO> {
-        return this.prisma.$transaction((tx) =>
+        return prisma.$transaction((tx) =>
             this.updateParticipation(
                 tx,
                 currentUserId,
@@ -337,7 +336,7 @@ export class ParticipationService {
         currentUserId: string,
         participationId: number,
     ): Promise<ParticipationDTO> {
-        return this.prisma.$transaction((tx) =>
+        return prisma.$transaction((tx) =>
             this.updateParticipation(
                 tx,
                 currentUserId,

@@ -11,3 +11,5 @@ coverage/
 **/prisma/generated/
 
 .turbo/
+
+packages/database/src/generated

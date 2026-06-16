@@ -1,15 +1,46 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "DATABASE_URL",
+    "DATABASE_HOST",
+    "DATABASE_PORT",
+    "DATABASE_USER",
+    "DATABASE_PASSWORD",
+    "DATABASE_NAME",
+    "NODE_ENV"
+  ],
   "tasks": {
     "dev": {
+      "dependsOn": ["^db:generate"],
       "cache": false,
       "persistent": true
     },
+
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "dependsOn": ["^build", "^db:generate"],
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": true
     },
+
     "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "cache": false
+    },
+
+    "db:generate": {
+      "cache": false,
+      "outputs": [
+        "generated/prisma/**"
+      ]
+    },
+
+    "db:migrate": {
+      "cache": false
+    },
+
+    "db:deploy": {
       "cache": false
     }
   }

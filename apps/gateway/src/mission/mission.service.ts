@@ -7,7 +7,7 @@ import { CreateMissionDto } from './dto/create-mission.dto';
 import { MissionDTO, MissionWithDetails } from './dto/mission.dto';
 import { UpdateMissionDto } from './dto/update-mission.dto';
 import { mapMission, toMissionDetails } from './mapper/mission.mapper';
-import { PrismaService } from '../../prisma/prisma.service';
+import { prisma } from '@app/db';
 
 @Injectable()
 export class MissionService {
@@ -21,13 +21,11 @@ export class MissionService {
         updated_at: true,
     };
 
-    constructor(private readonly prisma: PrismaService) {}
-
     async create(
         eventId: number,
         createMissionDto: CreateMissionDto,
     ): Promise<MissionDTO> {
-        const newMission = await this.prisma.mission.create({
+        const newMission = await prisma.mission.create({
             data: {
                 ...createMissionDto,
                 Event: { connect: { id: eventId } },
@@ -39,7 +37,7 @@ export class MissionService {
     }
 
     async findAll(): Promise<MissionDTO[]> {
-        const missions = await this.prisma.mission.findMany({
+        const missions = await prisma.mission.findMany({
             select: this.missionSelect,
         });
 
@@ -47,7 +45,7 @@ export class MissionService {
     }
 
     async findOneById(id: number): Promise<MissionDTO> {
-        const mission = await this.prisma.mission.findUnique({
+        const mission = await prisma.mission.findUnique({
             where: { id },
             select: this.missionSelect,
         });
@@ -57,7 +55,7 @@ export class MissionService {
     }
 
     async findOneWithDetails(id: number): Promise<MissionWithDetails> {
-        const mission = await this.prisma.mission.findUnique({
+        const mission = await prisma.mission.findUnique({
             where: { id },
             select: {
                 id: true,
@@ -108,7 +106,7 @@ export class MissionService {
     ): Promise<MissionDTO> {
         await this.verifyOwnership(userId, missionId);
 
-        const updatedMission = await this.prisma.mission.update({
+        const updatedMission = await prisma.mission.update({
             where: { id: missionId },
             data: updateMissionDto,
             select: this.missionSelect,
@@ -119,7 +117,7 @@ export class MissionService {
     async remove(userId: string, missionId: number) {
         await this.verifyOwnership(userId, missionId);
 
-        await this.prisma.mission.delete({
+        await prisma.mission.delete({
             where: { id: missionId },
         });
 
@@ -127,7 +125,7 @@ export class MissionService {
     }
 
     async verifyOwnership(userId: string, missionId: number) {
-        const mission = await this.prisma.mission.findUnique({
+        const mission = await prisma.mission.findUnique({
             where: { id: missionId },
             include: { Event: true },
         });

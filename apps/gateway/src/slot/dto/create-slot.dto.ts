@@ -1,6 +1,11 @@
-import { Slot_status } from '@prisma/client';
 import { IsDateString, IsEnum, IsInt, Min } from 'class-validator';
 
+enum Slot_status {
+    OPEN = 'OPEN',
+    FULL = 'FULL',
+    CLOSED = 'CLOSED',
+    CANCELLED = 'CANCELLED',
+}
 export class CreateSlotDto {
     @IsEnum(Slot_status)
     status: Slot_status;

@@ -12,7 +12,7 @@ import {
 import { SlotService } from './slot.service';
 import { CreateSlotDto } from './dto/create-slot.dto';
 import { UpdateSlotDto } from './dto/update-slot.dto';
-import { User } from 'src/user/decorators/user.decorator';
+import { User } from 'src/ms-auth/decorators/user.decorator';
 
 @Controller()
 export class SlotController {

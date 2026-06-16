@@ -1,5 +1,5 @@
-import { Slot } from '@prisma/client';
 import {
+    Slot,
     SlotDTO,
     SlotWithParticipationDto,
     SlotWithParticipations,

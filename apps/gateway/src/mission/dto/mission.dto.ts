@@ -1,16 +1,14 @@
-import {
-    Mission_status,
-    Participation_status,
-    Slot_status,
-} from '@prisma/client';
-import { SlotDTO } from 'src/slot/dto/slot.dto';
+import { ParticipationStatus } from 'src/participation/dto/participation.dto';
+import { SlotDTO, SlotStatus } from 'src/slot/dto/slot.dto';
+
+export type MissionStatus = 'OPEN' | 'FULL' | 'COMPLETED';
 
 export interface MissionDTO {
     id: number;
     event_id: number;
     title: string;
     description: string;
-    status: Mission_status;
+    status: MissionStatus;
     created_at: Date;
     updated_at?: Date | null;
 }
@@ -19,7 +17,7 @@ export interface MissionWithSlotDTO {
     id: number;
     title: string;
     description: string;
-    status: Mission_status;
+    status: MissionStatus;
     slots: SlotDTO[];
 }
 
@@ -29,7 +27,7 @@ export interface MissionWithDetails {
     organizer_id: string;
     title: string;
     description: string;
-    status: Mission_status;
+    status: MissionStatus;
     slots: SlotDTO[];
 }
 
@@ -38,7 +36,7 @@ export interface MissionWithRelation {
     event_id: number;
     title: string;
     description: string;
-    status: Mission_status;
+    status: MissionStatus;
     Event: {
         organizer_id: string;
     };
@@ -47,10 +45,10 @@ export interface MissionWithRelation {
         start_at: Date;
         end_at: Date;
         max_participant: number;
-        status: Slot_status;
+        status: SlotStatus;
         Participation: {
             id: number;
-            status: Participation_status;
+            status: ParticipationStatus;
             // User: {
             //     id: string;
             //     email: string;

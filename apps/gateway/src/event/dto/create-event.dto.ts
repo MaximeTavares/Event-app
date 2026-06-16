@@ -6,8 +6,13 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { CreateAddressDto } from '../../address/dto/create-address.dto';
-import { Event_status } from '@prisma/client';
 
+enum Event_status {
+    OPEN = 'OPEN',
+    CLOSED = 'CLOSED',
+    DRAFT = 'DRAFT',
+    CANCELLED = 'CANCELLED',
+}
 export class CreateEventDto {
     @IsString()
     title: string;

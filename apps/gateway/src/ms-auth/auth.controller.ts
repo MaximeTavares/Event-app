@@ -1,9 +1,9 @@
 import { Body, Controller, Post, Res, Req, Get } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { User } from '../user/decorators/user.decorator';
+import { User } from './decorators/user.decorator';
 import { NatsService } from '../nats/nats.service';
-import { Public } from '../user/decorators/public.decorator';
+import { Public } from './decorators/public.decorator';
 import {
     AUTH_SUBJECTS,
     CurrentUserData,

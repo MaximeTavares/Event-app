@@ -1,4 +1,17 @@
-import { Participation_status, Slot_status } from '@prisma/client';
+import { ParticipationStatus } from 'src/participation/dto/participation.dto';
+
+export type SlotStatus = 'OPEN' | 'FULL' | 'CLOSED' | 'CANCELLED';
+
+export interface Slot {
+    id: number;
+    mission_id: number;
+    start_at: Date;
+    end_at: Date;
+    max_participant: number;
+    status: SlotStatus;
+    created_at: Date;
+    updated_at: Date | null;
+}
 
 export interface SlotDTO {
     id: number;
@@ -7,13 +20,13 @@ export interface SlotDTO {
     max_participants: number;
     current_participants: number;
     available_place: number;
-    status: Slot_status;
+    status: SlotStatus;
 }
 
 export interface SlotWithParticipations {
     id: number;
     mission_id: number;
-    status: Slot_status;
+    status: SlotStatus;
     start_at: Date;
     end_at: Date;
     max_participant: number;
@@ -24,7 +37,7 @@ export interface SlotWithParticipations {
     };
     Participation: {
         id: number;
-        status: Participation_status;
+        status: ParticipationStatus;
         user_id: string;
     }[];
 }
@@ -37,7 +50,7 @@ export interface SlotWithParticipationDto {
     max_participants: number;
     current_participants: number;
     available_place: number;
-    status: Slot_status;
+    status: SlotStatus;
     participants: {
         user_id: string;
         participation_id: number;
@@ -45,6 +58,6 @@ export interface SlotWithParticipationDto {
         last_name: string | null;
         email: string;
         avatar_url: string | null;
-        participation_status: Participation_status;
+        participation_status: ParticipationStatus;
     }[];
 }

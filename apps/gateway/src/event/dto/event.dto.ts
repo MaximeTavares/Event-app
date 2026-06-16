@@ -1,14 +1,9 @@
-import {
-    Address,
-    Event_status,
-    Mission_status,
-    Participation_status,
-    Slot_status,
-} from '@prisma/client';
+import { Address, AddressDTO } from 'src/address/dto/address.dto';
+import { MissionStatus, MissionWithSlotDTO } from 'src/mission/dto/mission.dto';
+import { ParticipationStatus } from 'src/participation/dto/participation.dto';
+import { SlotStatus } from 'src/slot/dto/slot.dto';
 
-import { AddressDTO } from 'src/address/dto/address.dto';
-import { MissionWithSlotDTO } from 'src/mission/dto/mission.dto';
-import { UserDTO } from 'src/user/dto/user.dto';
+export type EventStatus = 'OPEN' | 'CLOSED' | 'DRAFT' | 'CANCELLED';
 
 export class EventDTO {
     id: number;
@@ -19,7 +14,7 @@ export class EventDTO {
     start_date: Date;
     end_date: Date;
     address: AddressDTO | null;
-    status: Event_status;
+    status: EventStatus;
     created_at: Date;
     updated_at: Date | null;
 }
@@ -27,7 +22,7 @@ export class EventDTO {
 export class EventWithUserAndAddressDTO {
     data: EventDTO & {
         address?: AddressDTO | null;
-        user?: UserDTO | null;
+        user?: any;
     };
 }
 
@@ -38,7 +33,7 @@ export class EventWithRelations {
     program: string;
     start_date: Date;
     end_date: Date;
-    status: Event_status;
+    status: EventStatus;
     created_at: Date;
     updated_at: Date | null;
     organizer_id: string;
@@ -47,16 +42,16 @@ export class EventWithRelations {
         id: number;
         title: string;
         description: string;
-        status: Mission_status;
+        status: MissionStatus;
         Slot: {
             id: number;
             start_at: Date;
             end_at: Date;
             max_participant: number;
-            status: Slot_status;
+            status: SlotStatus;
             Participation: {
                 id: number;
-                status: Participation_status;
+                status: ParticipationStatus;
                 // User: {
                 //     id: string;
                 //     email: string;
@@ -79,7 +74,7 @@ export interface EventDetailsDTO {
     start_date: Date;
     end_date: Date;
     address: AddressDTO | null;
-    status: Event_status;
+    status: EventStatus;
     created_at: Date;
     updated_at: Date | null;
     missions: MissionWithSlotDTO[];

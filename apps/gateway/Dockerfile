@@ -1,68 +1,96 @@
-# -------------------------
+# syntax=docker/dockerfile:1.7
+
+########################
 # BASE
-# -------------------------
-FROM node:20-slim AS base
-
+########################
+FROM node:20-alpine AS base
 WORKDIR /app
+# Installation des dépendances système minimales pour Prisma et OpenSSL
+RUN apk add --no-cache libc6-compat
+# Installation globale de Turbo et pnpm
+RUN corepack enable && \
+    corepack prepare pnpm@latest --activate && \
+    npm install -g turbo
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  ca-certificates \
-  openssl \
-  && update-ca-certificates \
-  && rm -rf /var/lib/apt/lists/* \
-  && corepack enable
+########################
+# PRUNE
+########################
+FROM base AS pruner
+WORKDIR /app
+ARG APP=gateway
 
+COPY . .
+RUN turbo prune --scope=${APP} --docker
 
-# -------------------------
-# DEPS
-# -------------------------
-FROM base AS deps
-
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-
-COPY apps ./apps
-COPY packages ./packages
-
-RUN pnpm install --frozen-lockfile
-
-
-# -------------------------
-# BUILDER
-# -------------------------
+########################
+# BUILD
+########################
 FROM base AS builder
-
 WORKDIR /app
+ARG APP=gateway
 
-COPY --from=deps /app ./
+COPY --from=pruner /app/out/json/ ./
+COPY --from=pruner /app/out/pnpm-lock.yaml ./
+COPY --from=pruner /app/out/pnpm-workspace.yaml ./
 
-RUN pnpm --filter gateway prisma:generate
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile
 
-RUN pnpm --filter gateway build
+COPY --from=pruner /app/out/full/ .
+COPY tsconfig.base.json ./tsconfig.base.json
 
+# Build (inclut la compilation TS)
+RUN turbo build --filter=${APP}...
 
-# -------------------------
-# PRODUCTION
-# -------------------------
-FROM base AS production
-
+########################
+# DEPLOY
+########################
+FROM base AS deployer
 WORKDIR /app
+ARG APP=gateway
 
+# 1. Récupère les manifests
+COPY --from=pruner /app/out/json/ ./
+COPY --from=pruner /app/out/pnpm-lock.yaml ./
+COPY --from=pruner /app/out/pnpm-workspace.yaml ./
+
+# 2. Install prod
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --prod --frozen-lockfile
+
+# 3. Copie des artifacts buildés
+COPY --from=builder /app/apps/gateway/dist ./apps/gateway/dist
+COPY --from=builder /app/packages/contracts/dist ./packages/contracts/dist
+
+# 4. Copie du schema et package.json pour génération finale
+# COPY --from=builder /app/packages/database/generated ./packages/database/generated
+COPY --from=builder /app/packages/database/dist ./packages/database/dist
+
+# 5. pnpm deploy - Crée la structure légère dans /deploy
+RUN pnpm --filter gateway deploy --prod /deploy
+
+# 6. Génère Prisma DANS le dossier /deploy
+# Grâce à votre output = "../node_modules/.prisma/client" dans schema.prisma,
+# le client sera généré au bon endroit relatif au schema
+# WORKDIR /deploy
+# RUN pnpm exec prisma generate
+
+# WORKDIR /deploy
+
+########################
+# RUNNER
+########################
+FROM base AS runner
+WORKDIR /app
 ENV NODE_ENV=production
 
-RUN corepack enable
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nodejs
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# Copie UNIQUEMENT le contenu de /deploy (déjà optimisé)
+COPY --from=deployer --chown=nodejs:nodejs /deploy/ .
 
-RUN pnpm install --prod --frozen-lockfile
-
-# app build
-COPY --from=builder /app/apps/gateway/dist ./apps/gateway/dist
-
-# prisma runtime
-COPY --from=builder /app/apps/gateway/prisma ./apps/gateway/prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-
+USER nodejs
 EXPOSE 3000
 
-CMD ["node", "apps/gateway/dist/src/main.js"]
+CMD ["node", "dist/src/main.js"]

@@ -18,7 +18,7 @@
 //     ) {}
 
 //     async getForUser(userId: string): Promise<MeSettingsDto> {
-//         const user = await this.prisma.user.findUnique({
+//         const user = await prisma.user.findUnique({
 //             where: { id: userId },
 //             include: {
 //                 User_profile: {
@@ -31,7 +31,7 @@
 //             throw new NotFoundException('Utilisateur introuvable.');
 //         }
 
-//         const availabilities = await this.prisma.availability.findMany({
+//         const availabilities = await prisma.availability.findMany({
 //             where: { user_id: userId },
 //             select: { start_at: true },
 //         });
@@ -120,7 +120,7 @@
 //         userId: string,
 //         availability: MeSettingsDto['availability'],
 //     ): Promise<void> {
-//         const existing = await this.prisma.availability.findMany({
+//         const existing = await prisma.availability.findMany({
 //             where: { user_id: userId },
 //         });
 
@@ -129,7 +129,7 @@
 //             .map((row) => row.id);
 
 //         if (templateIds.length > 0) {
-//             await this.prisma.availability.deleteMany({
+//             await prisma.availability.deleteMany({
 //                 where: { id: { in: templateIds } },
 //             });
 //         }
@@ -148,7 +148,7 @@
 //         );
 
 //         if (toCreate.length > 0) {
-//             await this.prisma.availability.createMany({ data: toCreate });
+//             await prisma.availability.createMany({ data: toCreate });
 //         }
 //     }
 // }

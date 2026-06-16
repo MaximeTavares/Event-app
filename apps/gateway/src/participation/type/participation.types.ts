@@ -1,8 +1,8 @@
-import { Participation_status } from '@prisma/client';
+import { ParticipationStatus } from '../dto/participation.dto';
 
 export interface ParticipationWithStatusAndOrganizer {
     userId: string;
-    status: Participation_status;
+    status: ParticipationStatus;
     event: {
         organizerId: string;
     };

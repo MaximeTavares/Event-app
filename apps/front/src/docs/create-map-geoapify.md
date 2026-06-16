@@ -32,38 +32,38 @@ Contrat DTO backend de référence pour les données utilisateur :
 
 ```ts
 type UserWithProfileAndAddressDTO = {
-	user: UserDTO;
-	profile: UserProfileDTO | null;
-	address: AddressDTO | null;
+    user: UserDTO;
+    profile: UserProfileDTO | null;
+    address: AddressDTO | null;
 };
 
 type UserProfileDTO = {
-	firstName?: string | null;
-	lastName?: string | null;
-	phoneNumber?: string | null;
-	birthDate?: Date | null;
-	bio?: string | null;
-	avatarUrl?: string | null;
-	createdAt?: Date;
-	updatedAt?: Date | null; //Données calculées
-	fullName?: string | null;
-	age?: number | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    phoneNumber?: string | null;
+    birthDate?: Date | null;
+    bio?: string | null;
+    avatarUrl?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date | null; //Données calculées
+    fullName?: string | null;
+    age?: number | null;
 };
 
 type AddressDTO = {
-	id: number;
-	street_number: string;
-	street_name: string;
-	address_line_2?: string | null;
-	city: string;
-	postal_code: string;
-	country: string;
-	coordinates?: AddressCoordinates;
+    id: number;
+    street_number: string;
+    street_name: string;
+    address_line_2?: string | null;
+    city: string;
+    postal_code: string;
+    country: string;
+    coordinates?: AddressCoordinates;
 };
 
 interface AddressCoordinates {
-	lat: number;
-	lon: number;
+    lat: number;
+    lon: number;
 }
 ```
 
@@ -82,24 +82,24 @@ Contrat DTO backend de référence pour les événements :
 
 ```ts
 class EventDTO {
-	id: number;
-	user: UserDTO;
-	title: string;
-	description: string;
-	program: string;
-	start_date: Date;
-	end_date: Date;
-	address: AddressDTO | null;
-	status: Event_status;
-	created_at: Date;
-	updated_at: Date | null;
+    id: number;
+    user: UserDTO;
+    title: string;
+    description: string;
+    program: string;
+    start_date: Date;
+    end_date: Date;
+    address: AddressDTO | null;
+    status: Event_status;
+    created_at: Date;
+    updated_at: Date | null;
 }
 
 class EventWithUserAndAddressDTO {
-	data: EventDTO & {
-		address?: AddressDTO | null;
-		user?: UserDTO | null;
-	};
+    data: EventDTO & {
+        address?: AddressDTO | null;
+        user?: UserDTO | null;
+    };
 }
 ```
 
@@ -152,15 +152,15 @@ Exemple minimal :
 
 ```ts
 const userProfile = {
-	id: 1,
-	userId: 1,
-	address: {
-		street_number: 8,
-		street_name: "Rue de la République",
-		postal_code: 59000,
-		city: "Lille",
-		country: "France",
-	},
+    id: 1,
+    userId: 1,
+    address: {
+        street_number: 8,
+        street_name: 'Rue de la République',
+        postal_code: 59000,
+        city: 'Lille',
+        country: 'France',
+    },
 };
 ```
 
@@ -215,67 +215,67 @@ Exemple de logique à réutiliser pour géocoder une adresse complète :
 
 ```ts
 export interface Coordinates {
-	lat: number;
-	lon: number;
+    lat: number;
+    lon: number;
 }
 
 export interface GeocodingAddress {
-	street_number?: number | string;
-	street_name?: string;
-	address_line_2?: string;
-	postal_code?: number | string;
-	city?: string;
-	country?: string;
+    street_number?: number | string;
+    street_name?: string;
+    address_line_2?: string;
+    postal_code?: number | string;
+    city?: string;
+    country?: string;
 }
 
 export type GeoapifyResponse = {
-	results: {
-		lat: number;
-		lon: number;
-	}[];
+    results: {
+        lat: number;
+        lon: number;
+    }[];
 };
 
 function buildAddressQuery(address: GeocodingAddress): string {
-	return [
-		address.street_number,
-		address.street_name,
-		address.address_line_2,
-		address.postal_code,
-		address.city,
-		address.country,
-	]
-		.filter((value) => value !== undefined && value !== null && String(value).trim() !== "")
-		.join(", ");
+    return [
+        address.street_number,
+        address.street_name,
+        address.address_line_2,
+        address.postal_code,
+        address.city,
+        address.country,
+    ]
+        .filter((value) => value !== undefined && value !== null && String(value).trim() !== '')
+        .join(', ');
 }
 
 export async function geocodeAddress(address: GeocodingAddress): Promise<Coordinates | null> {
-	const query = buildAddressQuery(address);
-	if (!query) return null;
+    const query = buildAddressQuery(address);
+    if (!query) return null;
 
-	const apiKey = process.env.GEOAPIFY_API_KEY;
-	if (!apiKey) {
-		throw new Error("La clé API Geoapify n'est pas définie");
-	}
+    const apiKey = process.env.GEOAPIFY_API_KEY;
+    if (!apiKey) {
+        throw new Error("La clé API Geoapify n'est pas définie");
+    }
 
-	const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(query)}&lang=fr&limit=10&filter=countrycode:fr&apiKey=${apiKey}`;
+    const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(query)}&lang=fr&limit=10&filter=countrycode:fr&apiKey=${apiKey}`;
 
-	try {
-		const response = await fetch(url);
-		if (!response.ok) return null;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) return null;
 
-		const result: GeoapifyResponse = await response.json();
-		const firstResult = result.results?.[0];
+        const result: GeoapifyResponse = await response.json();
+        const firstResult = result.results?.[0];
 
-		if (!firstResult) return null;
+        if (!firstResult) return null;
 
-		return {
-			lat: firstResult.lat,
-			lon: firstResult.lon,
-		};
-	} catch (error) {
-		console.error("Erreur geocodeAddress:", error);
-		return null;
-	}
+        return {
+            lat: firstResult.lat,
+            lon: firstResult.lon,
+        };
+    } catch (error) {
+        console.error('Erreur geocodeAddress:', error);
+        return null;
+    }
 }
 ```
 
@@ -283,19 +283,19 @@ export async function geocodeAddress(address: GeocodingAddress): Promise<Coordin
 
 ```ts
 async function enrichAddressWithCoordinates(address: CreateAddressDto) {
-	const coordinates = await geocodeAddress({
-		street_number: address.street_number,
-		street_name: address.street_name,
-		address_line_2: address.address_line_2,
-		postal_code: address.postal_code,
-		city: address.city,
-		country: address.country,
-	});
+    const coordinates = await geocodeAddress({
+        street_number: address.street_number,
+        street_name: address.street_name,
+        address_line_2: address.address_line_2,
+        postal_code: address.postal_code,
+        city: address.city,
+        country: address.country,
+    });
 
-	return {
-		...address,
-		coordinates,
-	};
+    return {
+        ...address,
+        coordinates,
+    };
 }
 ```
 
@@ -321,31 +321,31 @@ Exemple adapté à la logique :
 
 ```ts
 export async function buildProfileData(profile: CreateUserProfileDto | UpdateUserProfileDto) {
-	const { address, ...profileData } = profile;
+    const { address, ...profileData } = profile;
 
-	const addressWithCoordinates = address
-		? await enrichAddressWithCoordinates(address)
-		: undefined;
+    const addressWithCoordinates = address
+        ? await enrichAddressWithCoordinates(address)
+        : undefined;
 
-	return {
-		profileData,
-		addressData: addressWithCoordinates
-			? {
-					connectOrCreate: {
-						where: {
-							unique_address: {
-								street_number: addressWithCoordinates.street_number,
-								street_name: addressWithCoordinates.street_name,
-								city: addressWithCoordinates.city,
-								postal_code: addressWithCoordinates.postal_code,
-								country: addressWithCoordinates.country,
-							},
-						},
-						create: addressWithCoordinates,
-					},
-				}
-			: undefined,
-	};
+    return {
+        profileData,
+        addressData: addressWithCoordinates
+            ? {
+                  connectOrCreate: {
+                      where: {
+                          unique_address: {
+                              street_number: addressWithCoordinates.street_number,
+                              street_name: addressWithCoordinates.street_name,
+                              city: addressWithCoordinates.city,
+                              postal_code: addressWithCoordinates.postal_code,
+                              country: addressWithCoordinates.country,
+                          },
+                      },
+                      create: addressWithCoordinates,
+                  },
+              }
+            : undefined,
+    };
 }
 ```
 
@@ -365,7 +365,7 @@ async create(
 	const { address, ...eventData } = createEventDto;
 	const addressWithCoordinates = await enrichAddressWithCoordinates(address);
 
-	const newEvent = await this.prisma.event.create({
+	const newEvent = await prisma.event.create({
 		data: {
 			...eventData,
 			Address: {
@@ -462,7 +462,7 @@ On centralise la configuration de la couche de tuiles dans un helper dédié. `L
 Ce type limite explicitement les styles autorisés dans le projet.
 
 ```tsx
-export type GeoapifyMapStyle = "osm-bright" | "osm-carto" | "toner-grey" | "klokantech-basic";
+export type GeoapifyMapStyle = 'osm-bright' | 'osm-carto' | 'toner-grey' | 'klokantech-basic';
 ```
 
 Le bénéfice est simple :
@@ -477,14 +477,14 @@ Cette interface décrit l'objet final attendu par votre couche de tuiles.
 
 ```tsx
 export interface GeoapifyLeafletTileLayerOptions {
-	attribution: string;
-	apiKey: string;
-	maxZoom: number;
-	id: GeoapifyMapStyle;
-	url: string;
-	baseUrl: string;
-	retinaUrl: string;
-	isRetina: boolean;
+    attribution: string;
+    apiKey: string;
+    maxZoom: number;
+    id: GeoapifyMapStyle;
+    url: string;
+    baseUrl: string;
+    retinaUrl: string;
+    isRetina: boolean;
 }
 ```
 
@@ -501,7 +501,7 @@ Autrement dit, le composant carte n'a pas à reconstruire lui-même ces informat
 #### GEOAPIFY_MAPS_HOST
 
 ```tsx
-const GEOAPIFY_MAPS_HOST = "https://maps.geoapify.com/v1/tile";
+const GEOAPIFY_MAPS_HOST = 'https://maps.geoapify.com/v1/tile';
 ```
 
 Cette constante porte la base commune des URLs de tuiles Geoapify.
@@ -514,7 +514,7 @@ Leaflet doit afficher l'attribution du fournisseur de tuiles.
 
 ```tsx
 export const GEOAPIFY_LEAFLET_ATTRIBUTION =
-	'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" target="_blank">© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a> contributors';
+    'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" target="_blank">© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a> contributors';
 ```
 
 Cette constante garantit que le texte d'attribution reste cohérent partout dans le projet.
@@ -533,8 +533,8 @@ Elle sert à éviter des comportements incohérents si plusieurs composants cart
 
 ```tsx
 function buildTileUrl(style: GeoapifyMapStyle, apiKey: string, retina = false): string {
-	const suffix = retina ? "@2x" : "";
-	return `${GEOAPIFY_MAPS_HOST}/${style}/{z}/{x}/{y}${suffix}.png?apiKey=${apiKey}`;
+    const suffix = retina ? '@2x' : '';
+    return `${GEOAPIFY_MAPS_HOST}/${style}/{z}/{x}/{y}${suffix}.png?apiKey=${apiKey}`;
 }
 ```
 
@@ -552,23 +552,23 @@ Cette fonction construit l'objet complet utilisé par la couche Leaflet.
 
 ```tsx
 export function createGeoapifyLeafletTileLayerOptions(
-	apiKey: string,
-	style: GeoapifyMapStyle = "osm-bright",
-	isRetina = typeof window !== "undefined" ? window.devicePixelRatio > 1 : false,
+    apiKey: string,
+    style: GeoapifyMapStyle = 'osm-bright',
+    isRetina = typeof window !== 'undefined' ? window.devicePixelRatio > 1 : false,
 ): GeoapifyLeafletTileLayerOptions {
-	const baseUrl = buildTileUrl(style, apiKey, false);
-	const retinaUrl = buildTileUrl(style, apiKey, true);
+    const baseUrl = buildTileUrl(style, apiKey, false);
+    const retinaUrl = buildTileUrl(style, apiKey, true);
 
-	return {
-		attribution: GEOAPIFY_LEAFLET_ATTRIBUTION,
-		apiKey,
-		maxZoom: GEOAPIFY_LEAFLET_MAX_ZOOM,
-		id: style,
-		url: isRetina ? retinaUrl : baseUrl,
-		baseUrl,
-		retinaUrl,
-		isRetina,
-	};
+    return {
+        attribution: GEOAPIFY_LEAFLET_ATTRIBUTION,
+        apiKey,
+        maxZoom: GEOAPIFY_LEAFLET_MAX_ZOOM,
+        id: style,
+        url: isRetina ? retinaUrl : baseUrl,
+        baseUrl,
+        retinaUrl,
+        isRetina,
+    };
 }
 ```
 
@@ -586,14 +586,14 @@ Elle devient donc l'entrée principale pour tout composant qui veut brancher Geo
 Cette fonction lit directement la clé dans l'environnement front.
 
 ```tsx
-export function getDefaultGeoapifyLeafletConfig(style: GeoapifyMapStyle = "osm-bright") {
-	const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+export function getDefaultGeoapifyLeafletConfig(style: GeoapifyMapStyle = 'osm-bright') {
+    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
-	if (!apiKey) {
-		throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
-	}
+    if (!apiKey) {
+        throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
+    }
 
-	return createGeoapifyLeafletTileLayerOptions(apiKey, style);
+    return createGeoapifyLeafletTileLayerOptions(apiKey, style);
 }
 ```
 
@@ -608,59 +608,59 @@ Elle simplifie le code du composant carte, qui n'a plus à gérer lui-même la l
 Exemple de helper complet `LeafletMap.tsx` :
 
 ```tsx
-export type GeoapifyMapStyle = "osm-bright" | "osm-carto" | "toner-grey" | "klokantech-basic";
+export type GeoapifyMapStyle = 'osm-bright' | 'osm-carto' | 'toner-grey' | 'klokantech-basic';
 
 export interface GeoapifyLeafletTileLayerOptions {
-	attribution: string;
-	apiKey: string;
-	maxZoom: number;
-	id: GeoapifyMapStyle;
-	url: string;
-	baseUrl: string;
-	retinaUrl: string;
-	isRetina: boolean;
+    attribution: string;
+    apiKey: string;
+    maxZoom: number;
+    id: GeoapifyMapStyle;
+    url: string;
+    baseUrl: string;
+    retinaUrl: string;
+    isRetina: boolean;
 }
 
-const GEOAPIFY_MAPS_HOST = "https://maps.geoapify.com/v1/tile";
+const GEOAPIFY_MAPS_HOST = 'https://maps.geoapify.com/v1/tile';
 
 export const GEOAPIFY_LEAFLET_ATTRIBUTION =
-	'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" target="_blank">© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a> contributors';
+    'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" target="_blank">© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a> contributors';
 
 export const GEOAPIFY_LEAFLET_MAX_ZOOM = 20;
 
 function buildTileUrl(style: GeoapifyMapStyle, apiKey: string, retina = false): string {
-	const suffix = retina ? "@2x" : "";
-	return `${GEOAPIFY_MAPS_HOST}/${style}/{z}/{x}/{y}${suffix}.png?apiKey=${apiKey}`;
+    const suffix = retina ? '@2x' : '';
+    return `${GEOAPIFY_MAPS_HOST}/${style}/{z}/{x}/{y}${suffix}.png?apiKey=${apiKey}`;
 }
 
 export function createGeoapifyLeafletTileLayerOptions(
-	apiKey: string,
-	style: GeoapifyMapStyle = "osm-bright",
-	isRetina = typeof window !== "undefined" ? window.devicePixelRatio > 1 : false,
+    apiKey: string,
+    style: GeoapifyMapStyle = 'osm-bright',
+    isRetina = typeof window !== 'undefined' ? window.devicePixelRatio > 1 : false,
 ): GeoapifyLeafletTileLayerOptions {
-	const baseUrl = buildTileUrl(style, apiKey, false);
-	const retinaUrl = buildTileUrl(style, apiKey, true);
+    const baseUrl = buildTileUrl(style, apiKey, false);
+    const retinaUrl = buildTileUrl(style, apiKey, true);
 
-	return {
-		attribution: GEOAPIFY_LEAFLET_ATTRIBUTION,
-		apiKey,
-		maxZoom: GEOAPIFY_LEAFLET_MAX_ZOOM,
-		id: style,
-		url: isRetina ? retinaUrl : baseUrl,
-		baseUrl,
-		retinaUrl,
-		isRetina,
-	};
+    return {
+        attribution: GEOAPIFY_LEAFLET_ATTRIBUTION,
+        apiKey,
+        maxZoom: GEOAPIFY_LEAFLET_MAX_ZOOM,
+        id: style,
+        url: isRetina ? retinaUrl : baseUrl,
+        baseUrl,
+        retinaUrl,
+        isRetina,
+    };
 }
 
-export function getDefaultGeoapifyLeafletConfig(style: GeoapifyMapStyle = "osm-bright") {
-	const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+export function getDefaultGeoapifyLeafletConfig(style: GeoapifyMapStyle = 'osm-bright') {
+    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
-	if (!apiKey) {
-		throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
-	}
+    if (!apiKey) {
+        throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
+    }
 
-	return createGeoapifyLeafletTileLayerOptions(apiKey, style);
+    return createGeoapifyLeafletTileLayerOptions(apiKey, style);
 }
 ```
 
@@ -677,43 +677,43 @@ Ce fichier ne contient pas seulement des types.
 Il contient aussi les fonctions de transformation qui convertissent les données métier du projet en données prêtes pour la carte.
 
 ```ts
-import type { AddressCoordinates } from "../../../../features/address/types/address.type";
-import type { Event } from "../../../../features/event/types/event.type";
-import type { UserWithProfileAndAddress } from "../../../../features/user_profile/types/types";
+import type { AddressCoordinates } from '../../../../features/address/types/address.type';
+import type { Event } from '../../../../features/event/types/event.type';
+import type { UserWithProfileAndAddress } from '../../../../features/user_profile/types/types';
 
 export type UserOrigin = AddressCoordinates;
-export type EventMapPoint = Pick<Event, "id" | "title"> & AddressCoordinates;
+export type EventMapPoint = Pick<Event, 'id' | 'title'> & AddressCoordinates;
 
 export function toUserOrigin(userProfile: UserWithProfileAndAddress): UserOrigin | null {
-	const coordinates = userProfile.address?.coordinates;
+    const coordinates = userProfile.address?.coordinates;
 
-	if (!coordinates) {
-		return null;
-	}
+    if (!coordinates) {
+        return null;
+    }
 
-	return {
-		lat: coordinates.lat,
-		lon: coordinates.lon,
-	};
+    return {
+        lat: coordinates.lat,
+        lon: coordinates.lon,
+    };
 }
 
 export function toEventMapPoints(events: Event[]): EventMapPoint[] {
-	return events
-		.filter(
-			(
-				event,
-			): event is Event & {
-				address: NonNullable<Event["address"]> & { coordinates: UserOrigin };
-			} => Boolean(event.address?.coordinates),
-		)
-		.map(
-			(event): EventMapPoint => ({
-				id: event.id,
-				title: event.title,
-				lat: event.address.coordinates.lat,
-				lon: event.address.coordinates.lon,
-			}),
-		);
+    return events
+        .filter(
+            (
+                event,
+            ): event is Event & {
+                address: NonNullable<Event['address']> & { coordinates: UserOrigin };
+            } => Boolean(event.address?.coordinates),
+        )
+        .map(
+            (event): EventMapPoint => ({
+                id: event.id,
+                title: event.title,
+                lat: event.address.coordinates.lat,
+                lon: event.address.coordinates.lon,
+            }),
+        );
 }
 ```
 
@@ -751,7 +751,7 @@ Puis charger le CSS Leaflet dans le point d'entrée front `src/main.tsx`.
 Exemple :
 
 ```ts
-import "leaflet/dist/leaflet.css";
+import 'leaflet/dist/leaflet.css';
 ```
 
 #### 2. Créer un composant carte dédié dans `src/shared/components/UI/map/UserEventsMap.tsx`
@@ -760,9 +760,9 @@ Le composant peut recevoir seulement les données utiles :
 
 ```tsx
 type UserEventsMapProps = {
-	userOrigin: UserOrigin;
-	events: EventMapPoint[];
-	radiusMeters?: number;
+    userOrigin: UserOrigin;
+    events: EventMapPoint[];
+    radiusMeters?: number;
 };
 ```
 
@@ -773,7 +773,7 @@ Le composant récupère la configuration via le helper `src/shared/utils/leaflet
 Exemple `UserEventsMap.tsx` :
 
 ```tsx
-const tileLayer = getDefaultGeoapifyLeafletConfig("osm-bright");
+const tileLayer = getDefaultGeoapifyLeafletConfig('osm-bright');
 ```
 
 Puis `UserEventsMap.tsx` :
@@ -805,7 +805,7 @@ Exemple `UserEventsMap.tsx` :
 
 ```tsx
 <Marker position={[userOrigin.lat, userOrigin.lon]}>
-	<Popup>Position de l'utilisateur</Popup>
+    <Popup>Position de l'utilisateur</Popup>
 </Marker>
 ```
 
@@ -817,11 +817,11 @@ Exemple `UserEventsMap.tsx` :
 
 ```tsx
 {
-	events.map((event) => (
-		<Marker key={event.id} position={[event.lat, event.lon]}>
-			<Popup>{event.title}</Popup>
-		</Marker>
-	));
+    events.map((event) => (
+        <Marker key={event.id} position={[event.lat, event.lon]}>
+            <Popup>{event.title}</Popup>
+        </Marker>
+    ));
 }
 ```
 
@@ -833,14 +833,14 @@ Exemple `UserEventsMap.tsx` :
 
 ```tsx
 <Circle
-	center={[userOrigin.lat, userOrigin.lon]}
-	radius={radiusMeters}
-	pathOptions={{
-		color: "#0ea5e9",
-		fillColor: "#0ea5e9",
-		fillOpacity: 0.12,
-		weight: 2,
-	}}
+    center={[userOrigin.lat, userOrigin.lon]}
+    radius={radiusMeters}
+    pathOptions={{
+        color: '#0ea5e9',
+        fillColor: '#0ea5e9',
+        fillOpacity: 0.12,
+        weight: 2,
+    }}
 />
 ```
 
@@ -850,49 +850,49 @@ Dans le projet actuel, le composant utilise bien `radiusMeters` au lieu d'une va
 
 ```tsx
 type UserEventsMapProps = {
-	userOrigin: UserOrigin;
-	events: EventMapPoint[];
-	radiusMeters?: number;
+    userOrigin: UserOrigin;
+    events: EventMapPoint[];
+    radiusMeters?: number;
 };
 
 export function UserEventsMap({ userOrigin, events, radiusMeters = 25_000 }: UserEventsMapProps) {
-	const tileLayer = getDefaultGeoapifyLeafletConfig("osm-bright");
+    const tileLayer = getDefaultGeoapifyLeafletConfig('osm-bright');
 
-	return (
-		<MapContainer
-			center={[userOrigin.lat, userOrigin.lon]}
-			zoom={9}
-			scrollWheelZoom
-			className="h-130 w-full rounded-xl border border-base-300"
-		>
-			<TileLayer
-				attribution={tileLayer.attribution}
-				url={tileLayer.url}
-				maxZoom={tileLayer.maxZoom}
-			/>
+    return (
+        <MapContainer
+            center={[userOrigin.lat, userOrigin.lon]}
+            zoom={9}
+            scrollWheelZoom
+            className="h-130 w-full rounded-xl border border-base-300"
+        >
+            <TileLayer
+                attribution={tileLayer.attribution}
+                url={tileLayer.url}
+                maxZoom={tileLayer.maxZoom}
+            />
 
-			<Marker position={[userOrigin.lat, userOrigin.lon]}>
-				<Popup>Position de l'utilisateur</Popup>
-			</Marker>
+            <Marker position={[userOrigin.lat, userOrigin.lon]}>
+                <Popup>Position de l'utilisateur</Popup>
+            </Marker>
 
-			<Circle
-				center={[userOrigin.lat, userOrigin.lon]}
-				radius={radiusMeters}
-				pathOptions={{
-					color: "#0ea5e9",
-					fillColor: "#0ea5e9",
-					fillOpacity: 0.12,
-					weight: 2,
-				}}
-			/>
+            <Circle
+                center={[userOrigin.lat, userOrigin.lon]}
+                radius={radiusMeters}
+                pathOptions={{
+                    color: '#0ea5e9',
+                    fillColor: '#0ea5e9',
+                    fillOpacity: 0.12,
+                    weight: 2,
+                }}
+            />
 
-			{events.map((event) => (
-				<Marker key={event.id} position={[event.lat, event.lon]}>
-					<Popup>{event.title}</Popup>
-				</Marker>
-			))}
-		</MapContainer>
-	);
+            {events.map((event) => (
+                <Marker key={event.id} position={[event.lat, event.lon]}>
+                    <Popup>{event.title}</Popup>
+                </Marker>
+            ))}
+        </MapContainer>
+    );
 }
 ```
 
@@ -905,21 +905,21 @@ Ce hook ne récupère pas lui-même les données du profil. Son rôle est unique
 Exemple :
 
 ```tsx
-import { useMemo } from "react";
-import type { UserWithProfileAndAddress } from "../../../../features/user_profile/types/types";
-import type { UserOrigin } from "./map-data";
-import { toUserOrigin } from "./map-data";
+import { useMemo } from 'react';
+import type { UserWithProfileAndAddress } from '../../../../features/user_profile/types/types';
+import type { UserOrigin } from './map-data';
+import { toUserOrigin } from './map-data';
 
 export function useUserMapOrigin(
-	userWithProfileAndAddress: UserWithProfileAndAddress | null | undefined,
+    userWithProfileAndAddress: UserWithProfileAndAddress | null | undefined,
 ): UserOrigin | null {
-	return useMemo(() => {
-		if (!userWithProfileAndAddress) {
-			return null;
-		}
+    return useMemo(() => {
+        if (!userWithProfileAndAddress) {
+            return null;
+        }
 
-		return toUserOrigin(userWithProfileAndAddress);
-	}, [userWithProfileAndAddress]);
+        return toUserOrigin(userWithProfileAndAddress);
+    }, [userWithProfileAndAddress]);
 }
 ```
 
@@ -945,33 +945,33 @@ Le flux est donc :
 Exemple `Home.tsx` :
 
 ```tsx
-import { useMemo, useState } from "react";
-import { useGetCurrentUserWithProfileAndAddress } from "../features/user_profile/hooks/use_user_profile.service";
-import UserEventsMap from "../shared/components/UI/map/UserEventsMap";
-import { toEventMapPoints } from "../shared/components/UI/map/map-data";
-import { useUserMapOrigin } from "../shared/components/UI/map/useUserMapOrigin";
+import { useMemo, useState } from 'react';
+import { useGetCurrentUserWithProfileAndAddress } from '../features/user_profile/hooks/use_user_profile.service';
+import UserEventsMap from '../shared/components/UI/map/UserEventsMap';
+import { toEventMapPoints } from '../shared/components/UI/map/map-data';
+import { useUserMapOrigin } from '../shared/components/UI/map/useUserMapOrigin';
 
 const { data: events = [], isLoading, isError, error } = useGetEvents(filters);
 const {
-	data: currentUser,
-	isLoading: isUserLoading,
-	isError: isUserError,
-	error: userError,
+    data: currentUser,
+    isLoading: isUserLoading,
+    isError: isUserError,
+    error: userError,
 } = useGetCurrentUserWithProfileAndAddress();
 const userOrigin = useUserMapOrigin(currentUser);
 const eventMapPoints = useMemo(() => toEventMapPoints(events), [events]);
 const mapRadiusMeters = location.distanceKm > 0 ? location.distanceKm * 1000 : 25_000;
 
 return (
-	<>
-		{!isLoading && !isError && !isUserLoading && !isUserError && userOrigin ? (
-			<UserEventsMap
-				userOrigin={userOrigin}
-				events={eventMapPoints}
-				radiusMeters={mapRadiusMeters}
-			/>
-		) : null}
-	</>
+    <>
+        {!isLoading && !isError && !isUserLoading && !isUserError && userOrigin ? (
+            <UserEventsMap
+                userOrigin={userOrigin}
+                events={eventMapPoints}
+                radiusMeters={mapRadiusMeters}
+            />
+        ) : null}
+    </>
 );
 ```
 
@@ -981,35 +981,35 @@ Exemple `src/features/user_profile/api/api.ts` :
 
 ```ts
 // import axios from "axios";
-import type { UserWithProfileAndAddress } from "../types/types";
-import { fakeUsersWithProfileAndAddress } from "../../user/api/fakeUserData";
+import type { UserWithProfileAndAddress } from '../types/types';
+import { fakeUsersWithProfileAndAddress } from '../../user/api/fakeUserData';
 
 // const API_URL = "";
 
 export async function getCurrentUserWithProfileAndAddress(): Promise<UserWithProfileAndAddress | null> {
-	// const { data } = await axios.get<UserWithProfileAndAddress>(`${API_URL}/user-profile/me`);
+    // const { data } = await axios.get<UserWithProfileAndAddress>(`${API_URL}/user-profile/me`);
 
-	await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
-	return fakeUsersWithProfileAndAddress[0] ?? null;
+    return fakeUsersWithProfileAndAddress[0] ?? null;
 }
 ```
 
 Exemple `src/features/user_profile/hooks/use_user_profile.service.ts` :
 
 ```ts
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
-import { getCurrentUserWithProfileAndAddress } from "../api/api";
-import type { UserWithProfileAndAddress } from "../types/types";
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { getCurrentUserWithProfileAndAddress } from '../api/api';
+import type { UserWithProfileAndAddress } from '../types/types';
 
 export function useGetCurrentUserWithProfileAndAddress(): UseQueryResult<
-	UserWithProfileAndAddress | null,
-	Error
+    UserWithProfileAndAddress | null,
+    Error
 > {
-	return useQuery<UserWithProfileAndAddress | null, Error>({
-		queryKey: ["user-profile", "me"],
-		queryFn: () => getCurrentUserWithProfileAndAddress(),
-	});
+    return useQuery<UserWithProfileAndAddress | null, Error>({
+        queryKey: ['user-profile', 'me'],
+        queryFn: () => getCurrentUserWithProfileAndAddress(),
+    });
 }
 ```
 
@@ -1059,17 +1059,17 @@ Exemple de helper local dans `UserEventsMap.tsx` :
 
 ```tsx
 function buildMarkerIconUrl(apiKey: string, icon: string, color: string): string {
-	const searchParams = new URLSearchParams({
-		apiKey,
-		type: "material",
-		icon,
-		iconType: "material",
-		size: "52",
-		color,
-		contentColor: "#ffffff",
-	});
+    const searchParams = new URLSearchParams({
+        apiKey,
+        type: 'material',
+        icon,
+        iconType: 'material',
+        size: '52',
+        color,
+        contentColor: '#ffffff',
+    });
 
-	return `https://api.geoapify.com/v2/icon?${searchParams.toString()}`;
+    return `https://api.geoapify.com/v2/icon?${searchParams.toString()}`;
 }
 ```
 
@@ -1079,25 +1079,25 @@ Le composant crée ensuite deux objets `Icon` Leaflet distincts :
 
 ```tsx
 const userMarkerIcon = useMemo(
-	() =>
-		new Icon({
-			iconUrl: buildMarkerIconUrl(tileLayer.apiKey, "person", "#2563eb"),
-			iconSize: [31, 46],
-			iconAnchor: [15, 46],
-			popupAnchor: [0, -40],
-		}),
-	[tileLayer.apiKey],
+    () =>
+        new Icon({
+            iconUrl: buildMarkerIconUrl(tileLayer.apiKey, 'person', '#2563eb'),
+            iconSize: [31, 46],
+            iconAnchor: [15, 46],
+            popupAnchor: [0, -40],
+        }),
+    [tileLayer.apiKey],
 );
 
 const eventMarkerIcon = useMemo(
-	() =>
-		new Icon({
-			iconUrl: buildMarkerIconUrl(tileLayer.apiKey, "event", "#d97706"),
-			iconSize: [31, 46],
-			iconAnchor: [15, 46],
-			popupAnchor: [0, -40],
-		}),
-	[tileLayer.apiKey],
+    () =>
+        new Icon({
+            iconUrl: buildMarkerIconUrl(tileLayer.apiKey, 'event', '#d97706'),
+            iconSize: [31, 46],
+            iconAnchor: [15, 46],
+            popupAnchor: [0, -40],
+        }),
+    [tileLayer.apiKey],
 );
 ```
 
@@ -1105,15 +1105,15 @@ Puis ces icônes sont injectées dans les marqueurs :
 
 ```tsx
 <Marker position={[userOrigin.lat, userOrigin.lon]} icon={userMarkerIcon}>
-	<Popup>Position de l'utilisateur</Popup>
+    <Popup>Position de l'utilisateur</Popup>
 </Marker>;
 
 {
-	events.map((event) => (
-		<Marker key={event.id} position={[event.lat, event.lon]} icon={eventMarkerIcon}>
-			<Popup>{event.title}</Popup>
-		</Marker>
-	));
+    events.map((event) => (
+        <Marker key={event.id} position={[event.lat, event.lon]} icon={eventMarkerIcon}>
+            <Popup>{event.title}</Popup>
+        </Marker>
+    ));
 }
 ```
 
@@ -1193,13 +1193,13 @@ Exemple de logique attendue :
 
 ```ts
 const {
-	data: cityCoordinates,
-	isLoading: isCityGeocoding,
-	isError: isCityGeocodingError,
+    data: cityCoordinates,
+    isLoading: isCityGeocoding,
+    isError: isCityGeocodingError,
 } = useQuery({
-	queryKey: ["geocode-city", location.city.trim()],
-	queryFn: () => geocodeCity(location.city.trim()),
-	enabled: hasCityFilter,
+    queryKey: ['geocode-city', location.city.trim()],
+    queryFn: () => geocodeCity(location.city.trim()),
+    enabled: hasCityFilter,
 });
 ```
 
@@ -1215,75 +1215,75 @@ Le helper front actuel doit être documenté ainsi :
 
 ```ts
 export interface Coordinates {
-	lat: number;
-	lon: number;
+    lat: number;
+    lon: number;
 }
 
 type GeoapifyJsonResponse = {
-	results: {
-		lat: number;
-		lon: number;
-	}[];
+    results: {
+        lat: number;
+        lon: number;
+    }[];
 };
 
 type GeoapifyGeoJsonResponse = {
-	features?: {
-		geometry?: {
-			coordinates?: [number, number];
-		};
-	}[];
+    features?: {
+        geometry?: {
+            coordinates?: [number, number];
+        };
+    }[];
 };
 
 export async function geocodeCity(city: string): Promise<Coordinates | null> {
-	const normalizedCity = city.trim();
+    const normalizedCity = city.trim();
 
-	if (!normalizedCity) return null;
+    if (!normalizedCity) return null;
 
-	const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
-	if (!apiKey) {
-		throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
-	}
+    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+    if (!apiKey) {
+        throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
+    }
 
-	const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(normalizedCity)}&lang=fr&limit=10&type=city&filter=countrycode:fr&format=json&apiKey=${apiKey}`;
+    const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(normalizedCity)}&lang=fr&limit=10&type=city&filter=countrycode:fr&format=json&apiKey=${apiKey}`;
 
-	try {
-		const response = await fetch(url);
+    try {
+        const response = await fetch(url);
 
-		if (!response.ok) {
-			throw new Error(
-				`Impossible de contacter le service de géocodage (${response.status}).`,
-			);
-		}
+        if (!response.ok) {
+            throw new Error(
+                `Impossible de contacter le service de géocodage (${response.status}).`,
+            );
+        }
 
-		const result = (await response.json()) as GeoapifyJsonResponse | GeoapifyGeoJsonResponse;
-		const firstResult = "results" in result ? result.results?.[0] : undefined;
+        const result = (await response.json()) as GeoapifyJsonResponse | GeoapifyGeoJsonResponse;
+        const firstResult = 'results' in result ? result.results?.[0] : undefined;
 
-		if (firstResult) {
-			return {
-				lat: firstResult.lat,
-				lon: firstResult.lon,
-			};
-		}
+        if (firstResult) {
+            return {
+                lat: firstResult.lat,
+                lon: firstResult.lon,
+            };
+        }
 
-		const firstFeatureCoordinates =
-			"features" in result ? result.features?.[0]?.geometry?.coordinates : undefined;
+        const firstFeatureCoordinates =
+            'features' in result ? result.features?.[0]?.geometry?.coordinates : undefined;
 
-		if (firstFeatureCoordinates && firstFeatureCoordinates.length >= 2) {
-			const [lon, lat] = firstFeatureCoordinates;
+        if (firstFeatureCoordinates && firstFeatureCoordinates.length >= 2) {
+            const [lon, lat] = firstFeatureCoordinates;
 
-			return { lat, lon };
-		}
+            return { lat, lon };
+        }
 
-		return null;
-	} catch (error) {
-		console.error("Erreur geocodeCity:", error);
+        return null;
+    } catch (error) {
+        console.error('Erreur geocodeCity:', error);
 
-		if (error instanceof Error) {
-			throw error;
-		}
+        if (error instanceof Error) {
+            throw error;
+        }
 
-		throw new Error("Impossible de géocoder la ville sélectionnée.");
-	}
+        throw new Error('Impossible de géocoder la ville sélectionnée.');
+    }
 }
 ```
 
@@ -1354,11 +1354,11 @@ Concrètement, dans `Home.tsx`, le `useMemo<EventFilters>` doit rester limité a
 
 ```ts
 const filters = useMemo<EventFilters>(() => {
-	return {
-		statuses: statuses.length > 0 ? statuses : undefined,
-		start_date: filterDateValue.start ?? undefined,
-		end_date: filterDateValue.end ?? undefined,
-	};
+    return {
+        statuses: statuses.length > 0 ? statuses : undefined,
+        start_date: filterDateValue.start ?? undefined,
+        end_date: filterDateValue.end ?? undefined,
+    };
 }, [statuses, filterDateValue]);
 ```
 
@@ -1378,7 +1378,7 @@ Exemple :
 const coords = event.address?.coordinates;
 
 if (!coords) {
-	return false;
+    return false;
 }
 ```
 
@@ -1392,21 +1392,21 @@ Exemple d'implémentation :
 
 ```ts
 export function haversineDistance(origin: AddressCoordinates, target: AddressCoordinates): number {
-	const earthRadiusKm = 6371;
-	const deltaLat = toRadians(target.lat - origin.lat);
-	const deltaLon = toRadians(target.lon - origin.lon);
-	const originLat = toRadians(origin.lat);
-	const targetLat = toRadians(target.lat);
-	const a =
-		Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-		Math.cos(originLat) * Math.cos(targetLat) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
-	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const earthRadiusKm = 6371;
+    const deltaLat = toRadians(target.lat - origin.lat);
+    const deltaLon = toRadians(target.lon - origin.lon);
+    const originLat = toRadians(origin.lat);
+    const targetLat = toRadians(target.lat);
+    const a =
+        Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(originLat) * Math.cos(targetLat) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-	return earthRadiusKm * c;
+    return earthRadiusKm * c;
 }
 
 function toRadians(value: number): number {
-	return (value * Math.PI) / 180;
+    return (value * Math.PI) / 180;
 }
 ```
 
@@ -1427,16 +1427,16 @@ L'exemple suivant montre bien la logique attendue :
 
 ```ts
 const visibleEvents = events.filter((event) => {
-	const coords = event.address?.coordinates;
+    const coords = event.address?.coordinates;
 
-	if (!coords || !effectiveOrigin) return false;
+    if (!coords || !effectiveOrigin) return false;
 
-	const distanceKm = haversineDistance(
-		{ lat: effectiveOrigin.lat, lon: effectiveOrigin.lon },
-		{ lat: coords.lat, lon: coords.lon },
-	);
+    const distanceKm = haversineDistance(
+        { lat: effectiveOrigin.lat, lon: effectiveOrigin.lon },
+        { lat: coords.lat, lon: coords.lon },
+    );
 
-	return distanceKm <= mapRadiusMeters / 1000;
+    return distanceKm <= mapRadiusMeters / 1000;
 });
 ```
 
@@ -1452,24 +1452,24 @@ Exemple cohérent avec l'étape 6 complète :
 
 ```ts
 const visibleEvents = useMemo(() => {
-	if (!effectiveOrigin) {
-		return [];
-	}
+    if (!effectiveOrigin) {
+        return [];
+    }
 
-	return events.filter((event) => {
-		const coords = event.address?.coordinates;
+    return events.filter((event) => {
+        const coords = event.address?.coordinates;
 
-		if (!coords) {
-			return false;
-		}
+        if (!coords) {
+            return false;
+        }
 
-		const distanceKm = haversineDistance(
-			{ lat: effectiveOrigin.lat, lon: effectiveOrigin.lon },
-			{ lat: coords.lat, lon: coords.lon },
-		);
+        const distanceKm = haversineDistance(
+            { lat: effectiveOrigin.lat, lon: effectiveOrigin.lon },
+            { lat: coords.lat, lon: coords.lon },
+        );
 
-		return distanceKm <= mapRadiusMeters / 1000;
-	});
+        return distanceKm <= mapRadiusMeters / 1000;
+    });
 }, [effectiveOrigin, events, mapRadiusMeters]);
 ```
 
@@ -1559,39 +1559,39 @@ Exemple minimal de logique centralisée :
 
 ```ts
 const isCityNotFound =
-	hasCityFilter && !isCityGeocoding && !isCityGeocodingError && cityCoordinates === null;
+    hasCityFilter && !isCityGeocoding && !isCityGeocodingError && cityCoordinates === null;
 
 const mapStatusMessage = useMemo(() => {
-	return buildMapStatusMessage({
-		hasCityFilter,
-		isCityGeocoding,
-		isCityGeocodingError,
-		isCityNotFound,
-		isUserLoading,
-		isUserError,
-		userErrorMessage: userError?.message,
-		hasUserOrigin: Boolean(userOrigin),
-		hasEffectiveOrigin: Boolean(effectiveOrigin),
-	});
+    return buildMapStatusMessage({
+        hasCityFilter,
+        isCityGeocoding,
+        isCityGeocodingError,
+        isCityNotFound,
+        isUserLoading,
+        isUserError,
+        userErrorMessage: userError?.message,
+        hasUserOrigin: Boolean(userOrigin),
+        hasEffectiveOrigin: Boolean(effectiveOrigin),
+    });
 }, [
-	effectiveOrigin,
-	hasCityFilter,
-	isCityGeocoding,
-	isCityGeocodingError,
-	isCityNotFound,
-	isUserError,
-	isUserLoading,
-	userError?.message,
-	userOrigin,
+    effectiveOrigin,
+    hasCityFilter,
+    isCityGeocoding,
+    isCityGeocodingError,
+    isCityNotFound,
+    isUserError,
+    isUserLoading,
+    userError?.message,
+    userOrigin,
 ]);
 
 const mapWarningMessage = useMemo(() => {
-	return buildMapWarningMessage({
-		hasCityFilter,
-		isCityGeocodingError,
-		isCityNotFound,
-		hasUserOrigin: Boolean(userOrigin),
-	});
+    return buildMapWarningMessage({
+        hasCityFilter,
+        isCityGeocodingError,
+        isCityNotFound,
+        hasUserOrigin: Boolean(userOrigin),
+    });
 }, [hasCityFilter, isCityGeocodingError, isCityNotFound, userOrigin]);
 ```
 
@@ -1599,41 +1599,41 @@ Avec la version actuellement retenue de `mapUiMessages.ts`, la logique de messag
 
 ```ts
 export function buildMapStatusMessage(params: BuildMapStatusMessageParams): string | null {
-	if (isUserLoading) {
-		return "Chargement du profil utilisateur...";
-	}
+    if (isUserLoading) {
+        return 'Chargement du profil utilisateur...';
+    }
 
-	if (params.isUserError) {
-		return params.userErrorMessage ?? "Impossible de charger le profil utilisateur.";
-	}
+    if (params.isUserError) {
+        return params.userErrorMessage ?? 'Impossible de charger le profil utilisateur.';
+    }
 
-	if (params.isCityGeocoding && !params.hasEffectiveOrigin) {
-		return "Géocodage de la ville en cours...";
-	}
+    if (params.isCityGeocoding && !params.hasEffectiveOrigin) {
+        return 'Géocodage de la ville en cours...';
+    }
 
-	if ((params.isCityGeocodingError || params.isCityNotFound) && !params.hasEffectiveOrigin) {
-		return "Impossible de géocoder la ville sélectionnée.";
-	}
+    if ((params.isCityGeocodingError || params.isCityNotFound) && !params.hasEffectiveOrigin) {
+        return 'Impossible de géocoder la ville sélectionnée.';
+    }
 
-	if (!params.hasCityFilter && !params.hasUserOrigin) {
-		return "Adresse utilisateur introuvable.";
-	}
+    if (!params.hasCityFilter && !params.hasUserOrigin) {
+        return 'Adresse utilisateur introuvable.';
+    }
 
-	return null;
+    return null;
 }
 
 export function buildMapWarningMessage(params: BuildMapWarningMessageParams): string | null {
-	if (!params.hasCityFilter) {
-		return null;
-	}
+    if (!params.hasCityFilter) {
+        return null;
+    }
 
-	if (params.isCityGeocodingError || params.isCityNotFound) {
-		return params.hasUserOrigin
-			? "Impossible de géocoder la ville sélectionnée. La carte reste centrée sur votre adresse."
-			: "Impossible de géocoder la ville sélectionnée.";
-	}
+    if (params.isCityGeocodingError || params.isCityNotFound) {
+        return params.hasUserOrigin
+            ? 'Impossible de géocoder la ville sélectionnée. La carte reste centrée sur votre adresse.'
+            : 'Impossible de géocoder la ville sélectionnée.';
+    }
 
-	return null;
+    return null;
 }
 ```
 
@@ -1651,13 +1651,13 @@ Exemple :
 
 ```ts
 const listStatusMessage = useMemo(() => {
-	return buildListStatusMessage({
-		isEventsLoading: isLoading,
-		isEventsError: isError,
-		eventsErrorMessage: error?.message,
-		visibleEventsCount: visibleEvents.length,
-		radiusMeters: mapRadiusMeters,
-	});
+    return buildListStatusMessage({
+        isEventsLoading: isLoading,
+        isEventsError: isError,
+        eventsErrorMessage: error?.message,
+        visibleEventsCount: visibleEvents.length,
+        radiusMeters: mapRadiusMeters,
+    });
 }, [error?.message, isError, isLoading, mapRadiusMeters, visibleEvents.length]);
 ```
 
@@ -1720,60 +1720,60 @@ Exemple :
 
 ```ts
 type BuildMapStatusMessageParams = {
-	hasCityFilter: boolean;
-	isCityGeocoding: boolean;
-	isCityGeocodingError: boolean;
-	isCityNotFound: boolean;
-	isUserLoading: boolean;
-	isUserError: boolean;
-	userErrorMessage?: string;
-	hasUserOrigin: boolean;
-	hasEffectiveOrigin: boolean;
+    hasCityFilter: boolean;
+    isCityGeocoding: boolean;
+    isCityGeocodingError: boolean;
+    isCityNotFound: boolean;
+    isUserLoading: boolean;
+    isUserError: boolean;
+    userErrorMessage?: string;
+    hasUserOrigin: boolean;
+    hasEffectiveOrigin: boolean;
 };
 
 type BuildMapWarningMessageParams = {
-	hasCityFilter: boolean;
-	isCityGeocodingError: boolean;
-	isCityNotFound: boolean;
-	hasUserOrigin: boolean;
+    hasCityFilter: boolean;
+    isCityGeocodingError: boolean;
+    isCityNotFound: boolean;
+    hasUserOrigin: boolean;
 };
 
 export function buildMapStatusMessage(params: BuildMapStatusMessageParams): string | null {
-	if (params.isUserLoading) {
-		return "Chargement du profil utilisateur...";
-	}
+    if (params.isUserLoading) {
+        return 'Chargement du profil utilisateur...';
+    }
 
-	if (params.isUserError) {
-		return params.userErrorMessage ?? "Impossible de charger le profil utilisateur.";
-	}
+    if (params.isUserError) {
+        return params.userErrorMessage ?? 'Impossible de charger le profil utilisateur.';
+    }
 
-	if (params.isCityGeocoding && !params.hasEffectiveOrigin) {
-		return "Géocodage de la ville en cours...";
-	}
+    if (params.isCityGeocoding && !params.hasEffectiveOrigin) {
+        return 'Géocodage de la ville en cours...';
+    }
 
-	if ((params.isCityGeocodingError || params.isCityNotFound) && !params.hasEffectiveOrigin) {
-		return "Impossible de géocoder la ville sélectionnée.";
-	}
+    if ((params.isCityGeocodingError || params.isCityNotFound) && !params.hasEffectiveOrigin) {
+        return 'Impossible de géocoder la ville sélectionnée.';
+    }
 
-	if (!params.hasCityFilter && !params.hasUserOrigin) {
-		return "Adresse utilisateur introuvable.";
-	}
+    if (!params.hasCityFilter && !params.hasUserOrigin) {
+        return 'Adresse utilisateur introuvable.';
+    }
 
-	return null;
+    return null;
 }
 
 export function buildMapWarningMessage(params: BuildMapWarningMessageParams): string | null {
-	if (!params.hasCityFilter) {
-		return null;
-	}
+    if (!params.hasCityFilter) {
+        return null;
+    }
 
-	if (params.isCityGeocodingError || params.isCityNotFound) {
-		return params.hasUserOrigin
-			? "Impossible de géocoder la ville sélectionnée. La carte reste centrée sur votre adresse."
-			: "Impossible de géocoder la ville sélectionnée.";
-	}
+    if (params.isCityGeocodingError || params.isCityNotFound) {
+        return params.hasUserOrigin
+            ? 'Impossible de géocoder la ville sélectionnée. La carte reste centrée sur votre adresse.'
+            : 'Impossible de géocoder la ville sélectionnée.';
+    }
 
-	return null;
+    return null;
 }
 ```
 
@@ -1809,75 +1809,75 @@ Exemple complet cohérent avec l'implémentation actuelle :
 
 ```ts
 export interface Coordinates {
-	lat: number;
-	lon: number;
+    lat: number;
+    lon: number;
 }
 
 type GeoapifyJsonResponse = {
-	results: {
-		lat: number;
-		lon: number;
-	}[];
+    results: {
+        lat: number;
+        lon: number;
+    }[];
 };
 
 type GeoapifyGeoJsonResponse = {
-	features?: {
-		geometry?: {
-			coordinates?: [number, number];
-		};
-	}[];
+    features?: {
+        geometry?: {
+            coordinates?: [number, number];
+        };
+    }[];
 };
 
 export async function geocodeCity(city: string): Promise<Coordinates | null> {
-	const normalizedCity = city.trim();
+    const normalizedCity = city.trim();
 
-	if (!normalizedCity) return null;
+    if (!normalizedCity) return null;
 
-	const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
-	if (!apiKey) {
-		throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
-	}
+    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+    if (!apiKey) {
+        throw new Error("La clé API Geoapify n'est pas définie dans .env (VITE_GEOAPIFY_API_KEY)");
+    }
 
-	const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(normalizedCity)}&lang=fr&limit=10&type=city&filter=countrycode:fr&format=json&apiKey=${apiKey}`;
+    const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(normalizedCity)}&lang=fr&limit=10&type=city&filter=countrycode:fr&format=json&apiKey=${apiKey}`;
 
-	try {
-		const response = await fetch(url);
+    try {
+        const response = await fetch(url);
 
-		if (!response.ok) {
-			throw new Error(
-				`Impossible de contacter le service de géocodage (${response.status}).`,
-			);
-		}
+        if (!response.ok) {
+            throw new Error(
+                `Impossible de contacter le service de géocodage (${response.status}).`,
+            );
+        }
 
-		const result = (await response.json()) as GeoapifyJsonResponse | GeoapifyGeoJsonResponse;
-		const firstResult = "results" in result ? result.results?.[0] : undefined;
+        const result = (await response.json()) as GeoapifyJsonResponse | GeoapifyGeoJsonResponse;
+        const firstResult = 'results' in result ? result.results?.[0] : undefined;
 
-		if (firstResult) {
-			return {
-				lat: firstResult.lat,
-				lon: firstResult.lon,
-			};
-		}
+        if (firstResult) {
+            return {
+                lat: firstResult.lat,
+                lon: firstResult.lon,
+            };
+        }
 
-		const firstFeatureCoordinates =
-			"features" in result ? result.features?.[0]?.geometry?.coordinates : undefined;
+        const firstFeatureCoordinates =
+            'features' in result ? result.features?.[0]?.geometry?.coordinates : undefined;
 
-		if (firstFeatureCoordinates && firstFeatureCoordinates.length >= 2) {
-			const [lon, lat] = firstFeatureCoordinates;
+        if (firstFeatureCoordinates && firstFeatureCoordinates.length >= 2) {
+            const [lon, lat] = firstFeatureCoordinates;
 
-			return { lat, lon };
-		}
+            return { lat, lon };
+        }
 
-		return null;
-	} catch (error) {
-		console.error("Erreur geocodeCity:", error);
+        return null;
+    } catch (error) {
+        console.error('Erreur geocodeCity:', error);
 
-		if (error instanceof Error) {
-			throw error;
-		}
+        if (error instanceof Error) {
+            throw error;
+        }
 
-		throw new Error("Impossible de géocoder la ville sélectionnée.");
-	}
+        throw new Error('Impossible de géocoder la ville sélectionnée.');
+    }
 }
 ```
 
@@ -1908,36 +1908,36 @@ Exemple cohérent avec le composant actuel :
 
 ```tsx
 type FilterDistanceProps = {
-	city: string;
-	distanceKm: number;
-	onChange: (distanceKm: number) => void;
+    city: string;
+    distanceKm: number;
+    onChange: (distanceKm: number) => void;
 };
 
 export default function FilterDistance({ city, distanceKm, onChange }: FilterDistanceProps) {
-	const handleDistanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		onChange(Number(e.target.value));
-	};
+    const handleDistanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(Number(e.target.value));
+    };
 
-	return (
-		<label>
-			<span>
-				Distance{" "}
-				{city && (
-					<>
-						autour de <b>{city}</b>
-					</>
-				)}
-			</span>
-			<input
-				type="range"
-				min={0}
-				max={100}
-				step={25}
-				value={distanceKm}
-				onChange={handleDistanceChange}
-			/>
-		</label>
-	);
+    return (
+        <label>
+            <span>
+                Distance{' '}
+                {city && (
+                    <>
+                        autour de <b>{city}</b>
+                    </>
+                )}
+            </span>
+            <input
+                type="range"
+                min={0}
+                max={100}
+                step={25}
+                value={distanceKm}
+                onChange={handleDistanceChange}
+            />
+        </label>
+    );
 }
 ```
 
@@ -1957,13 +1957,13 @@ Exemple :
 
 ```ts
 type LocationState = {
-	city: string;
-	distanceKm: number;
+    city: string;
+    distanceKm: number;
 };
 
 const [location, setLocation] = useState<LocationState>({
-	city: "",
-	distanceKm: 0,
+    city: '',
+    distanceKm: 0,
 });
 ```
 
@@ -1971,11 +1971,11 @@ Puis le branchement du composant devient :
 
 ```tsx
 <FilterDistance
-	city={location.city}
-	distanceKm={location.distanceKm}
-	onChange={(distanceKm) => {
-		setLocation((prev) => ({ ...prev, distanceKm }));
-	}}
+    city={location.city}
+    distanceKm={location.distanceKm}
+    onChange={(distanceKm) => {
+        setLocation((prev) => ({ ...prev, distanceKm }));
+    }}
 />
 ```
 
@@ -2013,9 +2013,9 @@ Une fois `mapRadiusMeters` calculé, la carte l'utilise directement :
 
 ```tsx
 <UserEventsMap
-	searchOrigin={effectiveOrigin}
-	events={eventMapPoints}
-	radiusMeters={mapRadiusMeters}
+    searchOrigin={effectiveOrigin}
+    events={eventMapPoints}
+    radiusMeters={mapRadiusMeters}
 />
 ```
 
@@ -2029,24 +2029,24 @@ Le même `mapRadiusMeters` doit donc être réutilisé dans le filtre local :
 
 ```ts
 const visibleEvents = useMemo(() => {
-	if (!effectiveOrigin) {
-		return [];
-	}
+    if (!effectiveOrigin) {
+        return [];
+    }
 
-	return events.filter((event) => {
-		const coords = event.address?.coordinates;
+    return events.filter((event) => {
+        const coords = event.address?.coordinates;
 
-		if (!coords) {
-			return false;
-		}
+        if (!coords) {
+            return false;
+        }
 
-		const distanceKm = haversineDistance(
-			{ lat: effectiveOrigin.lat, lon: effectiveOrigin.lon },
-			{ lat: coords.lat, lon: coords.lon },
-		);
+        const distanceKm = haversineDistance(
+            { lat: effectiveOrigin.lat, lon: effectiveOrigin.lon },
+            { lat: coords.lat, lon: coords.lon },
+        );
 
-		return distanceKm <= mapRadiusMeters / 1000;
-	});
+        return distanceKm <= mapRadiusMeters / 1000;
+    });
 }, [effectiveOrigin, events, mapRadiusMeters]);
 ```
 
@@ -2154,15 +2154,15 @@ Exemple :
 
 ```tsx
 {
-	isMapVisible && !isLoading && !isError && !mapStatusMessage && effectiveOrigin ? (
-		<UserEventsMap
-			searchOrigin={effectiveOrigin}
-			events={eventMapPoints}
-			radiusMeters={mapRadiusMeters}
-		/>
-	) : isMapVisible && mapStatusMessage ? (
-		<div>{mapStatusMessage}</div>
-	) : null;
+    isMapVisible && !isLoading && !isError && !mapStatusMessage && effectiveOrigin ? (
+        <UserEventsMap
+            searchOrigin={effectiveOrigin}
+            events={eventMapPoints}
+            radiusMeters={mapRadiusMeters}
+        />
+    ) : isMapVisible && mapStatusMessage ? (
+        <div>{mapStatusMessage}</div>
+    ) : null;
 }
 ```
 
@@ -2179,18 +2179,18 @@ Exemple :
 
 ```tsx
 <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-	{displayedEvents.map((event) => (
-		<li key={event.id} className="border rounded p-4">
-			<div className="font-bold text-lg mb-1">{event.title}</div>
-			<div className="text-sm text-gray-500 mb-2">
-				{event.address?.city ?? "Adresse indisponible"} — {event.status}
-			</div>
-			<div className="mb-2">{event.description}</div>
-			<div className="text-xs text-gray-400">
-				{event.start_date.toLocaleDateString()} — {event.end_date.toLocaleDateString()}
-			</div>
-		</li>
-	))}
+    {displayedEvents.map((event) => (
+        <li key={event.id} className="border rounded p-4">
+            <div className="font-bold text-lg mb-1">{event.title}</div>
+            <div className="text-sm text-gray-500 mb-2">
+                {event.address?.city ?? 'Adresse indisponible'} — {event.status}
+            </div>
+            <div className="mb-2">{event.description}</div>
+            <div className="text-xs text-gray-400">
+                {event.start_date.toLocaleDateString()} — {event.end_date.toLocaleDateString()}
+            </div>
+        </li>
+    ))}
 </ul>
 ```
 
@@ -2217,12 +2217,12 @@ Exemple cohérent avec l'état actuel du code :
 
 ```ts
 return buildListStatusMessage({
-	isEventsLoading: isLoading,
-	isEventsError: isError,
-	eventsErrorMessage: error?.message,
-	displayedEventsCount: displayedEvents.length,
-	radiusMeters: mapRadiusMeters,
-	showRadiusEmptyMessage: isSpatialFilterActive,
+    isEventsLoading: isLoading,
+    isEventsError: isError,
+    eventsErrorMessage: error?.message,
+    displayedEventsCount: displayedEvents.length,
+    radiusMeters: mapRadiusMeters,
+    showRadiusEmptyMessage: isSpatialFilterActive,
 });
 ```
 
@@ -2247,9 +2247,9 @@ Le plus utile est de poser un petit contrat front explicite pour l'origine activ
 
 ```ts
 type MapSearchOrigin = {
-	lat: number;
-	lon: number;
-	source: "profile" | "city-filter";
+    lat: number;
+    lon: number;
+    source: 'profile' | 'city-filter';
 };
 ```
 
@@ -2263,10 +2263,10 @@ Pour les marqueurs événements, le contrat actuel peut rester simple :
 
 ```ts
 type EventMapMarker = {
-	id: number;
-	title: string;
-	lat: number;
-	lon: number;
+    id: number;
+    title: string;
+    lat: number;
+    lon: number;
 };
 ```
 

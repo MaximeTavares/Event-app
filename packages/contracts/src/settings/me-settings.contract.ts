@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { availabilitySchema } from "./availability.contract";
-import { notificationsSchema } from "./notification.contract";
-import { preferencesSchema } from "./preferences.contract";
-import { addressSchema } from "./profile.contract";
+import { availabilitySchema } from "./availability.contract.js";
+import { notificationsSchema } from "./notification.contract.js";
+import { preferencesSchema } from "./preferences.contract.js";
+import { addressSchema } from "./profile.contract.js";
 
 export const meSettingsSchema = z.object({
 	profile: z.object({

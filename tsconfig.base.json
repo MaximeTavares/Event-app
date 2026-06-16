@@ -7,7 +7,9 @@
 
     "baseUrl": ".",
     "paths": {
-        "@app/contracts": ["packages/contracts/src/index.ts"]
+        "@app/contracts": ["packages/contracts/src/index.ts"],
+        "@app/db": ["packages/database/src/index.ts"]
+
     },
 
     "esModuleInterop": true,
@@ -27,7 +29,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
-    "verbatimModuleSyntax": false,
+    // "verbatimModuleSyntax": true,
     "importsNotUsedAsValues": "remove",
   }
 }

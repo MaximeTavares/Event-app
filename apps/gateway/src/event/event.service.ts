@@ -18,17 +18,13 @@ import { EventFiltersDto } from './dto/event-filters.dto';
 import { CreateAddressDto } from '../address/dto/create-address.dto';
 import { toGeocodeDto } from '../address/mapper/address.mapper';
 import { Coordinates } from '../geoapify/type/geoapify.type';
-import { UserService } from '../user/user.service';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Event_status, Prisma } from '@prisma/client';
+import { Prisma, prisma } from '@app/db';
 import { NatsService } from 'src/nats/nats.service';
 import { USER_SUBJECTS } from '@app/contracts';
 
 @Injectable()
 export class EventService {
     constructor(
-        private readonly prisma: PrismaService,
-        private readonly userService: UserService,
         private readonly geoapifyService: GeoapifyService,
         private readonly natsService: NatsService,
     ) {}
@@ -54,7 +50,7 @@ export class EventService {
         const { address, ...eventData } = createEventDto;
         const coordinates = await this.geoapifyService.geocodeAddress(address);
 
-        const newEvent = await this.prisma.event.create({
+        const newEvent = await prisma.event.create({
             data: {
                 ...eventData,
                 organizer_id: userId,
@@ -98,7 +94,7 @@ export class EventService {
         address: CreateAddressDto,
         excludeEventId?: number,
     ): Promise<boolean> {
-        const existingEvent = await this.prisma.event.findFirst({
+        const existingEvent = await prisma.event.findFirst({
             where: {
                 organizer_id: userId,
                 start_date: startDate,
@@ -120,7 +116,7 @@ export class EventService {
     }
 
     private async findOwnedEventOrFail(id: number, userId: string) {
-        const existingEvent = await this.prisma.event.findUnique({
+        const existingEvent = await prisma.event.findUnique({
             where: { id },
             select: {
                 id: true,
@@ -230,7 +226,7 @@ export class EventService {
             // Filtre statut (par défaut : exclut CANCELLED)
             status: filters?.statuses?.length
                 ? { in: filters.statuses }
-                : { not: Event_status.CANCELLED },
+                : { not: 'CANCELLED' },
 
             // Filtre ville uniquement si PAS de géolocalisation
             ...(requestedCity &&
@@ -314,7 +310,7 @@ export class EventService {
 
         const [events, total] = await Promise.all([
             // findMany → récupération des événements paginés
-            this.prisma.event.findMany({
+            prisma.event.findMany({
                 where,
                 // skip / take → pagination SQL (performante)
                 skip,
@@ -325,7 +321,7 @@ export class EventService {
                 select: eventWithAddressAndUser,
             }),
             // count → total des résultats (pour pagination front)
-            this.prisma.event.count({ where }),
+            prisma.event.count({ where }),
         ]);
 
         // PAGINATION FINALE :
@@ -343,7 +339,7 @@ export class EventService {
     ): Promise<EventWithUserAndAddressDTO[]> {
         await this.natsService.send(USER_SUBJECTS.GET_USER, { userId });
 
-        const events = await this.prisma.event.findMany({
+        const events = await prisma.event.findMany({
             where: { organizer_id: userId },
             select: eventWithAddressAndUser,
         });
@@ -356,7 +352,7 @@ export class EventService {
     }
 
     async findOneWithRelation(eventId: number): Promise<EventDetailsDTO> {
-        const event = await this.prisma.event.findUnique({
+        const event = await prisma.event.findUnique({
             where: { id: eventId },
             select: {
                 id: true,
@@ -405,7 +401,7 @@ export class EventService {
     }
 
     async findOne(id: number): Promise<EventWithUserAndAddressDTO> {
-        const event = await this.prisma.event.findUnique({
+        const event = await prisma.event.findUnique({
             where: {
                 id,
                 status: {
@@ -463,7 +459,7 @@ export class EventService {
             coordinates = await this.geoapifyService.geocodeAddress(geoAddress);
         }
 
-        const event = await this.prisma.event.update({
+        const event = await prisma.event.update({
             where: { id },
             data: {
                 ...eventData,
@@ -517,7 +513,7 @@ export class EventService {
     ): Promise<EventWithUserAndAddressDTO | null> {
         await this.findOwnedEventOrFail(id, userId);
 
-        const event = await this.prisma.event.findUnique({
+        const event = await prisma.event.findUnique({
             where: { id },
             select: eventWithAddressAndUser,
         });
@@ -525,7 +521,7 @@ export class EventService {
         if (!event) return null;
 
         if (event?.status !== 'CANCELLED') {
-            const updateEvent = await this.prisma.event.update({
+            const updateEvent = await prisma.event.update({
                 where: { id },
                 data: { status: 'CANCELLED' },
                 select: eventWithAddressAndUser,
@@ -562,14 +558,14 @@ export class EventService {
     ): Promise<EventWithUserAndAddressDTO | null> {
         await this.findOwnedEventOrFail(id, userId);
 
-        const event = await this.prisma.event.findUnique({
+        const event = await prisma.event.findUnique({
             where: { id },
             select: eventWithAddressAndUser,
         });
 
         if (!event) return null;
 
-        await this.prisma.$transaction(async (transaction) => {
+        await prisma.$transaction(async (transaction) => {
             await transaction.notification.deleteMany({
                 where: {
                     reference_id: id,

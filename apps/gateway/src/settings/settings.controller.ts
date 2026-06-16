@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
 import { NatsService } from '../nats/nats.service';
-import { User } from '../user/decorators/user.decorator';
+import { User } from '../ms-auth/decorators/user.decorator';
 import {
     AvailabilityDto,
     availabilitySchema,

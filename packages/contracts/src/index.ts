@@ -1,13 +1,13 @@
 // NATS
-export * from "./nats/nats.contract";
+export * from "./nats/nats.contract.js";
 
 // AUTH
-export * from "./auth/auth.contracts";
+export * from "./auth/auth.contracts.js";
 
 // SETTINGS
-export * from "./settings/profile.contract";
-export * from "./settings/availability.contract";
-export * from "./settings/notification.contract";
-export * from "./settings/preferences.contract";
-export * from "./settings/me-settings.contract"
-export * from "./settings/security.contract"
+export * from "./settings/profile.contract.js";
+export * from "./settings/availability.contract.js";
+export * from "./settings/notification.contract.js";
+export * from "./settings/preferences.contract.js";
+export * from "./settings/me-settings.contract.js"
+export * from "./settings/security.contract.js"

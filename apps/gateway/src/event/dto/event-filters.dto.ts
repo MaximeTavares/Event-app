@@ -1,15 +1,15 @@
-import { Event_status } from '@prisma/client';
 import { Transform, Type } from 'class-transformer';
 import { IsOptional, IsArray, IsString, IsNumber } from 'class-validator';
+import { EventStatus } from './event.dto';
 
 export class EventFiltersDto {
     @IsOptional()
-    @Transform(({ value }: { value: unknown }): Event_status[] | undefined => {
+    @Transform(({ value }: { value: unknown }): EventStatus[] | undefined => {
         if (value == null) return undefined;
-        return (Array.isArray(value) ? value : [value]) as Event_status[];
+        return (Array.isArray(value) ? value : [value]) as EventStatus[];
     })
     @IsArray()
-    statuses?: Event_status[];
+    statuses?: EventStatus[];
 
     @IsOptional()
     @IsString()

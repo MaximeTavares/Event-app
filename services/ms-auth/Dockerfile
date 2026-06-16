@@ -14,12 +14,13 @@ RUN corepack enable
 FROM base AS deps
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY tsconfig.base.json ./
 
-# workspace packages nécessaires
-COPY services/ms-auth/package.json services/ms-auth/package.json
-COPY packages/contracts/package.json packages/contracts/package.json
+COPY apps ./apps
+COPY services ./services
+COPY packages ./packages
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 
 # -------------------------
@@ -27,13 +28,11 @@ RUN pnpm install --frozen-lockfile
 # -------------------------
 FROM base AS builder
 
-RUN corepack enable
+WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app /app
 
-COPY . .
-
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 RUN pnpm --filter ms-auth build
 
@@ -51,8 +50,9 @@ RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
+# app build
 COPY --from=builder /app/services/ms-auth/dist ./services/ms-auth/dist
 
 EXPOSE 3000
