@@ -105,20 +105,24 @@ jobs:
     if: always()
 
     steps:
-      - name: Check build results
+      - name: Validate atomic build
         run: |
           echo "gateway=${{ needs.build-gateway.result }}"
           echo "auth=${{ needs.build-auth.result }}"
           echo "front=${{ needs.build-front.result }}"
 
-          if [[ "${{ needs.build-gateway.result }}" == "failure" || \
-                "${{ needs.build-auth.result }}" == "failure" || \
-                "${{ needs.build-front.result }}" == "failure" ]]; then
-            echo "❌ At least one build failed → blocking deploys"
-            exit 1
-          fi
+          for r in \
+            "${{ needs.build-gateway.result }}" \
+            "${{ needs.build-auth.result }}" \
+            "${{ needs.build-front.result }}"; do
 
-          echo "✅ All builds OK → deploy allowed"
+            if [[ "$r" == "failure" || "$r" == "cancelled" ]]; then
+              echo "❌ Atomic release blocked"
+              exit 1
+            fi
+          done
+
+          echo "✅ Atomic build OK → deploy allowed"
 
 ##########################
 ## DEPLOYS
@@ -127,7 +131,9 @@ jobs:
   deploy-gateway:
     needs: [detect-changes, build-gate]
 
-    if: needs.detect-changes.outputs.gateway == 'true'
+    if: |
+      needs.detect-changes.outputs.gateway == 'true' &&
+      needs.build-gate.result == 'success'
 
     uses: ./.github/workflows/deploy.yml
 
@@ -143,7 +149,9 @@ jobs:
   deploy-auth:
     needs: [detect-changes, build-gate]
 
-    if: needs.detect-changes.outputs.auth == 'true'
+    if: |
+      needs.detect-changes.outputs.auth == 'true' &&
+      needs.build-gate.result == 'success'
 
     uses: ./.github/workflows/deploy.yml
 
@@ -159,7 +167,9 @@ jobs:
   deploy-front:
     needs: [detect-changes, build-gate]
 
-    if: needs.detect-changes.outputs.front == 'true'
+    if: |
+      needs.detect-changes.outputs.front == 'true' &&
+      needs.build-gate.result == 'success'
 
     uses: ./.github/workflows/deploy.yml
 
