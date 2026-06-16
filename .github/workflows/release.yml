@@ -121,7 +121,6 @@ jobs:
       environment: staging
       image-name: gateway
       network: nginx-staging
-      run-migrations: true
 
   deploy-auth:
     needs:
