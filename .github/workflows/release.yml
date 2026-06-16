@@ -24,10 +24,12 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          base: ${{ github.event.before }}
           filters: |
             gateway:
               - 'apps/gateway/**'
               - 'packages/contracts/**'
+              - 'packages/database/**'
 
             auth:
               - 'services/ms-auth/**'
@@ -94,22 +96,38 @@ jobs:
             VITE_GEOAPIFY_API_KEY=${{ vars.GEOAPIFY_API_KEY }}
 
 ##########################
+## BUILD GATE
+##########################
+  build-gate:
+    needs: [build-gateway, build-auth, build-front]
+    runs-on: ubuntu-latest
+
+    if: always()
+
+    steps:
+      - name: Check build results
+        run: |
+          echo "gateway=${{ needs.build-gateway.result }}"
+          echo "auth=${{ needs.build-auth.result }}"
+          echo "front=${{ needs.build-front.result }}"
+
+          if [[ "${{ needs.build-gateway.result }}" == "failure" || \
+                "${{ needs.build-auth.result }}" == "failure" || \
+                "${{ needs.build-front.result }}" == "failure" ]]; then
+            echo "❌ At least one build failed → blocking deploys"
+            exit 1
+          fi
+
+          echo "✅ All builds OK → deploy allowed"
+
+##########################
 ## DEPLOYS
 ##########################
 
   deploy-gateway:
-    needs:
-      - detect-changes
-      - build-gateway
-      - build-auth
-      - build-front
+    needs: [detect-changes, build-gate]
 
-    if: |
-      always() &&
-      needs.detect-changes.outputs.gateway == 'true' &&
-      needs.build-gateway.result == 'success' &&
-      needs.build-auth.result != 'failure' &&
-      needs.build-front.result != 'failure'
+    if: needs.detect-changes.outputs.gateway == 'true'
 
     uses: ./.github/workflows/deploy.yml
 
@@ -123,18 +141,9 @@ jobs:
       network: nginx-staging
 
   deploy-auth:
-    needs:
-      - detect-changes
-      - build-gateway
-      - build-auth
-      - build-front
+    needs: [detect-changes, build-gate]
 
-    if: |
-      always() &&
-      needs.detect-changes.outputs.auth == 'true' &&
-      needs.build-auth.result == 'success' &&
-      needs.build-gateway.result != 'failure' &&
-      needs.build-front.result != 'failure'
+    if: needs.detect-changes.outputs.auth == 'true'
 
     uses: ./.github/workflows/deploy.yml
 
@@ -148,18 +157,9 @@ jobs:
       network: nginx-staging
 
   deploy-front:
-    needs:
-      - detect-changes
-      - build-gateway
-      - build-auth
-      - build-front
+    needs: [detect-changes, build-gate]
 
-    if: |
-      always() &&
-      needs.detect-changes.outputs.front == 'true' &&
-      needs.build-front.result == 'success' &&
-      needs.build-gateway.result != 'failure' &&
-      needs.build-auth.result != 'failure'
+    if: needs.detect-changes.outputs.front == 'true'
 
     uses: ./.github/workflows/deploy.yml
 
