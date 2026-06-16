@@ -4,7 +4,7 @@ services:
     # -------------------------
     nats:
         image: nats:latest
-        container_name: nats-alt
+        container_name: dev-nats-alt
         ports:
             - "4222:4222"
 
@@ -13,7 +13,7 @@ services:
     # -------------------------
     mongo-auth:
         image: mongo:latest
-        container_name: mongo-auth
+        container_name: dev-mongo-auth
         ports:
             - "27017:27017"
         volumes:
@@ -21,13 +21,13 @@ services:
 
     mongo-express-auth:
         image: mongo-express:latest
-        container_name: mongo-express-auth
+        container_name: dev-mongo-express-auth
         restart: always
         ports:
             - "8084:8081"
         environment:
-            ME_CONFIG_MONGODB_SERVER: mongo-auth
-            ME_CONFIG_BASICAUTH: false
+            ME_CONFIG_MONGODB_URL: mongodb://mongo-auth:27017
+            ME_CONFIG_BASICAUTH: "false"
         depends_on:
             - mongo-auth
 
@@ -36,7 +36,7 @@ services:
     # -------------------------
     mongo-user:
         image: mongo:latest
-        container_name: mongo-user
+        container_name: dev-mongo-user
         ports:
             - "27018:27017"
         volumes:
@@ -44,13 +44,13 @@ services:
 
     mongo-express-user:
         image: mongo-express:latest
-        container_name: mongo-express-user
+        container_name: dev-mongo-express-user
         restart: always
         ports:
             - "8082:8081"
         environment:
-            ME_CONFIG_MONGODB_SERVER: mongo-user
-            ME_CONFIG_BASICAUTH: false
+            ME_CONFIG_MONGODB_URL: mongodb://mongo-user:27017
+            ME_CONFIG_BASICAUTH: "false"
         depends_on:
             - mongo-user
 
@@ -70,27 +70,28 @@ services:
             - "3308:3306"
 
     phpmyadmin:
-        depends_on:
-            - db
         image: phpmyadmin
+        container_name: dev-phpmyadmin
         restart: always
         ports:
             - "8083:80"
         environment:
             PMA_HOST: db
+        depends_on:
+            - db
 
     # =========================================================
-    # 🚀 MICROSERVICES (TON AJOUT)
+    # MICROSERVICES
     # =========================================================
 
     # -------------------------
-    # GATEWAY (Nest API)
+    # GATEWAY
     # -------------------------
     gateway:
         build:
             context: .
             dockerfile: apps/gateway/Dockerfile
-        container_name: gateway
+        container_name: dev-gateway
         ports:
             - "3000:3000"
         env_file:
@@ -99,6 +100,7 @@ services:
             - db
             - nats
             - ms-auth
+        restart: unless-stopped
 
     # -------------------------
     # MS-AUTH
@@ -106,8 +108,8 @@ services:
     ms-auth:
         build:
             context: .
-            dockerfile: apps/ms-auth/Dockerfile
-        container_name: ms-auth
+            dockerfile: services/ms-auth/Dockerfile
+        container_name: dev-ms-auth
         ports:
             - "3001:3001"
         env_file:
@@ -115,21 +117,23 @@ services:
         depends_on:
             - mongo-auth
             - nats
+        restart: unless-stopped
 
     # -------------------------
-    # FRONTEND (React / Vite)
+    # FRONTEND
     # -------------------------
     frontend:
         build:
             context: .
-            dockerfile: apps/frontend/Dockerfile
-        container_name: frontend
+            dockerfile: apps/front/Dockerfile
+        container_name: dev-frontend
         ports:
-            - "5173:5173"
+            - "5173:80"
         environment:
             VITE_API_URL: http://localhost:3000
         depends_on:
             - gateway
+        restart: unless-stopped
 
 # -------------------------
 # VOLUMES

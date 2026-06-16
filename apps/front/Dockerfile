@@ -1,42 +1,45 @@
-# -------------------------
-# BASE
-# -------------------------
-FROM node:20-alpine AS base
+# syntax=docker/dockerfile:1.7
 
+########################
+# BASE
+########################
+FROM node:20-alpine AS base
 WORKDIR /app
 
 RUN corepack enable
+RUN npm install -g turbo
 
+########################
+# PRUNE
+########################
+FROM base AS pruner
+WORKDIR /app
 
-# -------------------------
-# DEPENDENCIES
-# -------------------------
-FROM base AS deps
+ARG APP=front
 
-# Copie uniquement les fichiers de résolution monorepo
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-
-# workspace packages nécessaires
-COPY apps/front/package.json apps/front/package.json
-COPY packages/contracts/package.json packages/contracts/package.json
-
-RUN pnpm install --frozen-lockfile
-
-
-# -------------------------
-# BUILDER
-# -------------------------
-FROM base AS builder
-
-RUN corepack enable
-
-COPY --from=deps /app/node_modules ./node_modules
-
-# On copie tout le monorepo
 COPY . .
+RUN turbo prune --scope=${APP} --docker
 
-RUN pnpm install --frozen-lockfile
+########################
+# BUILD
+########################
+FROM base AS builder
+WORKDIR /app
+ARG APP=front
 
+# dépendances prunées
+COPY --from=pruner /app/out/json/ ./
+COPY --from=pruner /app/out/pnpm-lock.yaml ./
+COPY --from=pruner /app/out/pnpm-workspace.yaml ./
+
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile
+
+# full pruned repo
+COPY --from=pruner /app/out/full/ ./
+COPY tsconfig.base.json ./tsconfig.base.json
+
+# env build Vite
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
@@ -46,18 +49,20 @@ ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 ARG VITE_GEOAPIFY_API_KEY
 ENV VITE_GEOAPIFY_API_KEY=$VITE_GEOAPIFY_API_KEY
 
-RUN pnpm --filter front build
+# build turbo
+RUN turbo build --filter=${APP}...
 
+########################
+# RUNNER (nginx)
+########################
+FROM nginx:stable-alpine AS runner
 
-# -------------------------
-# PRODUCTION
-# -------------------------
-FROM nginx:stable-alpine AS production
+RUN apk add --no-cache ca-certificates
 
-RUN apk add --no-cache wget
-
+# copie build front uniquement
 COPY --from=builder /app/apps/front/dist /usr/share/nginx/html
 
+# nginx config
 COPY apps/front/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
