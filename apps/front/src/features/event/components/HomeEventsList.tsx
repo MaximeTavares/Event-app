@@ -22,6 +22,10 @@ export default function HomeEventsList({
 
     const listEvent = events.filter((e) => e.status === 'OPEN');
 
+    if (listEvent.length === 0) {
+        return <p>Aucun événement pour le moment... Vous pouvez cependant en créer un.</p>;
+    }
+
     return (
         <>
             {listStatusMessage ? (
