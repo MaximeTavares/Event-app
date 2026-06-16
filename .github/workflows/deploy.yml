@@ -29,6 +29,12 @@ on:
         required: true
         type: string
 
+    secrets:
+      EC2_HOST:
+        required: true
+      EC2_KEY:
+        required: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

@@ -113,6 +113,8 @@ jobs:
 
     uses: ./.github/workflows/deploy.yml
 
+    secrets: inherit
+
     with:
       compose-directory: /opt/event-app/staging
       compose-service: staging-gateway
@@ -137,6 +139,8 @@ jobs:
 
     uses: ./.github/workflows/deploy.yml
 
+    secrets: inherit
+
     with:
       compose-directory: /opt/event-app/staging
       compose-service: staging-ms-auth
@@ -159,6 +163,8 @@ jobs:
       needs.build-auth.result != 'failure'
 
     uses: ./.github/workflows/deploy.yml
+
+    secrets: inherit
 
     with:
       compose-directory: /opt/event-app/staging
