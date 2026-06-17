@@ -14,9 +14,9 @@ import {
 import { MissionService } from './mission.service';
 import { CreateMissionDto } from './dto/create-mission.dto';
 import { UpdateMissionDto } from './dto/update-mission.dto';
-import { User } from 'src/ms-auth/decorators/user.decorator';
-import { EventService } from 'src/event/event.service';
 import { MissionDTO, MissionWithSlotDTO } from './dto/mission.dto';
+import { EventService } from '../event/event.service';
+import { User } from '../ms-auth/decorators/user.decorator';
 
 @Controller()
 export class MissionController {

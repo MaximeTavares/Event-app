@@ -1,5 +1,5 @@
+import { GeocodeDto } from '../../geoapify/dto/geocode.dto';
 import { Address, AddressDTO } from '../dto/address.dto';
-import { GeocodeDto } from 'src/geoapify/dto/geocode.dto';
 
 export function mapAddress(address: Address | null): AddressDTO | null {
     if (!address) return null;

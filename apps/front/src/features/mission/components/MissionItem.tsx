@@ -37,6 +37,8 @@ export function MissionItem({ mission }: Readonly<MissionItemProps>) {
                     </Button>
                 </div>
 
+                <p className="text-gray-500">{mission.description}</p>
+
                 {/* SLOTS */}
                 <div className="flex flex-col gap-3">
                     {mission.slots.map((s) => (

@@ -7,7 +7,7 @@ import {
     ParseIntPipe,
 } from '@nestjs/common';
 import { ParticipationService } from './participation.service';
-import { User } from 'src/ms-auth/decorators/user.decorator';
+import { User } from '../ms-auth/decorators/user.decorator';
 
 @Controller()
 export class ParticipationController {

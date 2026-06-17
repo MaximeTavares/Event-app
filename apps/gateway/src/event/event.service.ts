@@ -19,8 +19,8 @@ import { CreateAddressDto } from '../address/dto/create-address.dto';
 import { toGeocodeDto } from '../address/mapper/address.mapper';
 import { Coordinates } from '../geoapify/type/geoapify.type';
 import { Prisma, prisma } from '@app/db';
-import { NatsService } from 'src/nats/nats.service';
 import { USER_SUBJECTS } from '@app/contracts';
+import { NatsService } from '../nats/nats.service';
 
 @Injectable()
 export class EventService {

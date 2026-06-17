@@ -1,7 +1,10 @@
-import { Address, AddressDTO } from 'src/address/dto/address.dto';
-import { MissionStatus, MissionWithSlotDTO } from 'src/mission/dto/mission.dto';
-import { ParticipationStatus } from 'src/participation/dto/participation.dto';
-import { SlotStatus } from 'src/slot/dto/slot.dto';
+import { Address, AddressDTO } from '../../address/dto/address.dto';
+import {
+    MissionStatus,
+    MissionWithSlotDTO,
+} from '../../mission/dto/mission.dto';
+import { ParticipationStatus } from '../../participation/dto/participation.dto';
+import { SlotStatus } from '../../slot/dto/slot.dto';
 
 export type EventStatus = 'OPEN' | 'CLOSED' | 'DRAFT' | 'CANCELLED';
 

@@ -2,14 +2,14 @@ import { SlotMapper } from './../slot/dto/mapper/slot.mapper';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ParticipationWithStatusAndOrganizer } from './type/participation.types';
 import { ParticipationDTO } from './dto/participation.dto';
-import { SlotDTO } from 'src/slot/dto/slot.dto';
-import { EventDTO } from 'src/event/dto/event.dto';
 import { ParticipationPolicyService } from './policy/participationPolicy.service.';
 import { SlotPolicyService } from './policy/slotPolicy.service';
 import { UpdateParticipationDto } from './dto/update-participation.dto';
 import { PARTICIPATION_ACTION_CONFIG } from './policy/participations.policy';
 import { prisma, Prisma } from '@app/db';
-import { Mission } from 'src/mission/types/types';
+import { EventDTO } from '../event/dto/event.dto';
+import { Mission } from '../mission/types/types';
+import { SlotDTO } from '../slot/dto/slot.dto';
 
 @Injectable()
 export class ParticipationService {

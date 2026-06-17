@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
-import { AuthUser } from 'src/ms-auth/type/auth.type';
+import { AuthUser } from '../type/auth.type';
 
 type AuthenticatedRequest = Request & {
     user: AuthUser;

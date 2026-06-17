@@ -8,9 +8,9 @@ import { CreateSlotDto } from './dto/create-slot.dto';
 import { UpdateSlotDto } from './dto/update-slot.dto';
 import { SlotMapper } from './dto/mapper/slot.mapper';
 import { SlotDTO, SlotWithParticipationDto } from './dto/slot.dto';
-import { NatsService } from 'src/nats/nats.service';
 import { prisma } from '@app/db';
-import { ParticipationStatus } from 'src/participation/dto/participation.dto';
+import { NatsService } from '../nats/nats.service';
+import { ParticipationStatus } from '../participation/dto/participation.dto';
 
 type OwnerShipEntity = 'Mission' | 'Slot';
 

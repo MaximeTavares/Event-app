@@ -1,5 +1,5 @@
-import { ParticipationStatus } from 'src/participation/dto/participation.dto';
-import { SlotDTO, SlotStatus } from 'src/slot/dto/slot.dto';
+import { ParticipationStatus } from '../../participation/dto/participation.dto';
+import { SlotDTO, SlotStatus } from '../../slot/dto/slot.dto';
 
 export type MissionStatus = 'OPEN' | 'FULL' | 'COMPLETED';
 

@@ -1,4 +1,4 @@
-import { SlotStatus } from 'src/slot/dto/slot.dto';
+import { SlotStatus } from '../../slot/dto/slot.dto';
 
 interface SlotPolicy {
     canJoin: {

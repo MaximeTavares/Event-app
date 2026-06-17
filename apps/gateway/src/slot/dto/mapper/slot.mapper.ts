@@ -1,10 +1,10 @@
+import { ParticipantWithProfile } from '../../slot.service';
 import {
     Slot,
     SlotDTO,
     SlotWithParticipationDto,
     SlotWithParticipations,
 } from '../slot.dto';
-import { ParticipantWithProfile } from 'src/slot/slot.service';
 
 export class SlotMapper {
     static toSlotWithParticipations(

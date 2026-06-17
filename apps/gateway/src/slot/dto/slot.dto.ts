@@ -1,4 +1,4 @@
-import { ParticipationStatus } from 'src/participation/dto/participation.dto';
+import { ParticipationStatus } from '../../participation/dto/participation.dto';
 
 export type SlotStatus = 'OPEN' | 'FULL' | 'CLOSED' | 'CANCELLED';
 
