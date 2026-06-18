@@ -1,4 +1,4 @@
-import type { Slot, SlotFromEventDetails } from '../../mission_slot/types/slot.type';
+
 
 export type MissionStatus = 'OPEN' | 'FULL' | 'COMPLETED';
 
@@ -25,13 +25,13 @@ export interface BaseMission {
     status: MissionStatus;
 }
 
-export interface Mission {
-    id: number;
-    title: string;
-    description: string;
-    status: MissionStatus;
-    slot: Slot[];
-}
+// export interface Mission {
+//     id: number;
+//     title: string;
+//     description: string;
+//     status: MissionStatus;
+//     slot: Slot[];
+// }
 
 export interface UpdateMissionInput {
     title?: string;
@@ -39,13 +39,13 @@ export interface UpdateMissionInput {
     status?: MissionStatus;
 }
 
-export interface MissionFromEventDetails {
-    id: number;
-    title: string;
-    description: string;
-    status: MissionStatus;
-    slots: SlotFromEventDetails[];
-}
+// export interface MissionFromEventDetails {
+//     id: number;
+//     title: string;
+//     description: string;
+//     status: MissionStatus;
+//     slots: SlotFromEventDetails[];
+// }
 
 export type MissionDetailsApiResponse = {
     id: number;

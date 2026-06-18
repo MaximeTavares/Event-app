@@ -5,15 +5,12 @@ import {
     type UseMutationResult,
     type UseQueryResult,
 } from '@tanstack/react-query';
-import type {
-    BaseMission,
-    MissionDetailsApiResponse,
-    UpdateMissionInput,
-} from '../types/mission.type';
+import type { BaseMission, UpdateMissionInput } from '../types/mission.type';
 import { MissionApi } from '../api/mission.api';
 import type { MissionCreationFormValues } from '../validation/MissionCreation.schema';
+import { MissionDetailsDto } from '@app/contracts';
 
-export function useGetMissionById(id: number): UseQueryResult<MissionDetailsApiResponse, Error> {
+export function useGetMissionById(id: number): UseQueryResult<MissionDetailsDto, Error> {
     return useQuery({
         queryKey: ['mission', id],
         queryFn: () => MissionApi.getMissionById(id),

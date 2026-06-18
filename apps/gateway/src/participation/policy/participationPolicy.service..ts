@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ParticipationWithStatusAndOrganizer } from '../type/participation.types';
 import { PARTICIPATION_POLICY } from './participations.policy';
-import { ParticipationDTO } from '../dto/participation.dto';
+import { ParticipantDto } from '@app/contracts';
 
 @Injectable()
 export class ParticipationPolicyService {
@@ -58,7 +58,7 @@ export class ParticipationPolicyService {
             );
     }
 
-    assertCanCreateOrRejoin(participation: ParticipationDTO | null): void {
+    assertCanCreateOrRejoin(participation: ParticipantDto | null): void {
         if (!participation) return;
 
         if (participation.status === 'CANCELLED') return;

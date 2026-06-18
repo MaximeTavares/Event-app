@@ -7,10 +7,9 @@ import {
 import { CreateSlotDto } from './dto/create-slot.dto';
 import { UpdateSlotDto } from './dto/update-slot.dto';
 import { SlotMapper } from './dto/mapper/slot.mapper';
-import { SlotDTO, SlotWithParticipationDto } from './dto/slot.dto';
 import { prisma } from '@app/db';
 import { NatsService } from '../nats/nats.service';
-import { ParticipationStatus } from '../participation/dto/participation.dto';
+import { ParticipationStatus, SlotDetails, SlotDto } from '@app/contracts';
 
 type OwnerShipEntity = 'Mission' | 'Slot';
 
@@ -83,9 +82,23 @@ export class SlotService {
      * @returns SlotDTO enrichi avec currentParticipants (status "ACCEPTED" uniquement)
      * @throws NotFoundException si le slot n'existe pas
      */
-    async findOneById(slotId: number): Promise<SlotDTO> {
+    async findOneById(userId: string, slotId: number): Promise<SlotDto> {
         const [slot, currentParticipants] = await Promise.all([
-            prisma.slot.findUnique({ where: { id: slotId } }),
+            prisma.slot.findUnique({
+                where: { id: slotId },
+                select: {
+                    id: true,
+                    mission_id: true,
+                    start_at: true,
+                    end_at: true,
+                    max_participant: true,
+                    status: true,
+                    Mission: {
+                        select: { Event: { select: { organizer_id: true } } },
+                    },
+                    Participation: { select: { user_id: true } },
+                },
+            }),
             prisma.participation.count({
                 where: { slot_id: slotId, status: 'ACCEPTED' },
             }),
@@ -93,12 +106,13 @@ export class SlotService {
 
         if (!slot) throw new NotFoundException('Slot not found');
 
-        return SlotMapper.MapSlot(slot, currentParticipants);
+        return SlotMapper.toSlotDto(userId, slot, currentParticipants);
     }
 
     async findOneWithParticipants(
+        userId: string,
         slotId: number,
-    ): Promise<SlotWithParticipationDto> {
+    ): Promise<SlotDetails> {
         const [slot, currentParticipants] = await Promise.all([
             prisma.slot.findUnique({
                 where: {
@@ -145,9 +159,10 @@ export class SlotService {
             const profile = profilesMap.get(participation.user_id);
 
             return {
-                participation_id: participation.id,
-                participation_status: participation.status,
-                userId: participation.user_id,
+                slot_id: slot.id,
+                id: participation.id,
+                status: participation.status,
+                user_id: participation.user_id,
                 email: profile?.email ?? '',
                 first_name: profile?.first_name ?? null,
                 last_name: profile?.last_name ?? null,
@@ -156,6 +171,7 @@ export class SlotService {
         });
 
         return SlotMapper.toSlotWithParticipations(
+            userId,
             slot,
             participants,
             currentParticipants,

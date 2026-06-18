@@ -1,9 +1,9 @@
+import { SlotDetails } from '@app/contracts';
 import { formatForInput } from '../../../shared/utils/formatDate';
-import type { SlotDetailsApiResponse } from '../types/slot.type';
 import type { SlotCreationInputValues } from '../validation/SlotCreation.schema';
 
 export class SlotMapper {
-    static toDefaultValues(slot: SlotDetailsApiResponse): SlotCreationInputValues {
+    static toDefaultValues(slot: SlotDetails): SlotCreationInputValues {
         return {
             status: slot.status,
             start_at: formatForInput(slot.start_at),

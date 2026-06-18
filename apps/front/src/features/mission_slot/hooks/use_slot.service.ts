@@ -6,10 +6,11 @@ import {
     type UseQueryResult,
 } from '@tanstack/react-query';
 import { SlotApi } from '../api/slot.api';
-import type { BaseSlot, SlotDetailsApiResponse } from '../types/slot.type';
+import type { BaseSlot } from '../types/slot.type';
 import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema';
+import { SlotDetails } from '@app/contracts';
 
-export function useGetSlot(id: number): UseQueryResult<SlotDetailsApiResponse, Error> {
+export function useGetSlot(id: number): UseQueryResult<SlotDetails, Error> {
     return useQuery({
         queryKey: ['slot', id],
         queryFn: () => SlotApi.getSlotById(id),

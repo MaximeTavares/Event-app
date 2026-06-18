@@ -1,10 +1,11 @@
+import { SlotDetails } from '@app/contracts';
 import { api } from '../../../shared/utils/axios-client';
-import type { BaseSlot, SlotDetailsApiResponse } from '../types/slot.type';
+import type { BaseSlot} from '../types/slot.type';
 import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema';
 
 export class SlotApi {
-    static async getSlotById(slotId: number): Promise<SlotDetailsApiResponse> {
-        const { data } = await api.get<SlotDetailsApiResponse>(`/slots/${slotId}?details=true`);
+    static async getSlotById(slotId: number) {
+        const { data } = await api.get<SlotDetails>(`/slots/${slotId}?details=true`);
         return data;
     }
 

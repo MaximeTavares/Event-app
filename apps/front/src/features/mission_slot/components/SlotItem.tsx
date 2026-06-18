@@ -1,17 +1,32 @@
 import { formatInTimeZone } from 'date-fns-tz';
-import { slotStatusColor, slotStatusLabel, type SlotFromEventDetails } from '../types/slot.type';
 import { Link } from 'react-router';
 import Button from '../../../shared/components/UI/Button';
 import { useState } from 'react';
-import { Modal2 } from '../../../shared/components/UI/Modal2';
-import { Card } from '../../../shared/layout/Card';
+import { ConfirmModal } from '../../../shared/components/UI/ConfirmModal';
+import { useParticipateMutation } from '../../participation/use_participation.service';
+import { toastMutation } from '../../../shared/utils/useToastMutation';
+import { SlotDto, slotStatusColor, slotStatusLabel } from '@app/contracts';
 
 type SlotItemProps = {
-    slot: SlotFromEventDetails;
+    slot: SlotDto;
+    eventId: number;
+    missionId?: number;
 };
 
-export function SlotItem({ slot }: Readonly<SlotItemProps>) {
+export function SlotItem({ slot, eventId, missionId }: Readonly<SlotItemProps>) {
     const [isSlotParticipationOpen, setIsSlotParticipationOpen] = useState<boolean>(false);
+
+    const participationMutation = useParticipateMutation(eventId, missionId);
+
+    const handleParticipation = async () => {
+        await toastMutation(participationMutation.mutateAsync(slot.id), {
+            loading: 'Chargement...',
+            success: 'Inscription prise en compte',
+            error: 'Une erreur est survenue, veuillez recommencer.',
+        });
+
+        setIsSlotParticipationOpen(false);
+    };
 
     return (
         <div className="p-2 border border-primary rounded-md">
@@ -33,23 +48,30 @@ export function SlotItem({ slot }: Readonly<SlotItemProps>) {
                     Voir
                 </Button>
 
-                <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => setIsSlotParticipationOpen(true)}
-                >
-                    S'inscrire
-                </Button>
+                {slot.is_participating ? (
+                    <Button size="sm" variant="primary" disabled>
+                        Déjà inscrit
+                    </Button>
+                ) : (
+                    <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => setIsSlotParticipationOpen(true)}
+                    >
+                        S'inscrire
+                    </Button>
+                )}
             </div>
             {/* PARTICIPATION MODAL */}
 
-            <Modal2
+            <ConfirmModal
+                key={slot.id}
+                message="Souhaitez vous confirmer votre inscription sur ce créneau ?"
+                onConfirm={handleParticipation}
                 isOpen={isSlotParticipationOpen}
-                size="lg"
+                size="md"
                 onClose={() => setIsSlotParticipationOpen(false)}
-            >
-                <Card title="Test">Test</Card>
-            </Modal2>
+            ></ConfirmModal>
         </div>
     );
 }

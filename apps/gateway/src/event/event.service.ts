@@ -6,21 +6,21 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
-import {
-    EventDetailsDTO,
-    EventWithUserAndAddressDTO,
-    PaginatedEventsDTO,
-} from './dto/event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { eventWithAddressAndUser } from './prisma/event.select';
 import { mapEvent, toEventDetails } from './dto/event.mapper';
 import { EventFiltersDto } from './dto/event-filters.dto';
 import { CreateAddressDto } from '../address/dto/create-address.dto';
 import { toGeocodeDto } from '../address/mapper/address.mapper';
 import { Coordinates } from '../geoapify/type/geoapify.type';
 import { Prisma, prisma } from '@app/db';
-import { USER_SUBJECTS } from '@app/contracts';
+import {
+    EventDto,
+    EventWithAddress,
+    PaginatedEventsDto,
+    USER_SUBJECTS,
+} from '@app/contracts';
 import { NatsService } from '../nats/nats.service';
+import { eventWithAddressQuery } from './prisma/event.select';
 
 @Injectable()
 export class EventService {
@@ -32,7 +32,7 @@ export class EventService {
     async create(
         createEventDto: CreateEventDto,
         userId: string,
-    ): Promise<EventWithUserAndAddressDTO> {
+    ): Promise<EventWithAddress> {
         await this.natsService.send(USER_SUBJECTS.GET_USER, { userId });
 
         const hasConflict = await this.hasEventConflict(
@@ -80,12 +80,10 @@ export class EventService {
                 start_date: new Date(createEventDto.start_date),
                 end_date: new Date(createEventDto.end_date),
             },
-            select: eventWithAddressAndUser,
+            select: eventWithAddressQuery,
         });
 
-        return {
-            data: mapEvent(newEvent),
-        };
+        return mapEvent(newEvent);
     }
 
     async hasEventConflict(
@@ -166,10 +164,10 @@ export class EventService {
      * - Si distanceKm est défini → filtrage par rayon (post-query)
      *
      * @param {EventFiltersDto} [filters] - Filtres optionnels (date, ville, géoloc, statut, pagination)
-     * @return {Promise<PaginatedEventsDTO>} Liste paginée des événements filtrés
+     * @return {Promise<PaginatedEventsDto>} Liste paginée des événements filtrés
      * @memberof EventService
      */
-    async findAll(filters?: EventFiltersDto): Promise<PaginatedEventsDTO> {
+    async findAll(filters?: EventFiltersDto): Promise<PaginatedEventsDto> {
         // Pagination : Page courante, Nombre d'éléments par page, Offset pour pagination SQL
         const page = filters?.page ?? 1;
         const limit = filters?.limit ?? 12;
@@ -318,7 +316,7 @@ export class EventService {
                 orderBy: {
                     start_date: 'asc', // garantit une pagination stable (évite doublons / trous)
                 },
-                select: eventWithAddressAndUser,
+                select: eventWithAddressQuery,
             }),
             // count → total des résultats (pour pagination front)
             prisma.event.count({ where }),
@@ -327,31 +325,30 @@ export class EventService {
         // PAGINATION FINALE :
 
         return {
-            items: events.map(mapEvent),
+            items: events.map((e) => mapEvent(e)),
             total,
             page,
             limit,
         };
     }
 
-    async findAllMyEvents(
-        userId: string,
-    ): Promise<EventWithUserAndAddressDTO[]> {
+    async findAllMyEvents(userId: string): Promise<EventWithAddress[]> {
         await this.natsService.send(USER_SUBJECTS.GET_USER, { userId });
 
         const events = await prisma.event.findMany({
             where: { organizer_id: userId },
-            select: eventWithAddressAndUser,
+            select: eventWithAddressQuery,
         });
 
         return events.map((event) => {
-            return {
-                data: mapEvent(event),
-            };
+            return mapEvent(event);
         });
     }
 
-    async findOneWithRelation(eventId: number): Promise<EventDetailsDTO> {
+    async findOneWithRelation(
+        eventId: number,
+        userId?: string,
+    ): Promise<EventDto> {
         const event = await prisma.event.findUnique({
             where: { id: eventId },
             select: {
@@ -362,8 +359,6 @@ export class EventService {
                 start_date: true,
                 end_date: true,
                 status: true,
-                created_at: true,
-                updated_at: true,
                 organizer_id: true,
                 Address: true,
                 Mission: {
@@ -380,11 +375,12 @@ export class EventService {
                                 max_participant: true,
                                 status: true,
                                 Participation: {
-                                    where: {
-                                        status: 'ACCEPTED',
-                                    },
+                                    // where: {
+                                    //     status: 'ACCEPTED',
+                                    // },
                                     select: {
                                         id: true,
+                                        user_id: true,
                                         status: true,
                                     },
                                 },
@@ -397,10 +393,10 @@ export class EventService {
 
         if (!event) throw new NotFoundException('Événement non trouvé');
 
-        return toEventDetails(event);
+        return toEventDetails(event, userId);
     }
 
-    async findOne(id: number): Promise<EventWithUserAndAddressDTO> {
+    async findOne(id: number): Promise<EventWithAddress> {
         const event = await prisma.event.findUnique({
             where: {
                 id,
@@ -408,20 +404,18 @@ export class EventService {
                     not: 'CANCELLED',
                 },
             },
-            select: eventWithAddressAndUser,
+            select: eventWithAddressQuery,
         });
 
         if (!event) throw new NotFoundException('Événement non trouvé');
-        return {
-            data: mapEvent(event),
-        };
+        return mapEvent(event);
     }
 
     async update(
         id: number,
         updateEventDto: UpdateEventDto,
         userId: string,
-    ): Promise<EventWithUserAndAddressDTO> {
+    ): Promise<EventWithAddress> {
         const existingEvent = await this.findOwnedEventOrFail(id, userId);
         await this.natsService.send(USER_SUBJECTS.GET_USER, {
             userId,
@@ -499,23 +493,18 @@ export class EventService {
                 organizer_id: userId,
                 status: eventData.status,
             },
-            select: eventWithAddressAndUser,
+            select: eventWithAddressQuery,
         });
 
-        return {
-            data: mapEvent(event),
-        };
+        return mapEvent(event);
     }
 
-    async cancel(
-        id: number,
-        userId: string,
-    ): Promise<EventWithUserAndAddressDTO | null> {
+    async cancel(id: number, userId: string): Promise<EventWithAddress | null> {
         await this.findOwnedEventOrFail(id, userId);
 
         const event = await prisma.event.findUnique({
             where: { id },
-            select: eventWithAddressAndUser,
+            select: eventWithAddressQuery,
         });
 
         if (!event) return null;
@@ -524,16 +513,12 @@ export class EventService {
             const updateEvent = await prisma.event.update({
                 where: { id },
                 data: { status: 'CANCELLED' },
-                select: eventWithAddressAndUser,
+                select: eventWithAddressQuery,
             });
-            return {
-                data: mapEvent(updateEvent),
-            };
+            return mapEvent(updateEvent);
         }
 
-        return {
-            data: mapEvent(event),
-        };
+        return mapEvent(event);
     }
 
     /**
@@ -552,15 +537,12 @@ export class EventService {
      *      La transaction est utile car la suppression réelle repose sur plusieurs opérations dépendantes.
      *      Sans la transaction, une panne ou une erreur entre les deux étapes pourrait laisser la BDD dans un état partiellement modifié.
      */
-    async remove(
-        id: number,
-        userId: string,
-    ): Promise<EventWithUserAndAddressDTO | null> {
+    async remove(id: number, userId: string): Promise<EventWithAddress | null> {
         await this.findOwnedEventOrFail(id, userId);
 
         const event = await prisma.event.findUnique({
             where: { id },
-            select: eventWithAddressAndUser,
+            select: eventWithAddressQuery,
         });
 
         if (!event) return null;
@@ -578,8 +560,6 @@ export class EventService {
             });
         });
 
-        return {
-            data: mapEvent(event),
-        };
+        return mapEvent(event);
     }
 }

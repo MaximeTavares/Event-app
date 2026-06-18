@@ -1,4 +1,4 @@
-export const eventWithAddressAndUser = {
+export const eventWithAddressQuery = {
     id: true,
     organizer_id: true,
     title: true,
@@ -7,8 +7,6 @@ export const eventWithAddressAndUser = {
     start_date: true,
     end_date: true,
     status: true,
-    created_at: true,
-    updated_at: true,
     Address: {
         select: {
             id: true,
@@ -20,8 +18,6 @@ export const eventWithAddressAndUser = {
             country: true,
             coordinates_lat: true,
             coordinates_lon: true,
-            created_at: true,
-            updated_at: true,
         },
     },
 };

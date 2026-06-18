@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router';
-import type { MissionDetailsApiResponse, UpdateMissionInput } from '../types/mission.type';
+import type { UpdateMissionInput } from '../types/mission.type';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { useCreateSlot } from '../../mission_slot/hooks/use_slot.service';
 import type { SlotCreationOutputValues } from '../../mission_slot/validation/SlotCreation.schema';
 import { useDeleteMission, useUpdateMission } from './use_mission.service';
 import { useMe } from '../../auth/hooks/use_auth.service';
+import { MissionDetailsDto } from '@app/contracts';
 
-export function useMissionDetails(mission: MissionDetailsApiResponse) {
+export function useMissionDetails(mission: MissionDetailsDto) {
     const { data: user } = useMe();
 
     const navigate = useNavigate();

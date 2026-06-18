@@ -1,7 +1,7 @@
-import type { ParticipationFromSlotDetails } from '../types/participation.types';
+import { ParticipantDetailsDto, participationStatusLabel } from '@app/contracts';
 
 type ParticipantItemProps = {
-    participations: ParticipationFromSlotDetails;
+    participations: ParticipantDetailsDto[];
     canEdit: boolean;
     emptyMessage: string;
 };
@@ -33,12 +33,12 @@ export function ParticipantItem({
 
                             <span
                                 className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                                    p.participation_status === 'ACCEPTED'
+                                    p.status === 'ACCEPTED'
                                         ? 'bg-secondary text-white'
                                         : 'bg-warning text-white'
                                 }`}
                             >
-                                {p.participation_status}
+                                {participationStatusLabel[p.status]}
                             </span>
                         </li>
                     ))}

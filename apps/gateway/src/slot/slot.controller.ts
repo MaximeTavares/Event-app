@@ -28,12 +28,14 @@ export class SlotController {
     }
 
     @Get('slots/:id')
-    findOneById(
-        @Param('id', ParseIntPipe) id: number,
+    async findOneById(
+        @User('id') userId: string,
+        @Param('id', ParseIntPipe) slodId: number,
         @Query('details') details: boolean,
     ) {
-        if (details) return this.slotService.findOneWithParticipants(id);
-        return this.slotService.findOneById(id);
+        if (details)
+            return this.slotService.findOneWithParticipants(userId, slodId);
+        return this.slotService.findOneById(userId, slodId);
     }
 
     @Patch('slots/:id')

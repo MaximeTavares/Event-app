@@ -15,3 +15,13 @@ export const User = createParamDecorator(
         return data ? user[data] : user;
     },
 );
+
+export const PublicUser = createParamDecorator(
+    (data: keyof AuthUser | undefined, ctx: ExecutionContext) => {
+        const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
+
+        const user = request.user;
+
+        return data ? user?.[data] : user;
+    },
+);

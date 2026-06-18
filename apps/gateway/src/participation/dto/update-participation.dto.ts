@@ -1,9 +1,7 @@
+import { ParticipationStatus, ParticipationStatusEnum } from '@app/contracts';
 import { Type } from 'class-transformer';
 import { IsDate, IsEnum, IsOptional } from 'class-validator';
-import {
-    ParticipationStatus,
-    ParticipationStatusEnum,
-} from './participation.dto';
+
 
 export class UpdateParticipationDto {
     @IsEnum(ParticipationStatusEnum)

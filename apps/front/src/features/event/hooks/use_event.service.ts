@@ -8,13 +8,13 @@ import {
 import type {
     BaseEvent,
     CreateEventInput,
-    EventDetailsApiResponse,
     PaginatedEvents,
     UpdateEventInput,
 } from '../types/event.type';
 import { createEvent, deleteEvent, getEventById, getEvents, updateEvent } from '../api/event.api';
 import type { EventFilters } from '../../../shared/components/UI/filter/eventsFilters.interface';
 import { EventMapper } from '../mapper/EventMapper';
+import { EventDto } from '@app/contracts';
 
 //Lecture
 export function useGetEvents(filters?: EventFilters): UseQueryResult<PaginatedEvents, Error> {
@@ -33,7 +33,7 @@ export function useGetEvents(filters?: EventFilters): UseQueryResult<PaginatedEv
     });
 }
 
-export function useGetEventById(id: number): UseQueryResult<EventDetailsApiResponse, Error> {
+export function useGetEventById(id: number): UseQueryResult<EventDto, Error> {
     return useQuery({
         queryKey: ['events', id],
         queryFn: () => getEventById(id),

@@ -1,15 +1,13 @@
 import { SlotMapper } from './../slot/dto/mapper/slot.mapper';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ParticipationWithStatusAndOrganizer } from './type/participation.types';
-import { ParticipationDTO } from './dto/participation.dto';
 import { ParticipationPolicyService } from './policy/participationPolicy.service.';
 import { SlotPolicyService } from './policy/slotPolicy.service';
 import { UpdateParticipationDto } from './dto/update-participation.dto';
 import { PARTICIPATION_ACTION_CONFIG } from './policy/participations.policy';
 import { prisma, Prisma } from '@app/db';
-import { EventDTO } from '../event/dto/event.dto';
 import { Mission } from '../mission/types/types';
-import { SlotDTO } from '../slot/dto/slot.dto';
+import { EventDto, ParticipantDto, SlotDto } from '@app/contracts';
 
 @Injectable()
 export class ParticipationService {
@@ -36,7 +34,7 @@ export class ParticipationService {
     async create(
         currentUserId: string,
         slotId: number,
-    ): Promise<ParticipationDTO> {
+    ): Promise<ParticipantDto> {
         return await prisma.$transaction(async (tx) => {
             //Check if slot exist
             const slot = await this.getSlotOrThrow(tx, slotId);
@@ -102,7 +100,7 @@ export class ParticipationService {
         tx: Prisma.TransactionClient,
         currentUserId: string,
         slotId: number,
-        existing: ParticipationDTO | null,
+        existing: ParticipantDto | null,
     ) {
         //Update existing participation with status "CANCELLED"
         if (existing?.status === 'CANCELLED') {
@@ -131,11 +129,11 @@ export class ParticipationService {
         });
     }
 
-    async findAll(): Promise<ParticipationDTO[]> {
+    async findAll(): Promise<ParticipantDto[]> {
         return await prisma.participation.findMany();
     }
 
-    async findOne(id: number): Promise<ParticipationDTO> {
+    async findOne(id: number): Promise<ParticipantDto> {
         const participation = await prisma.participation.findUnique({
             where: { id },
         });
@@ -146,7 +144,7 @@ export class ParticipationService {
         return participation;
     }
 
-    async getMyParticipations(userId: string): Promise<ParticipationDTO[]> {
+    async getMyParticipations(userId: string): Promise<ParticipantDto[]> {
         const participations = await prisma.participation.findMany({
             where: { user_id: userId },
         });
@@ -171,17 +169,26 @@ export class ParticipationService {
      * @throws {NotFoundException} If no slots are found (optional, depending on your implementation)
     
      */
-    async getMySlots(userId: string): Promise<SlotDTO[]> {
+    async getMySlots(userId: string): Promise<SlotDto[]> {
         const participations = await prisma.participation.findMany({
             where: { user_id: userId },
             select: {
                 Slot: {
                     select: {
                         id: true,
+                        Mission: {
+                            select: {
+                                Event: {
+                                    select: { organizer_id: true },
+                                },
+                            },
+                        },
+                        mission_id: true,
                         start_at: true,
                         end_at: true,
                         max_participant: true,
                         status: true,
+                        Participation: { select: { user_id: true } },
                     },
                 },
             },
@@ -243,7 +250,7 @@ export class ParticipationService {
         });
 
         return slots.map((slot) =>
-            SlotMapper.MapSlot(slot, countMap.get(slot.id) ?? 0),
+            SlotMapper.toSlotDto(userId, slot, countMap.get(slot.id) ?? 0),
         );
     }
 
@@ -279,7 +286,7 @@ export class ParticipationService {
 
     async getMyEvents(
         userId: string,
-    ): Promise<Omit<EventDTO, 'user' | 'address'>[]> {
+    ): Promise<Omit<EventDto, 'user' | 'address' | 'missions'>[]> {
         const participations = await prisma.participation.findMany({
             where: { user_id: userId },
             select: {
@@ -307,7 +314,7 @@ export class ParticipationService {
     async acceptParticipation(
         currentUserId: string,
         participationId: number,
-    ): Promise<ParticipationDTO> {
+    ): Promise<ParticipantDto> {
         return prisma.$transaction((tx) =>
             this.updateParticipation(
                 tx,
@@ -321,7 +328,7 @@ export class ParticipationService {
     async rejectParticipation(
         currentUserId: string,
         participationId: number,
-    ): Promise<ParticipationDTO> {
+    ): Promise<ParticipantDto> {
         return prisma.$transaction((tx) =>
             this.updateParticipation(
                 tx,
@@ -335,7 +342,7 @@ export class ParticipationService {
     async cancelParticipation(
         currentUserId: string,
         participationId: number,
-    ): Promise<ParticipationDTO> {
+    ): Promise<ParticipantDto> {
         return prisma.$transaction((tx) =>
             this.updateParticipation(
                 tx,

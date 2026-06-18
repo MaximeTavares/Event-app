@@ -1,5 +1,4 @@
 import { formatInTimeZone } from 'date-fns-tz';
-import { slotStatusColor, slotStatusLabel, type SlotDetailsApiResponse } from '../types/slot.type';
 import { ParticipantItem } from '../../participation/components/ParticipantItem';
 import { HeaderDetails } from '../../../shared/components/UI/HeaderDetails';
 import { DeleteModal } from '../../../shared/components/UI/DeleteModal';
@@ -10,12 +9,14 @@ import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema
 import { SlotMapper } from '../mapper/SlotMapper';
 import { Modal2 } from '../../../shared/components/UI/Modal2';
 import { Card } from '../../../shared/layout/Card';
+import { SlotDetails, slotStatusColor, slotStatusLabel } from '@app/contracts';
 
 type SlotDetailsProps = {
-    slot: SlotDetailsApiResponse;
+    slot: SlotDetails;
 };
 
-export function SlotDetails({ slot }: Readonly<SlotDetailsProps>) {
+export function SlotDetailsComponent({ slot }: Readonly<SlotDetailsProps>) {
+    console.log('🚀 ~ SlotDetails ~ slot:', slot);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
 

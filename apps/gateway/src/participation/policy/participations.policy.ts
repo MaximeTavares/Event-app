@@ -1,6 +1,6 @@
 import { ParticipationPolicyService } from './participationPolicy.service.';
 import { ParticipationWithStatusAndOrganizer } from '../type/participation.types';
-import { ParticipationStatus } from '../dto/participation.dto';
+import { ParticipationStatus } from '@app/contracts';
 
 interface ParticipationPolicy {
     CanBeCancelByUser: { allowed: boolean; errorMessage?: string };

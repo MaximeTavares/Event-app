@@ -4,10 +4,10 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { CreateMissionDto } from './dto/create-mission.dto';
-import { MissionDTO, MissionWithDetails } from './dto/mission.dto';
 import { UpdateMissionDto } from './dto/update-mission.dto';
-import { mapMission, toMissionDetails } from './mapper/mission.mapper';
+import { toMissionDto, toMissionDetails } from './mapper/mission.mapper';
 import { prisma } from '@app/db';
+import { MissionDetailsDto, MissionDto } from '@app/contracts';
 
 @Injectable()
 export class MissionService {
@@ -19,12 +19,17 @@ export class MissionService {
         status: true,
         created_at: true,
         updated_at: true,
+        Event: {
+            select: {
+                organizer_id: true,
+            },
+        },
     };
 
     async create(
         eventId: number,
         createMissionDto: CreateMissionDto,
-    ): Promise<MissionDTO> {
+    ): Promise<MissionDto> {
         const newMission = await prisma.mission.create({
             data: {
                 ...createMissionDto,
@@ -33,30 +38,33 @@ export class MissionService {
             select: this.missionSelect,
         });
 
-        return mapMission(newMission);
+        return toMissionDto(newMission);
     }
 
-    async findAll(): Promise<MissionDTO[]> {
+    async findAll(): Promise<MissionDto[]> {
         const missions = await prisma.mission.findMany({
             select: this.missionSelect,
         });
 
-        return missions.map((mission) => mapMission(mission));
+        return missions.map((mission) => toMissionDto(mission));
     }
 
-    async findOneById(id: number): Promise<MissionDTO> {
+    async findOneById(id: number): Promise<MissionDto> {
         const mission = await prisma.mission.findUnique({
             where: { id },
             select: this.missionSelect,
         });
         if (!mission) throw new NotFoundException('Mission not found');
 
-        return mapMission(mission);
+        return toMissionDto(mission);
     }
 
-    async findOneWithDetails(id: number): Promise<MissionWithDetails> {
+    async findOneWithDetails(
+        userId: string,
+        missionId: number,
+    ): Promise<MissionDetailsDto> {
         const mission = await prisma.mission.findUnique({
-            where: { id },
+            where: { id: missionId },
             select: {
                 id: true,
                 event_id: true,
@@ -75,18 +83,7 @@ export class MissionService {
                             select: {
                                 id: true,
                                 status: true,
-                                // User: {
-                                //     select: {
-                                //         id: true,
-                                //         email: true,
-                                //         User_profile: {
-                                //             select: {
-                                //                 first_name: true,
-                                //                 last_name: true,
-                                //             },
-                                //         },
-                                //     },
-                                // },
+                                user_id: true,
                             },
                         },
                     },
@@ -96,14 +93,14 @@ export class MissionService {
 
         if (!mission) throw new NotFoundException('Mission not found');
 
-        return toMissionDetails(mission);
+        return toMissionDetails(userId, mission);
     }
 
     async update(
         userId: string,
         missionId: number,
         updateMissionDto: UpdateMissionDto,
-    ): Promise<MissionDTO> {
+    ): Promise<MissionDto> {
         await this.verifyOwnership(userId, missionId);
 
         const updatedMission = await prisma.mission.update({
@@ -111,7 +108,7 @@ export class MissionService {
             data: updateMissionDto,
             select: this.missionSelect,
         });
-        return mapMission(updatedMission);
+        return toMissionDto(updatedMission);
     }
 
     async remove(userId: string, missionId: number) {

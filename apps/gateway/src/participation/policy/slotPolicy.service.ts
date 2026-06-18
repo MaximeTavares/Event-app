@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { SLOT_POLICY } from './slot.policy';
 import { Prisma } from '@app/db';
-import { Slot } from '../../slot/dto/slot.dto';
+import { SlotDomain } from '@app/contracts';
 
 @Injectable()
 export class SlotPolicyService {
-    assertCanJoin(slot: Slot, currentParticipants: number): void {
+    assertCanJoin(slot: SlotDomain, currentParticipants: number): void {
         const rules = SLOT_POLICY[slot.status];
 
         if (!rules.canJoin.allowed)
