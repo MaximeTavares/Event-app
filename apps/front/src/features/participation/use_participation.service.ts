@@ -9,7 +9,7 @@ export const useParticipateMutation = (eventId: number, missionId?: number) => {
 
         onSuccess: async () => {
             await queryClient.invalidateQueries({
-                queryKey: ['event', eventId],
+                queryKey: ['events', eventId],
             });
 
             if (missionId) {
