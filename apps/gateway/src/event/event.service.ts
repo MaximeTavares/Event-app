@@ -20,7 +20,8 @@ import {
     USER_SUBJECTS,
 } from '@app/contracts';
 import { NatsService } from '../nats/nats.service';
-import { eventWithAddressQuery } from './prisma/event.select';
+import { eventDetailsQuery } from './query/event-details.query';
+import { eventWithAddressQuery } from './query/event-address.query';
 
 @Injectable()
 export class EventService {
@@ -80,7 +81,7 @@ export class EventService {
                 start_date: new Date(createEventDto.start_date),
                 end_date: new Date(createEventDto.end_date),
             },
-            select: eventWithAddressQuery,
+            ...eventWithAddressQuery,
         });
 
         return mapEvent(newEvent);
@@ -316,7 +317,7 @@ export class EventService {
                 orderBy: {
                     start_date: 'asc', // garantit une pagination stable (évite doublons / trous)
                 },
-                select: eventWithAddressQuery,
+                ...eventWithAddressQuery,
             }),
             // count → total des résultats (pour pagination front)
             prisma.event.count({ where }),
@@ -337,7 +338,7 @@ export class EventService {
 
         const events = await prisma.event.findMany({
             where: { organizer_id: userId },
-            select: eventWithAddressQuery,
+            ...eventWithAddressQuery,
         });
 
         return events.map((event) => {
@@ -351,44 +352,7 @@ export class EventService {
     ): Promise<EventDto> {
         const event = await prisma.event.findUnique({
             where: { id: eventId },
-            select: {
-                id: true,
-                title: true,
-                description: true,
-                program: true,
-                start_date: true,
-                end_date: true,
-                status: true,
-                organizer_id: true,
-                Address: true,
-                Mission: {
-                    select: {
-                        id: true,
-                        title: true,
-                        description: true,
-                        status: true,
-                        Slot: {
-                            select: {
-                                id: true,
-                                start_at: true,
-                                end_at: true,
-                                max_participant: true,
-                                status: true,
-                                Participation: {
-                                    // where: {
-                                    //     status: 'ACCEPTED',
-                                    // },
-                                    select: {
-                                        id: true,
-                                        user_id: true,
-                                        status: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
+            ...eventDetailsQuery,
         });
 
         if (!event) throw new NotFoundException('Événement non trouvé');
@@ -404,7 +368,7 @@ export class EventService {
                     not: 'CANCELLED',
                 },
             },
-            select: eventWithAddressQuery,
+            ...eventWithAddressQuery,
         });
 
         if (!event) throw new NotFoundException('Événement non trouvé');
@@ -493,7 +457,7 @@ export class EventService {
                 organizer_id: userId,
                 status: eventData.status,
             },
-            select: eventWithAddressQuery,
+            ...eventWithAddressQuery,
         });
 
         return mapEvent(event);
@@ -504,7 +468,7 @@ export class EventService {
 
         const event = await prisma.event.findUnique({
             where: { id },
-            select: eventWithAddressQuery,
+            ...eventWithAddressQuery,
         });
 
         if (!event) return null;
@@ -513,7 +477,7 @@ export class EventService {
             const updateEvent = await prisma.event.update({
                 where: { id },
                 data: { status: 'CANCELLED' },
-                select: eventWithAddressQuery,
+                ...eventWithAddressQuery,
             });
             return mapEvent(updateEvent);
         }
@@ -542,7 +506,7 @@ export class EventService {
 
         const event = await prisma.event.findUnique({
             where: { id },
-            select: eventWithAddressQuery,
+            ...eventWithAddressQuery,
         });
 
         if (!event) return null;

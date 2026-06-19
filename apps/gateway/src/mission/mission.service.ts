@@ -8,24 +8,11 @@ import { UpdateMissionDto } from './dto/update-mission.dto';
 import { toMissionDto, toMissionDetails } from './mapper/mission.mapper';
 import { prisma } from '@app/db';
 import { MissionDetailsDto, MissionDto } from '@app/contracts';
+import { missionDetailsQuery } from './query/mission-details.query';
+import { missionQuery } from './query/mission.query';
 
 @Injectable()
 export class MissionService {
-    private readonly missionSelect = {
-        id: true,
-        event_id: true,
-        title: true,
-        description: true,
-        status: true,
-        created_at: true,
-        updated_at: true,
-        Event: {
-            select: {
-                organizer_id: true,
-            },
-        },
-    };
-
     async create(
         eventId: number,
         createMissionDto: CreateMissionDto,
@@ -35,7 +22,7 @@ export class MissionService {
                 ...createMissionDto,
                 Event: { connect: { id: eventId } },
             },
-            select: this.missionSelect,
+            ...missionQuery,
         });
 
         return toMissionDto(newMission);
@@ -43,7 +30,7 @@ export class MissionService {
 
     async findAll(): Promise<MissionDto[]> {
         const missions = await prisma.mission.findMany({
-            select: this.missionSelect,
+            ...missionQuery,
         });
 
         return missions.map((mission) => toMissionDto(mission));
@@ -52,7 +39,7 @@ export class MissionService {
     async findOneById(id: number): Promise<MissionDto> {
         const mission = await prisma.mission.findUnique({
             where: { id },
-            select: this.missionSelect,
+            ...missionQuery,
         });
         if (!mission) throw new NotFoundException('Mission not found');
 
@@ -65,30 +52,7 @@ export class MissionService {
     ): Promise<MissionDetailsDto> {
         const mission = await prisma.mission.findUnique({
             where: { id: missionId },
-            select: {
-                id: true,
-                event_id: true,
-                title: true,
-                description: true,
-                status: true,
-                Event: { select: { organizer_id: true } },
-                Slot: {
-                    select: {
-                        id: true,
-                        start_at: true,
-                        end_at: true,
-                        max_participant: true,
-                        status: true,
-                        Participation: {
-                            select: {
-                                id: true,
-                                status: true,
-                                user_id: true,
-                            },
-                        },
-                    },
-                },
-            },
+            ...missionDetailsQuery,
         });
 
         if (!mission) throw new NotFoundException('Mission not found');
@@ -106,7 +70,7 @@ export class MissionService {
         const updatedMission = await prisma.mission.update({
             where: { id: missionId },
             data: updateMissionDto,
-            select: this.missionSelect,
+            ...missionQuery,
         });
         return toMissionDto(updatedMission);
     }

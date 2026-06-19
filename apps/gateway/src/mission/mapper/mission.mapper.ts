@@ -1,9 +1,6 @@
-import {
-    MissionDetailsDto,
-    MissionDetailsQuery,
-    MissionDto,
-    MissionQuery,
-} from '@app/contracts';
+import { MissionDetailsDto, MissionDto } from '@app/contracts';
+import { MissionDetailsQuery } from '../query/mission-details.query';
+import { MissionQuery } from '../query/mission.query';
 
 export function toMissionDto(mission: MissionQuery): MissionDto {
     return {

@@ -1,11 +1,6 @@
-import { Prisma } from '@app/db';
-import { EventDto, EventWithAddress, EventWithRelations } from '@app/contracts';
-import { eventWithAddressQuery } from '../prisma/event.select';
-
-//TODO Faire en sorte de découpler de Prisma
-export type EventWithAddressQuery = Prisma.EventGetPayload<{
-    select: typeof eventWithAddressQuery;
-}>;
+import { EventDto, EventWithAddress } from '@app/contracts';
+import { EventDetailsQuery } from '../query/event-details.query';
+import { EventWithAddressQuery } from '../query/event-address.query';
 
 export function mapEvent(event: EventWithAddressQuery): EventWithAddress {
     return {
@@ -22,7 +17,7 @@ export function mapEvent(event: EventWithAddressQuery): EventWithAddress {
 }
 
 export function toEventDetails(
-    event: EventWithRelations,
+    event: EventDetailsQuery,
     currentUserId?: string,
 ): EventDto {
     return {
