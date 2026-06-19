@@ -10,15 +10,17 @@ import { SlotMapper } from '../mapper/SlotMapper';
 import { Modal2 } from '../../../shared/components/UI/Modal2';
 import { Card } from '../../../shared/layout/Card';
 import { SlotDetails, slotStatusColor, slotStatusLabel } from '@app/contracts';
+import { HandleParticipantItem } from '../../participation/components/HandleParticipantItem';
 
 type SlotDetailsProps = {
     slot: SlotDetails;
 };
 
 export function SlotDetailsComponent({ slot }: Readonly<SlotDetailsProps>) {
-    console.log('🚀 ~ SlotDetails ~ slot:', slot);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+    const [isParticipantModalOpen, setIsParticipantModalOpen] = useState<boolean>(false);
+    const isFull = slot.available_place === 0;
 
     const {
         acceptedParticipants,
@@ -83,7 +85,28 @@ export function SlotDetailsComponent({ slot }: Readonly<SlotDetailsProps>) {
                         />
                     </div>
                 )}
+
+                {canEdit && (
+                    <div className="pt-2">
+                        <button
+                            className="text-sm text-blue-600 hover:underline"
+                            onClick={() => setIsParticipantModalOpen(true)}
+                        >
+                            Gérer les participants
+                        </button>
+                    </div>
+                )}
             </div>
+
+            {/*  MODAL PARTICIPANTS */}
+            <Modal2
+                isOpen={isParticipantModalOpen}
+                onClose={() => setIsParticipantModalOpen(false)}
+                size="md"
+                title="Gestion des participants"
+            >
+                <HandleParticipantItem participations={slot.participants} isFull={isFull} />
+            </Modal2>
 
             {/* EDIT MODAL */}
             <Modal2 isOpen={isEditModalOpen} size="lg" onClose={() => setIsEditModalOpen(false)}>

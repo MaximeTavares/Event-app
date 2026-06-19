@@ -44,14 +44,6 @@ export function ParticipantItem({
                     ))}
                 </ul>
             )}
-
-            {canEdit && (
-                <div className="pt-2">
-                    <button className="text-sm text-blue-600 hover:underline">
-                        Gérer les participants
-                    </button>
-                </div>
-            )}
         </div>
     );
 }
