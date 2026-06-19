@@ -1,7 +1,6 @@
-import { AddressDto } from "./address.types.js";
-import { MissionDetailsDto, MissionDto, MissionStatus } from "./mission.type.js";
-import { ParticipationStatus } from "./participant.types.js";
-import { SlotDto, SlotStatus } from "./slot.types.js";
+import { AddressDto } from "../address/address.types.js";
+import { MissionDetailsDto, MissionDto } from "../mission/mission.type.js";
+import { SlotDto } from "../slot/slot.types.js";
 
 export type EventStatus = keyof typeof eventStatusLabel;
 
@@ -55,34 +54,4 @@ export class PaginatedEventsDto {
 
 export interface EventMissionDto extends MissionDto {
 	slots: SlotDto[];
-}
-
-export interface EventWithRelations {
-	id: number;
-	title: string;
-	description: string;
-	program: string;
-	start_date: Date;
-	end_date: Date;
-	status: EventStatus;
-	organizer_id: string;
-	Address: AddressDto;
-	Mission: {
-		id: number;
-		title: string;
-		description: string;
-		status: MissionStatus;
-		Slot: {
-			id: number;
-			start_at: Date;
-			end_at: Date;
-			max_participant: number;
-			status: SlotStatus;
-			Participation: {
-				id: number;
-				status: ParticipationStatus;
-				user_id: string;
-			}[];
-		}[];
-	}[];
 }

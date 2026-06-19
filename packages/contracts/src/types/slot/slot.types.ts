@@ -1,4 +1,5 @@
-import { ParticipantDetailsDto, ParticipationStatus } from "./participant.types.js";
+import { ParticipantDetailsDto, ParticipationStatus } from "../participation/participant.types.js";
+
 
 export type SlotStatus = "OPEN" | "FULL" | "CLOSED" | "CANCELLED";
 
