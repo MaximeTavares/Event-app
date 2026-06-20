@@ -48,6 +48,10 @@ export function toEventDetails(
                     (p) => p.user_id === currentUserId,
                 );
 
+                const currentParticipation = s.Participation.find(
+                    (p) => p.user_id === currentUserId,
+                );
+
                 return {
                     id: s.id,
                     organizer_id: event.organizer_id,
@@ -58,6 +62,7 @@ export function toEventDetails(
                     current_participants,
                     available_place: s.max_participant - current_participants,
                     is_participating,
+                    participation_status: currentParticipation?.status,
                 };
             }),
         })),

@@ -3,9 +3,9 @@ import { Link } from 'react-router';
 import Button from '../../../shared/components/UI/Button';
 import { useState } from 'react';
 import { ConfirmModal } from '../../../shared/components/UI/ConfirmModal';
-import { useParticipateMutation } from '../../participation/use_participation.service';
+import { useParticipateMutation } from '../../participation/hooks/use_participation.service';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
-import { SlotDto, slotStatusColor, slotStatusLabel } from '@app/contracts';
+import { ParticipationStatus, SlotDto, slotStatusColor, slotStatusLabel } from '@app/contracts';
 
 type SlotItemProps = {
     slot: SlotDto;
@@ -13,8 +13,39 @@ type SlotItemProps = {
     missionId?: number;
 };
 
+type ParticipationButtonConfig = {
+    label: string;
+    disabled: boolean;
+};
+
+const participationButtonConfig: Record<ParticipationStatus | 'NONE', ParticipationButtonConfig> = {
+    NONE: {
+        label: "S'inscrire",
+        disabled: false,
+    },
+    PENDING: {
+        label: 'Demande en attente',
+        disabled: true,
+    },
+    ACCEPTED: {
+        label: 'Déjà inscrit',
+        disabled: true,
+    },
+    REJECTED: {
+        label: 'Demande rejetée',
+        disabled: true,
+    },
+    CANCELLED: {
+        label: "S'inscrire",
+        disabled: false,
+    },
+};
+
 export function SlotItem({ slot, eventId, missionId }: Readonly<SlotItemProps>) {
     const [isSlotParticipationOpen, setIsSlotParticipationOpen] = useState<boolean>(false);
+
+    const status = slot.participation_status ?? 'NONE';
+    const config = participationButtonConfig[status];
 
     const participationMutation = useParticipateMutation(eventId, missionId);
 
@@ -48,19 +79,14 @@ export function SlotItem({ slot, eventId, missionId }: Readonly<SlotItemProps>) 
                     Voir
                 </Button>
 
-                {slot.is_participating ? (
-                    <Button size="sm" variant="primary" disabled>
-                        Déjà inscrit
-                    </Button>
-                ) : (
-                    <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={() => setIsSlotParticipationOpen(true)}
-                    >
-                        S'inscrire
-                    </Button>
-                )}
+                <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => setIsSlotParticipationOpen(true)}
+                    disabled={config.disabled}
+                >
+                    {config.label}
+                </Button>
             </div>
             {/* PARTICIPATION MODAL */}
 

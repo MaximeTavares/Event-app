@@ -1,15 +1,18 @@
 import { ParticipantDetailsDto, participationStatusLabel } from '@app/contracts';
 import Button from '../../../shared/components/UI/Button';
 import { UserInfo } from './UserInfo';
+import { TransitionAction } from '../hooks/use_participationTransition';
 
 type HandleParticipantItemProps = {
     participations: ParticipantDetailsDto[];
     isFull: boolean;
+    onAction: (action: TransitionAction, participationId: number) => void;
 };
 
 export function HandleParticipantItem({
     participations,
     isFull,
+    onAction,
 }: Readonly<HandleParticipantItemProps>) {
     return (
         <ul className="flex flex-col gap-2">
@@ -39,15 +42,29 @@ export function HandleParticipantItem({
 
                     {/* BUTTON */}
                     <div className="flex justify-end gap-1">
-                        <Button size="sm" disabled={p.status === 'ACCEPTED' || isFull}>
+                        <Button
+                            onClick={() => onAction('accept', p.id)}
+                            size="sm"
+                            disabled={p.status === 'ACCEPTED' || isFull}
+                        >
                             Accepter
                         </Button>
 
-                        <Button variant="warning" size="sm" disabled={p.status === 'ACCEPTED'}>
+                        <Button
+                            onClick={() => onAction('reject', p.id)}
+                            variant="warning"
+                            size="sm"
+                            disabled={p.status === 'ACCEPTED'}
+                        >
                             Refuser
                         </Button>
 
-                        <Button variant="error" size="sm" disabled={p.status === 'PENDING'}>
+                        <Button
+                            onClick={() => onAction('cancel', p.id)}
+                            variant="error"
+                            size="sm"
+                            disabled={p.status === 'REJECTED'}
+                        >
                             Annuler
                         </Button>
                     </div>

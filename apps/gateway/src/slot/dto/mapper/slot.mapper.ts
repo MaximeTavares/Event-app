@@ -3,8 +3,8 @@ import {
     SlotDetails,
     SlotDto,
     SlotWithParticipationsQuery,
-    SlotWithUserIdQuery,
 } from '@app/contracts';
+import { SlotWithParticipationStatusQuery } from '../../query/SlotWithParticipationStatus.query';
 
 export class SlotMapper {
     static toSlotWithParticipations(
@@ -40,9 +40,13 @@ export class SlotMapper {
 
     static toSlotDto(
         userId: string,
-        slot: SlotWithUserIdQuery,
+        slot: SlotWithParticipationStatusQuery,
         current_participants: number,
     ): SlotDto {
+        const currentParticipation = slot.Participation.find(
+            (p) => p.user_id === userId,
+        );
+
         return {
             id: slot.id,
             organizer_id: slot.Mission.Event.organizer_id,
@@ -55,6 +59,7 @@ export class SlotMapper {
             is_participating: slot.Participation.some(
                 (p) => p.user_id === userId,
             ),
+            participation_status: currentParticipation?.status,
         };
     }
 }

@@ -10,6 +10,7 @@ import { SlotMapper } from './dto/mapper/slot.mapper';
 import { prisma } from '@app/db';
 import { NatsService } from '../nats/nats.service';
 import { ParticipationStatus, SlotDetails, SlotDto } from '@app/contracts';
+import { slotWithParticipationStatusQuery } from './query/SlotWithParticipationStatus.query';
 
 type OwnerShipEntity = 'Mission' | 'Slot';
 
@@ -86,18 +87,7 @@ export class SlotService {
         const [slot, currentParticipants] = await Promise.all([
             prisma.slot.findUnique({
                 where: { id: slotId },
-                select: {
-                    id: true,
-                    mission_id: true,
-                    start_at: true,
-                    end_at: true,
-                    max_participant: true,
-                    status: true,
-                    Mission: {
-                        select: { Event: { select: { organizer_id: true } } },
-                    },
-                    Participation: { select: { user_id: true } },
-                },
+                ...slotWithParticipationStatusQuery,
             }),
             prisma.participation.count({
                 where: { slot_id: slotId, status: 'ACCEPTED' },

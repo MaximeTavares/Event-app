@@ -1,21 +1,18 @@
 import { SlotMapper } from './../slot/dto/mapper/slot.mapper';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ParticipationWithStatusAndOrganizer } from './type/participation.types';
-import { ParticipationPolicyService } from './policy/participationPolicy.service.';
-import { SlotPolicyService } from './policy/slotPolicy.service';
-import { UpdateParticipationDto } from './dto/update-participation.dto';
-import { PARTICIPATION_ACTION_CONFIG } from './policy/participations.policy';
+import {
+    PARTICIPATION_TRANSITIONS,
+    TransitionName,
+} from './policy/participations.transition';
 import { prisma, Prisma } from '@app/db';
 import { Mission } from '../mission/types/types';
 import { EventDto, ParticipantDto, SlotDto } from '@app/contracts';
+import { assertCanCreateOrRejoin } from './policy/participation.guards';
+import { assertCanJoin } from './policy/slot.guards';
 
 @Injectable()
 export class ParticipationService {
-    constructor(
-        private readonly participationPolicy: ParticipationPolicyService,
-        private readonly slotPolicy: SlotPolicyService,
-    ) {}
-
     /**
      * Create a participation on a slot :
      *  - Check if slot exist
@@ -47,8 +44,8 @@ export class ParticipationService {
             );
 
             //Policies
-            this.participationPolicy.assertCanCreateOrRejoin(existing);
-            this.slotPolicy.assertCanJoin(slot, currentParticipants);
+            assertCanCreateOrRejoin(existing);
+            assertCanJoin(slot, currentParticipants);
 
             //Update or Create participation
             const participation = await this.createOrRejointParticipation(
@@ -188,7 +185,9 @@ export class ParticipationService {
                         end_at: true,
                         max_participant: true,
                         status: true,
-                        Participation: { select: { user_id: true } },
+                        Participation: {
+                            select: { user_id: true, status: true },
+                        },
                     },
                 },
             },
@@ -311,84 +310,39 @@ export class ParticipationService {
         );
     }
 
-    async acceptParticipation(
-        currentUserId: string,
+    async transition(
+        userId: string,
         participationId: number,
-    ): Promise<ParticipantDto> {
+        action: TransitionName,
+    ) {
         return prisma.$transaction((tx) =>
-            this.updateParticipation(
-                tx,
-                currentUserId,
-                participationId,
-                'ACCEPT',
-            ),
+            this.applyTransition(tx, userId, participationId, action),
         );
     }
 
-    async rejectParticipation(
-        currentUserId: string,
-        participationId: number,
-    ): Promise<ParticipantDto> {
-        return prisma.$transaction((tx) =>
-            this.updateParticipation(
-                tx,
-                currentUserId,
-                participationId,
-                'REJECT',
-            ),
-        );
-    }
-
-    async cancelParticipation(
-        currentUserId: string,
-        participationId: number,
-    ): Promise<ParticipantDto> {
-        return prisma.$transaction((tx) =>
-            this.updateParticipation(
-                tx,
-                currentUserId,
-                participationId,
-                'CANCEL',
-            ),
-        );
-    }
-
-    async updateParticipation(
+    private async applyTransition(
         tx: Prisma.TransactionClient,
-        currentUserId: string,
+        userId: string,
         participationId: number,
-        action: 'ACCEPT' | 'REJECT' | 'CANCEL',
+        action: TransitionName,
     ) {
         const participation = await this.findWithContextOrThrow(
             tx,
             participationId,
         );
+        const transition = PARTICIPATION_TRANSITIONS[action];
 
-        const config = PARTICIPATION_ACTION_CONFIG[action];
-        // Policy
-        config.applyPolicy(
-            this.participationPolicy,
-            currentUserId,
-            participation,
-        );
+        // une seule fonction qui vérifie À LA FOIS le rôle ET l'état de départ
+        transition.guard(userId, participation);
 
-        // Data
-        const data: UpdateParticipationDto = {
-            status: config.status,
-            cancelled_at: config.cancelled_at(),
-            decision_at: config.decision_at(),
-        };
-
-        // Update
-        const updated = await tx.participation.update({
+        return tx.participation.update({
             where: { id: participationId },
-            data,
+            data: {
+                status: transition.toStatus,
+                decision_at: transition.decision_at(),
+                cancelled_at: transition.cancelled_at(),
+            },
         });
-
-        // Sync
-        await this.slotPolicy.syncSlotStatus(tx, updated.slot_id);
-
-        return updated;
     }
 
     async findWithContextOrThrow(

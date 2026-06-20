@@ -5,6 +5,12 @@ export enum ParticipationStatusEnum {
 	CANCELLED = "CANCELLED",
 }
 
+export enum ParticipationActions {
+	ACCEPT = "ACCEPT",
+	REJECT = "REJECT",
+	CANCEL = "CANCEL",
+}
+
 export const participationStatusLabel: Record<ParticipationStatus, string> = {
 	ACCEPTED: "Accepté",
 	PENDING: "En attente",

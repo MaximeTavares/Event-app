@@ -1,11 +1,4 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Patch,
-    Param,
-    ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, ParseIntPipe } from '@nestjs/common';
 import { ParticipationService } from './participation.service';
 import { User } from '../ms-auth/decorators/user.decorator';
 
@@ -51,36 +44,31 @@ export class ParticipationController {
         return this.participationService.getMyEvents(userId);
     }
 
-    @Patch('participations/:id/accept')
-    acceptParticipation(
-        @User('id') userId: string,
-        @Param('id', ParseIntPipe) participationId: number,
-    ) {
-        return this.participationService.acceptParticipation(
-            userId,
-            participationId,
-        );
+    @Post('participations/:id/accept')
+    accept(@User('id') userId: string, @Param('id', ParseIntPipe) id: number) {
+        return this.participationService.transition(userId, id, 'ACCEPT');
     }
 
-    @Patch('participations/:id/reject')
-    rejectParticipation(
-        @User('id') userId: string,
-        @Param('id', ParseIntPipe) participationId: number,
-    ) {
-        return this.participationService.rejectParticipation(
-            userId,
-            participationId,
-        );
+    @Post('participations/:id/reject')
+    reject(@User('id') userId: string, @Param('id', ParseIntPipe) id: number) {
+        return this.participationService.transition(userId, id, 'REJECT');
     }
 
-    @Patch('participations/:id/cancel')
-    cancelParticipation(
-        @User('id') userId: string,
-        @Param('id', ParseIntPipe) participationId: number,
-    ) {
-        return this.participationService.cancelParticipation(
-            userId,
-            participationId,
-        );
+    @Post('participations/:id/cancel')
+    cancel(@User('id') userId: string, @Param('id', ParseIntPipe) id: number) {
+        return this.participationService.transition(userId, id, 'CANCEL');
     }
+
+    // @Patch('participations/:id/status')
+    // updateParticipation(
+    //     @User('id') userId: string,
+    //     @Param('id', ParseIntPipe) participationId: number,
+    //     @Body() dto: UpdateParticipationDto,
+    // ) {
+    //     return this.participationService.updateStatus(
+    //         userId,
+    //         participationId,
+    //         dto.toStatus,
+    //     );
+    // }
 }

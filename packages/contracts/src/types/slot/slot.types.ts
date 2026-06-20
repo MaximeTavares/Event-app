@@ -41,25 +41,26 @@ export interface SlotDto {
 
 	status: SlotStatus;
 
-	is_participating: boolean;
+    is_participating: boolean;
+    participation_status?: ParticipationStatus
 }
 
-export interface SlotWithUserIdQuery {
-	id: number;
-	Mission: {
-		Event: {
-			organizer_id: string;
-		};
-	};
-	mission_id: number;
-	start_at: Date;
-	end_at: Date;
-	max_participant: number;
-	status: SlotStatus;
-	Participation: {
-		user_id: string;
-	}[];
-}
+// export interface SlotWithUserIdQuery {
+// 	id: number;
+// 	Mission: {
+// 		Event: {
+// 			organizer_id: string;
+// 		};
+// 	};
+// 	mission_id: number;
+// 	start_at: Date;
+// 	end_at: Date;
+// 	max_participant: number;
+// 	status: SlotStatus;
+// 	Participation: {
+// 		user_id: string;
+// 	}[];
+// }
 
 export interface SlotDetails extends SlotDto {
 	participants: ParticipantDetailsDto[];
