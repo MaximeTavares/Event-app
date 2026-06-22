@@ -23,7 +23,7 @@
     "noFallthroughCasesInSwitch": false,
     "strictPropertyInitialization": false
     },
-  "references": [{ "path": "../../packages/contracts"}],
+  "references": [{ "path": "../../packages/contracts"}, { "path": "../../packages/database" }],
   "include": [
     "src/**/*.ts",
     "prisma/**/*.ts"
