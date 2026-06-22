@@ -16,7 +16,7 @@ const widthMap = {
 export function FormLayout({ title, children, width = 'md' }: Readonly<FormLayoutProps>) {
     return (
         <fieldset
-            className={`fieldset bg-base-100 border-base-300 rounded-box w-full border p-6 flex flex-col gap-4 ${widthMap[width]}`}
+            className={`fieldset shadow bg-base-100 border-base-300 rounded-box w-full border p-6 flex flex-col gap-4 ${widthMap[width]}`}
         >
             <h1 className="text-center text-primary text-3xl font-bold">{title}</h1>
             {children}
