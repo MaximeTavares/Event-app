@@ -149,21 +149,22 @@ jobs:
     needs: [detect-changes, build-gate]
 
     if: |
+      always() &&
       (
-        github.event_name == 'push' &&
-        needs.detect-changes.outputs.gateway == 'true' &&
-        needs.build-gate.result == 'success'
-      )
-      ||
-      (
-        github.event_name == 'workflow_dispatch' &&
-        (inputs.service == 'gateway' || inputs.service == 'all')
+        (
+          github.event_name == 'push' &&
+          needs.detect-changes.outputs.gateway == 'true' &&
+          needs.build-gate.result == 'success'
+        )
+        ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          (inputs.service == 'gateway' || inputs.service == 'all')
+        )
       )
 
     uses: ./.github/workflows/deploy.yml
-
     secrets: inherit
-
     with:
       compose-directory: /opt/event-app/staging
       compose-service: staging-gateway
@@ -173,23 +174,22 @@ jobs:
 
   deploy-auth:
     needs: [detect-changes, build-gate]
-
     if: |
+      always() &&
       (
-        github.event_name == 'push' &&
-        needs.detect-changes.outputs.auth == 'true' &&
-        needs.build-gate.result == 'success'
+        (
+          github.event_name == 'push' &&
+          needs.detect-changes.outputs.auth == 'true' &&
+          needs.build-gate.result == 'success'
+        )
+        ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          (inputs.service == 'auth' || inputs.service == 'all')
+        )
       )
-      ||
-      (
-        github.event_name == 'workflow_dispatch' &&
-        (inputs.service == 'auth' || inputs.service == 'all')
-      )
-
     uses: ./.github/workflows/deploy.yml
-
     secrets: inherit
-
     with:
       compose-directory: /opt/event-app/staging
       compose-service: staging-ms-auth
@@ -199,23 +199,22 @@ jobs:
 
   deploy-front:
     needs: [detect-changes, build-gate]
-
     if: |
+      always() &&
       (
-        github.event_name == 'push' &&
-        needs.detect-changes.outputs.front == 'true' &&
-        needs.build-gate.result == 'success'
+        (
+          github.event_name == 'push' &&
+          needs.detect-changes.outputs.front == 'true' &&
+          needs.build-gate.result == 'success'
+        )
+        ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          (inputs.service == 'front' || inputs.service == 'all')
+        )
       )
-      ||
-      (
-        github.event_name == 'workflow_dispatch' &&
-        (inputs.service == 'front' || inputs.service == 'all')
-      )
-
     uses: ./.github/workflows/deploy.yml
-
     secrets: inherit
-
     with:
       compose-directory: /opt/event-app/staging
       compose-service: staging-front
