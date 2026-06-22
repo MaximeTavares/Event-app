@@ -2,7 +2,9 @@ import { EventDto, EventWithAddress } from '@app/contracts';
 import { EventDetailsQuery } from '../query/event-details.query';
 import { EventWithAddressQuery } from '../query/event-address.query';
 
-export function mapEvent(event: EventWithAddressQuery): EventWithAddress {
+export function toEventWithAddress(
+    event: EventWithAddressQuery,
+): EventWithAddress {
     return {
         id: event.id,
         organizer_id: event.organizer_id,

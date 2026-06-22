@@ -17,6 +17,7 @@ import { PublicUser, User } from '../ms-auth/decorators/user.decorator';
 import { Public } from '../ms-auth/decorators/public.decorator';
 import { EventDto, EventWithAddress, PaginatedEventsDto } from '@app/contracts';
 
+//TODO Refaire le tour de tous les controller pour typer les retours en fonctions des besoins du Front. Ajouter aussi ParseIntPipe pour les id
 @Controller('events')
 export class EventController {
     constructor(private readonly eventService: EventService) {}
@@ -26,7 +27,7 @@ export class EventController {
         @Body() createEventDTO: CreateEventDto,
         @User('id') userId: string,
     ): Promise<EventWithAddress> {
-        return await this.eventService.create(createEventDTO, userId);
+        return this.eventService.create(createEventDTO, userId);
     }
 
     @Public()
@@ -34,7 +35,7 @@ export class EventController {
     async findAll(
         @Query() filters?: EventFiltersDto,
     ): Promise<PaginatedEventsDto> {
-        return await this.eventService.findAll(filters);
+        return this.eventService.findAll(filters);
     }
 
     @Get('my-events')
@@ -56,21 +57,24 @@ export class EventController {
     }
 
     @Patch(':id')
-    update(
+    async update(
         @Param('id') id: string,
         @Body() updateEventDto: UpdateEventDto,
         @User('id') userId: string,
-    ) {
+    ): Promise<EventWithAddress> {
         return this.eventService.update(+id, updateEventDto, userId);
     }
 
     @Patch(':id/cancel')
-    cancel(@Param('id') id: string, @User('id') userId: string) {
+    async cancel(@Param('id') id: string, @User('id') userId: string) {
         return this.eventService.cancel(+id, userId);
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string, @User('id') userId: string) {
+    async remove(
+        @Param('id') id: string,
+        @User('id') userId: string,
+    ): Promise<void> {
         return this.eventService.remove(+id, userId);
     }
 }

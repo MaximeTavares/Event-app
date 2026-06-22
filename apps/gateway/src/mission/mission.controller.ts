@@ -74,7 +74,7 @@ export class MissionController {
     async remove(
         @User('id') userId: string,
         @Param('id', ParseIntPipe) missionId: number,
-    ) {
+    ): Promise<void> {
         return this.missionService.remove(userId, missionId);
     }
 }

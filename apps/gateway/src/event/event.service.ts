@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { mapEvent, toEventDetails } from './dto/event.mapper';
+import { toEventWithAddress, toEventDetails } from './dto/event.mapper';
 import { EventFiltersDto } from './dto/event-filters.dto';
 import { CreateAddressDto } from '../address/dto/create-address.dto';
 import { toGeocodeDto } from '../address/mapper/address.mapper';
@@ -84,7 +84,7 @@ export class EventService {
             ...eventWithAddressQuery,
         });
 
-        return mapEvent(newEvent);
+        return toEventWithAddress(newEvent);
     }
 
     async hasEventConflict(
@@ -326,7 +326,7 @@ export class EventService {
         // PAGINATION FINALE :
 
         return {
-            items: events.map((e) => mapEvent(e)),
+            items: events.map((e) => toEventWithAddress(e)),
             total,
             page,
             limit,
@@ -342,7 +342,7 @@ export class EventService {
         });
 
         return events.map((event) => {
-            return mapEvent(event);
+            return toEventWithAddress(event);
         });
     }
 
@@ -372,7 +372,7 @@ export class EventService {
         });
 
         if (!event) throw new NotFoundException('Événement non trouvé');
-        return mapEvent(event);
+        return toEventWithAddress(event);
     }
 
     async update(
@@ -460,7 +460,7 @@ export class EventService {
             ...eventWithAddressQuery,
         });
 
-        return mapEvent(event);
+        return toEventWithAddress(event);
     }
 
     async cancel(id: number, userId: string): Promise<EventWithAddress | null> {
@@ -479,10 +479,10 @@ export class EventService {
                 data: { status: 'CANCELLED' },
                 ...eventWithAddressQuery,
             });
-            return mapEvent(updateEvent);
+            return toEventWithAddress(updateEvent);
         }
 
-        return mapEvent(event);
+        return toEventWithAddress(event);
     }
 
     /**
@@ -501,7 +501,7 @@ export class EventService {
      *      La transaction est utile car la suppression réelle repose sur plusieurs opérations dépendantes.
      *      Sans la transaction, une panne ou une erreur entre les deux étapes pourrait laisser la BDD dans un état partiellement modifié.
      */
-    async remove(id: number, userId: string): Promise<EventWithAddress | null> {
+    async remove(id: number, userId: string): Promise<void> {
         await this.findOwnedEventOrFail(id, userId);
 
         const event = await prisma.event.findUnique({
@@ -509,7 +509,7 @@ export class EventService {
             ...eventWithAddressQuery,
         });
 
-        if (!event) return null;
+        if (!event) throw new NotFoundException('Event Not found');
 
         await prisma.$transaction(async (transaction) => {
             await transaction.notification.deleteMany({
@@ -523,7 +523,5 @@ export class EventService {
                 where: { id },
             });
         });
-
-        return mapEvent(event);
     }
 }

@@ -19,6 +19,7 @@ export const slotWithParticipationStatusQuery = {
         },
         Participation: {
             select: {
+                id: true,
                 user_id: true,
                 status: true,
             },

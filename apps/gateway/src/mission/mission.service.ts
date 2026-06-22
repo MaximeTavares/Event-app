@@ -75,20 +75,24 @@ export class MissionService {
         return toMissionDto(updatedMission);
     }
 
-    async remove(userId: string, missionId: number) {
+    async remove(userId: string, missionId: number): Promise<void> {
         await this.verifyOwnership(userId, missionId);
 
         await prisma.mission.delete({
             where: { id: missionId },
         });
-
-        return { message: 'Mission removed successfully' };
     }
 
-    async verifyOwnership(userId: string, missionId: number) {
+    async verifyOwnership(userId: string, missionId: number): Promise<void> {
         const mission = await prisma.mission.findUnique({
             where: { id: missionId },
-            include: { Event: true },
+            select: {
+                Event: {
+                    select: {
+                        organizer_id: true,
+                    },
+                },
+            },
         });
 
         if (!mission) throw new NotFoundException('Mission not found');
@@ -96,6 +100,6 @@ export class MissionService {
         if (mission?.Event.organizer_id !== userId)
             throw new ForbiddenException('Not allowed');
 
-        return mission;
+        // return mission;
     }
 }

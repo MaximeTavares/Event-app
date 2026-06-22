@@ -7,8 +7,6 @@ export const missionQuery = {
         title: true,
         description: true,
         status: true,
-        created_at: true,
-        updated_at: true,
         Event: {
             select: {
                 organizer_id: true,
