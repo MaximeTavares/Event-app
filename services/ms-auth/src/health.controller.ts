@@ -10,7 +10,8 @@ export class HealthController {
         try {
             await this.natsService.checkConnection();
             return { status: 'ok', nats: 'connected' };
-        } catch {
+        } catch (err) {
+            console.error('NATS health check failed:', err);
             throw new ServiceUnavailableException({
                 status: 'error',
                 nats: 'disconnected',
