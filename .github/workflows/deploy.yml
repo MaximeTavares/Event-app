@@ -41,12 +41,38 @@ jobs:
     environment: ${{ inputs.environment }}
 
     outputs:
-      previous-sha: ${{ steps.deploy.outputs.previous_sha }}
+      previous-sha: ${{ steps.parse.outputs.previous_sha }}
 
     steps:
+      - name: Read previous deployed SHA
+        id: read-sha
+        uses: appleboy/ssh-action@v1.2.1
+
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          capture_stdout: true
+
+          script: |
+            cd ${{ inputs.compose-directory }}
+            SHA_FILE=".deployed-${{ inputs.compose-service }}-sha"
+            if [ -f "$SHA_FILE" ]; then
+              cat "$SHA_FILE"
+            else
+              echo ""
+            fi
+
+      - name: Parse previous SHA
+        id: parse
+        run: |
+          PREVIOUS_SHA=$(echo "${{ steps.read-sha.outputs.stdout }}" | tr -d '[:space:]')
+          echo "previous_sha=$PREVIOUS_SHA" >> "$GITHUB_OUTPUT"
+          echo "Previous SHA: ${PREVIOUS_SHA:-none}"
+
       - name: Deploy via SSH
         id: deploy
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.1
 
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -63,22 +89,12 @@ jobs:
             IMAGE=ghcr.io/${OWNER}/${{ inputs.image-name }}:${{ github.sha }}
             SHA_FILE=".deployed-${{ inputs.compose-service }}-sha"
 
-            # Capture le SHA actuellement déployé, AVANT de le remplacer
-            if [ -f "$SHA_FILE" ]; then
-              PREVIOUS_SHA=$(cat "$SHA_FILE")
-            else
-              PREVIOUS_SHA=""
-            fi
-            echo "Previous SHA: ${PREVIOUS_SHA:-none}"
-            echo "previous_sha=$PREVIOUS_SHA" >> "$GITHUB_OUTPUT"
-
             echo "Pulling image..."
             docker pull $IMAGE
 
             echo "Deploying container..."
             IMAGE_TAG=${{ github.sha }} docker compose up -d ${{ inputs.compose-service }} --remove-orphans --wait --wait-timeout 60
 
-            # On n'écrit le nouveau SHA QUE si le déploiement a réussi
             echo "${{ github.sha }}" > "$SHA_FILE"
 
             echo "Cleanup images..."
