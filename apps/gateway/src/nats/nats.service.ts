@@ -18,4 +18,8 @@ export class NatsService {
             this.nats.send<TResponse, TPayload>(subject, data),
         );
     }
+
+    async checkConnection(): Promise<void> {
+        await this.nats.connect();
+    }
 }

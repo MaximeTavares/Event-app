@@ -18,4 +18,8 @@ export class NatsService {
     ): Promise<unknown> {
         return firstValueFrom(this.nats.send(subject, data));
     }
+
+    async checkConnection() {
+        await this.nats.connect();
+    }
 }
