@@ -20,11 +20,6 @@ on:
         type: string
         default: ""
 
-      run-migrations:
-        required: false
-        type: boolean
-        default: false
-
       environment:
         required: true
         type: string
@@ -35,13 +30,22 @@ on:
       EC2_KEY:
         required: true
 
+    outputs:
+      previous-sha:
+        description: "SHA déployé avant ce run (vide si premier déploiement)"
+        value: ${{ jobs.deploy.outputs.previous-sha }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment}}
+    environment: ${{ inputs.environment }}
+
+    outputs:
+      previous-sha: ${{ steps.deploy.outputs.previous_sha }}
 
     steps:
       - name: Deploy via SSH
+        id: deploy
         uses: appleboy/ssh-action@v1.0.3
 
         with:
@@ -57,28 +61,25 @@ jobs:
             cd ${{ inputs.compose-directory }}
 
             IMAGE=ghcr.io/${OWNER}/${{ inputs.image-name }}:${{ github.sha }}
+            SHA_FILE=".deployed-${{ inputs.compose-service }}-sha"
+
+            # Capture le SHA actuellement déployé, AVANT de le remplacer
+            if [ -f "$SHA_FILE" ]; then
+              PREVIOUS_SHA=$(cat "$SHA_FILE")
+            else
+              PREVIOUS_SHA=""
+            fi
+            echo "Previous SHA: ${PREVIOUS_SHA:-none}"
+            echo "previous_sha=$PREVIOUS_SHA" >> "$GITHUB_OUTPUT"
 
             echo "Pulling image..."
             docker pull $IMAGE
 
-            # =========================
-            # OPTIONAL: MIGRATIONS
-            # =========================
-            if [ "${{ inputs.run-migrations }}" = "true" ]; then
-              echo "Running migrations..."
-
-              docker run --rm \
-                --network ${{ inputs.network }} \
-                -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-                $IMAGE \
-                npx prisma migrate deploy
-            fi
-
-            # =========================
-            # DEPLOY
-            # =========================
             echo "Deploying container..."
-            IMAGE_TAG=${{ github.sha }} docker compose up -d ${{ inputs.compose-service }} --remove-orphans
+            IMAGE_TAG=${{ github.sha }} docker compose up -d ${{ inputs.compose-service }} --remove-orphans --wait --wait-timeout 60
+
+            # On n'écrit le nouveau SHA QUE si le déploiement a réussi
+            echo "${{ github.sha }}" > "$SHA_FILE"
 
             echo "Cleanup images..."
             docker image prune -f

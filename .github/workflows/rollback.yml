@@ -1,0 +1,56 @@
+name: Rollback
+
+on:
+  workflow_call:
+    inputs:
+      compose-directory:
+        required: true
+        type: string
+
+      compose-service:
+        required: true
+        type: string
+
+      target-sha:
+        required: true
+        type: string
+
+      environment:
+        required: true
+        type: string
+
+    secrets:
+      EC2_HOST:
+        required: true
+      EC2_KEY:
+        required: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Rollback via SSH
+        uses: appleboy/ssh-action@v1.0.3
+
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+
+          script: |
+            set -e
+
+            cd ${{ inputs.compose-directory }}
+
+            SHA_FILE=".deployed-${{ inputs.compose-service }}-sha"
+
+            echo "Rolling back ${{ inputs.compose-service }} to ${{ inputs.target-sha }}..."
+
+            IMAGE_TAG=${{ inputs.target-sha }} docker compose up -d ${{ inputs.compose-service }} --remove-orphans --wait --wait-timeout 60
+
+            echo "${{ inputs.target-sha }}" > "$SHA_FILE"
+
+            echo "Cleanup images..."
+            docker image prune -f
