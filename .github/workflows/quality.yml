@@ -66,15 +66,6 @@ jobs:
         if: inputs.prisma-generate
         run: pnpm --filter ${{ inputs.prisma-package }} exec prisma generate
 
-      - name: Debug Prisma output
-        run: |
-          echo "--- Contenu generated/prisma ---"
-          ls -la packages/database/generated/prisma || echo "DOSSIER ABSENT"
-          echo "--- Symlink depuis gateway ---"
-          ls -la apps/gateway/node_modules/@app/db || echo "PAS DE SYMLINK"
-          echo "--- Contenu réel via le symlink ---"
-          ls -la apps/gateway/node_modules/@app/db/generated/prisma 2>/dev/null || echo "INTROUVABLE VIA SYMLINK"
-
       - name: Lint
         run: pnpm --filter ${{ inputs.package }} lint
 
