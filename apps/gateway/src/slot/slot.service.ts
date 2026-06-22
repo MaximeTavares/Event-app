@@ -7,22 +7,13 @@ import {
 import { CreateSlotDto } from './dto/create-slot.dto';
 import { UpdateSlotDto } from './dto/update-slot.dto';
 import { SlotMapper } from './dto/mapper/slot.mapper';
-import { SlotDTO, SlotWithParticipationDto } from './dto/slot.dto';
-import { NatsService } from 'src/nats/nats.service';
 import { prisma } from '@app/db';
-import { ParticipationStatus } from 'src/participation/dto/participation.dto';
+import { NatsService } from '../nats/nats.service';
+import { SlotDetails, SlotDto, USER_SUBJECTS } from '@app/contracts';
+import { slotWithParticipationStatusQuery } from './query/SlotWithParticipationStatus.query';
 
 type OwnerShipEntity = 'Mission' | 'Slot';
 
-export interface ParticipantWithProfile {
-    participation_id: number;
-    participation_status: ParticipationStatus;
-    userId: string;
-    email: string;
-    first_name: string | null;
-    last_name: string | null;
-    avatar_url: string | null;
-}
 export interface UserProfileResponse {
     id: string;
     email: string;
@@ -38,19 +29,40 @@ export class SlotService {
         userId: string,
         missionId: number,
         createSlotDto: CreateSlotDto,
-    ) {
+    ): Promise<void> {
         await this.checkOwnership('Mission', missionId, userId);
+
+        const eventDates = await prisma.mission.findUnique({
+            where: { id: missionId },
+            select: {
+                Event: {
+                    select: {
+                        start_date: true,
+                        end_date: true,
+                    },
+                },
+            },
+        });
+
+        if (!eventDates) throw new NotFoundException('Event not found');
+
+        if (
+            new Date(createSlotDto.start_at) < eventDates?.Event.start_date ||
+            new Date(createSlotDto.end_at) > eventDates?.Event.end_date
+        )
+            throw new BadRequestException(
+                "Le créneau doit être compris entre les dates de l'évènement",
+            );
 
         if (new Date(createSlotDto.start_at) >= new Date(createSlotDto.end_at))
             throw new BadRequestException('Start date must be before end date');
 
-        const slot = await prisma.slot.create({
+        await prisma.slot.create({
             data: {
                 mission_id: missionId,
                 ...createSlotDto,
             },
         });
-        return slot;
     }
 
     /**
@@ -83,9 +95,12 @@ export class SlotService {
      * @returns SlotDTO enrichi avec currentParticipants (status "ACCEPTED" uniquement)
      * @throws NotFoundException si le slot n'existe pas
      */
-    async findOneById(slotId: number): Promise<SlotDTO> {
+    async findOneById(userId: string, slotId: number): Promise<SlotDto> {
         const [slot, currentParticipants] = await Promise.all([
-            prisma.slot.findUnique({ where: { id: slotId } }),
+            prisma.slot.findUnique({
+                where: { id: slotId },
+                ...slotWithParticipationStatusQuery,
+            }),
             prisma.participation.count({
                 where: { slot_id: slotId, status: 'ACCEPTED' },
             }),
@@ -93,35 +108,19 @@ export class SlotService {
 
         if (!slot) throw new NotFoundException('Slot not found');
 
-        return SlotMapper.MapSlot(slot, currentParticipants);
+        return SlotMapper.toSlotDto(userId, slot, currentParticipants);
     }
 
     async findOneWithParticipants(
+        userId: string,
         slotId: number,
-    ): Promise<SlotWithParticipationDto> {
+    ): Promise<SlotDetails> {
         const [slot, currentParticipants] = await Promise.all([
             prisma.slot.findUnique({
                 where: {
                     id: slotId,
                 },
-                select: {
-                    id: true,
-                    mission_id: true,
-                    status: true,
-                    start_at: true,
-                    end_at: true,
-                    max_participant: true,
-                    Mission: {
-                        select: { Event: { select: { organizer_id: true } } },
-                    },
-                    Participation: {
-                        select: {
-                            id: true,
-                            status: true,
-                            user_id: true,
-                        },
-                    },
-                },
+                ...slotWithParticipationStatusQuery,
             }),
             prisma.participation.count({
                 where: { slot_id: slotId, status: 'ACCEPTED' },
@@ -135,7 +134,7 @@ export class SlotService {
         const participantsProfiles = await this.nastService.send<
             UserProfileResponse[],
             { userIds: string[] }
-        >('users.profiles', { userIds });
+        >(USER_SUBJECTS.GET_PROFILES, { userIds });
 
         const profilesMap = new Map(
             participantsProfiles.map((profile) => [profile.id, profile]),
@@ -145,9 +144,10 @@ export class SlotService {
             const profile = profilesMap.get(participation.user_id);
 
             return {
-                participation_id: participation.id,
-                participation_status: participation.status,
-                userId: participation.user_id,
+                slot_id: slot.id,
+                id: participation.id,
+                status: participation.status,
+                user_id: participation.user_id,
                 email: profile?.email ?? '',
                 first_name: profile?.first_name ?? null,
                 last_name: profile?.last_name ?? null,
@@ -156,6 +156,7 @@ export class SlotService {
         });
 
         return SlotMapper.toSlotWithParticipations(
+            userId,
             slot,
             participants,
             currentParticipants,
@@ -166,49 +167,92 @@ export class SlotService {
         userId: string,
         slotId: number,
         updateSlotDto: UpdateSlotDto,
-    ): Promise<{ message: string }> {
+    ): Promise<void> {
         await this.checkOwnership('Slot', slotId, userId);
+
+        const slot = await prisma.slot.findUnique({
+            where: { id: slotId },
+            select: {
+                start_at: true,
+                end_at: true,
+                Mission: {
+                    select: {
+                        Event: {
+                            select: {
+                                start_date: true,
+                                end_date: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!slot) throw new NotFoundException('Slot not found');
+
+        console.log('Appel de update Slot');
+
+        const { start_date, end_date } = slot.Mission.Event;
+
+        const effectiveStartAt = new Date(
+            updateSlotDto.start_at ?? slot.start_at,
+        );
+
+        const effectiveEndAt = new Date(updateSlotDto.end_at ?? slot.end_at);
+
+        if (effectiveStartAt < start_date || effectiveEndAt > end_date)
+            throw new BadRequestException(
+                "Le créneau doit être compris entre les dates de l'évènement",
+            );
 
         await prisma.slot.update({
             where: { id: slotId },
             data: updateSlotDto,
         });
-
-        return { message: 'Slot updated successfully' };
     }
 
-    async remove(userId: string, slotId: number): Promise<{ message: string }> {
+    async remove(userId: string, slotId: number): Promise<void> {
         await this.checkOwnership('Slot', slotId, userId);
 
         await prisma.slot.delete({ where: { id: slotId } });
-
-        return { message: 'Slot removed successfully' };
     }
 
     async checkOwnership<T extends OwnerShipEntity>(
         entityType: T,
         id: number,
         userId: string,
-    ) {
+    ): Promise<void> {
         if (entityType === 'Mission') {
             const mission = await prisma.mission.findUnique({
                 where: { id },
-                include: { Event: true },
+                select: {
+                    Event: {
+                        select: {
+                            organizer_id: true,
+                        },
+                    },
+                },
             });
 
             if (!mission) throw new NotFoundException('Mission not found');
 
             if (mission.Event.organizer_id !== userId)
                 throw new ForbiddenException("You're not allowed");
-
-            return mission;
         }
 
         if (entityType === 'Slot') {
             const slot = await prisma.slot.findUnique({
                 where: { id },
-                include: {
-                    Mission: { include: { Event: true } },
+                select: {
+                    Mission: {
+                        select: {
+                            Event: {
+                                select: {
+                                    organizer_id: true,
+                                },
+                            },
+                        },
+                    },
                 },
             });
 
@@ -216,8 +260,6 @@ export class SlotService {
 
             if (slot.Mission.Event.organizer_id !== userId)
                 throw new ForbiddenException("You're not allowed");
-
-            return slot;
         }
     }
 }

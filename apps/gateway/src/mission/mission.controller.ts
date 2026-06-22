@@ -14,9 +14,9 @@ import {
 import { MissionService } from './mission.service';
 import { CreateMissionDto } from './dto/create-mission.dto';
 import { UpdateMissionDto } from './dto/update-mission.dto';
-import { User } from 'src/ms-auth/decorators/user.decorator';
-import { EventService } from 'src/event/event.service';
-import { MissionDTO, MissionWithSlotDTO } from './dto/mission.dto';
+import { EventService } from '../event/event.service';
+import { User } from '../ms-auth/decorators/user.decorator';
+import { MissionDetailsDto, MissionDto } from '@app/contracts';
 
 @Controller()
 export class MissionController {
@@ -30,12 +30,12 @@ export class MissionController {
         @User('id') userId: string,
         @Param('event_id', ParseIntPipe) eventId: number,
         @Body() createMissionDto: CreateMissionDto,
-    ): Promise<MissionDTO> {
+    ): Promise<MissionDto> {
         const event = await this.eventService.findOne(eventId);
 
         if (!event) throw new NotFoundException('Event not found');
 
-        if (event.data.organizer_id !== userId)
+        if (event.organizer_id !== userId)
             throw new ForbiddenException("You're not allowed");
 
         return this.missionService.create(eventId, createMissionDto);
@@ -48,12 +48,17 @@ export class MissionController {
 
     @Get('missions/:id')
     async findOneById(
-        @Param('id', ParseIntPipe) id: number,
+        @User('id') userId: string,
+        @Param('id', ParseIntPipe) missionId: number,
         @Query('details') details?: boolean,
-    ): Promise<MissionDTO | MissionWithSlotDTO> {
-        if (details) return await this.missionService.findOneWithDetails(id);
+    ): Promise<MissionDto | MissionDetailsDto> {
+        if (details)
+            return await this.missionService.findOneWithDetails(
+                userId,
+                missionId,
+            );
 
-        return await this.missionService.findOneById(id);
+        return await this.missionService.findOneById(missionId);
     }
 
     @Patch('missions/:id')
@@ -69,7 +74,7 @@ export class MissionController {
     async remove(
         @User('id') userId: string,
         @Param('id', ParseIntPipe) missionId: number,
-    ) {
+    ): Promise<void> {
         return this.missionService.remove(userId, missionId);
     }
 }

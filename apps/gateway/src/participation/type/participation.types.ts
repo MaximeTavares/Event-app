@@ -1,4 +1,4 @@
-import { ParticipationStatus } from '../dto/participation.dto';
+import { ParticipationStatus } from '@app/contracts';
 
 export interface ParticipationWithStatusAndOrganizer {
     userId: string;

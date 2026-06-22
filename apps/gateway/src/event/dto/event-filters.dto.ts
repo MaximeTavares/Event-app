@@ -1,6 +1,6 @@
+import { EventStatus } from '@app/contracts';
 import { Transform, Type } from 'class-transformer';
 import { IsOptional, IsArray, IsString, IsNumber } from 'class-validator';
-import { EventStatus } from './event.dto';
 
 export class EventFiltersDto {
     @IsOptional()

@@ -3,8 +3,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './guard/auth.guard';
 import { AuthController } from './auth.controller';
-import { NatsModule } from 'src/nats/nats.module';
 import { AuthService } from './auth.service';
+import { NatsModule } from '../nats/nats.module';
 
 @Module({
     controllers: [AuthController],

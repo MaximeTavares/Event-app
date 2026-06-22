@@ -1,18 +1,16 @@
 import { SlotItem } from '../../mission_slot/components/SlotItem';
-import {
-    missionStatusColor,
-    missionStatusLabel,
-    type MissionFromEventDetails,
-} from '../types/mission.type';
+import { missionStatusColor, missionStatusLabel } from '../types/mission.type';
 import { useNavigate } from 'react-router';
 import Button from '../../../shared/components/UI/Button';
 import { MoreDetailsIcon } from '../../../shared/components/UI/icons/icons';
+import { MissionDetailsDto } from '@app/contracts';
 
 type MissionItemProps = {
-    mission: MissionFromEventDetails;
+    mission: MissionDetailsDto;
 };
 
 export function MissionItem({ mission }: Readonly<MissionItemProps>) {
+    console.log('Détails de la mission sur Mission Item :', mission);
     const navigate = useNavigate();
     return (
         <div className="card bg-base-100 border border-base-300 shadow-sm group hover:shadow-md transition-all duration-200 rounded-xl">
@@ -37,10 +35,17 @@ export function MissionItem({ mission }: Readonly<MissionItemProps>) {
                     </Button>
                 </div>
 
+                <p className="text-gray-500">{mission.description}</p>
+
                 {/* SLOTS */}
                 <div className="flex flex-col gap-3">
                     {mission.slots.map((s) => (
-                        <SlotItem key={s.id} slot={s} />
+                        <SlotItem
+                            key={s.id}
+                            slot={s}
+                            eventId={mission.event_id}
+                            missionId={mission.id}
+                        />
                     ))}
                 </div>
                 <div className="card-actions justify-end"></div>

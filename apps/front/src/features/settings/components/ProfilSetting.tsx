@@ -3,6 +3,8 @@ import { ProfileDto } from '@app/contracts';
 import { ProfileForm } from './ProfileForm';
 import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
+import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
+import { FormLayout } from '../../../shared/layout/FormLayout';
 
 export default function ProfilSetting() {
     const { data, isPending, isError } = useSettings();
@@ -27,7 +29,7 @@ export default function ProfilSetting() {
     };
 
     if (isPending) {
-        return <p className="text-base-content/70">Chargement du profil…</p>;
+        return <SkeletonLoading />;
     }
 
     if (isError || !data) {
@@ -35,13 +37,17 @@ export default function ProfilSetting() {
     }
 
     return (
-        <ProfileForm
-            defaultValues={data.profile}
-            onSubmit={handleFormSubmit}
-            error={
-                updateProfile.isError ? "Impossible d'enregistrer les modifications." : undefined
-            }
-            isSubmitting={updateProfile.isPending}
-        />
+        <FormLayout title="Profil" width="xl">
+            <ProfileForm
+                defaultValues={data.profile}
+                onSubmit={handleFormSubmit}
+                error={
+                    updateProfile.isError
+                        ? "Impossible d'enregistrer les modifications."
+                        : undefined
+                }
+                isSubmitting={updateProfile.isPending}
+            />
+        </FormLayout>
     );
 }

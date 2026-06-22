@@ -6,12 +6,14 @@ import {
     type UseQueryResult,
 } from '@tanstack/react-query';
 import { SlotApi } from '../api/slot.api';
-import type { BaseSlot, SlotDetailsApiResponse } from '../types/slot.type';
+import type { BaseSlot } from '../types/slot.type';
 import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema';
+import { SlotDetails } from '@app/contracts';
+import { queryKeys } from '../../../shared/tanstack/QueryKeys';
 
-export function useGetSlot(id: number): UseQueryResult<SlotDetailsApiResponse, Error> {
+export function useGetSlot(id: number): UseQueryResult<SlotDetails, Error> {
     return useQuery({
-        queryKey: ['slot', id],
+        queryKey: queryKeys.slot(id),
         queryFn: () => SlotApi.getSlotById(id),
         enabled: !!id,
     });
@@ -27,7 +29,9 @@ export function useCreateSlot(): UseMutationResult<
     return useMutation({
         mutationFn: (variables) => SlotApi.createSlot(variables.missionId, variables.slot),
         onSuccess: async (_data, variables) => {
-            await queryClient.invalidateQueries({ queryKey: ['mission', variables.missionId] });
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.mission(variables.missionId),
+            });
         },
         onError: (error) => {
             console.error('Échec de la création :', error.message);
@@ -45,7 +49,7 @@ export function useUpdateSlot(): UseMutationResult<
     return useMutation({
         mutationFn: (variables) => SlotApi.updateSlot(variables.slotId, variables.slot),
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ['slot'] });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.slots });
         },
         onError: (error) => {
             console.error('Échec de la mise à jour :', error.message);
@@ -59,8 +63,8 @@ export function useDeleteSlot(): UseMutationResult<void, Error, { id: number }> 
     return useMutation({
         mutationFn: (variables) => SlotApi.deleteSlot(variables.id),
         onSuccess: async (_data, variables) => {
-            await queryClient.invalidateQueries({ queryKey: ['slot'] });
-            queryClient.removeQueries({ queryKey: ['slot', variables.id] });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.slots });
+            queryClient.removeQueries({ queryKey: queryKeys.slot(variables.id) });
         },
         onError: (error) => {
             console.error('Échec de la suppression :', error.message);

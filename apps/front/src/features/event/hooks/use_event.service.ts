@@ -8,13 +8,14 @@ import {
 import type {
     BaseEvent,
     CreateEventInput,
-    EventDetailsApiResponse,
     PaginatedEvents,
     UpdateEventInput,
 } from '../types/event.type';
 import { createEvent, deleteEvent, getEventById, getEvents, updateEvent } from '../api/event.api';
 import type { EventFilters } from '../../../shared/components/UI/filter/eventsFilters.interface';
 import { EventMapper } from '../mapper/EventMapper';
+import { EventDto } from '@app/contracts';
+import { queryKeys } from '../../../shared/tanstack/QueryKeys';
 
 //Lecture
 export function useGetEvents(filters?: EventFilters): UseQueryResult<PaginatedEvents, Error> {
@@ -33,9 +34,9 @@ export function useGetEvents(filters?: EventFilters): UseQueryResult<PaginatedEv
     });
 }
 
-export function useGetEventById(id: number): UseQueryResult<EventDetailsApiResponse, Error> {
+export function useGetEventById(id: number): UseQueryResult<EventDto, Error> {
     return useQuery({
-        queryKey: ['events', id],
+        queryKey: queryKeys.event(id),
         queryFn: () => getEventById(id),
         enabled: !!id,
     });
@@ -48,7 +49,7 @@ export function useCreateEvent(): UseMutationResult<BaseEvent, Error, CreateEven
     return useMutation({
         mutationFn: createEvent,
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ['events'] });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.events });
         },
         onError: (error) => {
             console.error('Échec de la création :', error.message);
@@ -66,7 +67,7 @@ export function useUpdateEvent(): UseMutationResult<
     return useMutation({
         mutationFn: (variables) => updateEvent(variables.id, variables.data),
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ['events'] });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.events });
         },
         onError: (error) => {
             console.error('Échec de la mise à jour :', error.message);
@@ -80,8 +81,8 @@ export function useDeleteEvent(): UseMutationResult<void, Error, { id: number }>
     return useMutation({
         mutationFn: (variables) => deleteEvent(variables.id),
         onSuccess: async (_data, variables) => {
-            await queryClient.invalidateQueries({ queryKey: ['events'] });
-            queryClient.removeQueries({ queryKey: ['events', variables.id] });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.events });
+            queryClient.removeQueries({ queryKey: queryKeys.event(variables.id) });
         },
         onError: (error) => {
             console.error('Échec de la suppression :', error.message);

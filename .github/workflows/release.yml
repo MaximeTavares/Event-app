@@ -12,6 +12,10 @@ on:
         required: true
         default: "all"
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
 
 ##########################
@@ -53,7 +57,9 @@ jobs:
   build-gateway:
     needs: detect-changes
 
-    if: needs.detect-changes.outputs.gateway == 'true'
+    if: |
+      needs.detect-changes.outputs.gateway == 'true' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.service == 'gateway' || inputs.service == 'all'))
 
     permissions:
       contents: read
@@ -69,7 +75,9 @@ jobs:
   build-auth:
     needs: detect-changes
 
-    if: needs.detect-changes.outputs.auth == 'true'
+    if: |
+      needs.detect-changes.outputs.auth == 'true' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.service == 'auth' || inputs.service == 'all'))
 
     permissions:
       contents: read
@@ -85,7 +93,9 @@ jobs:
   build-front:
     needs: detect-changes
 
-    if: needs.detect-changes.outputs.front == 'true'
+    if: |
+      needs.detect-changes.outputs.front == 'true' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.service == 'front' || inputs.service == 'all'))
 
     permissions:
       contents: read
@@ -212,3 +222,131 @@ jobs:
       environment: staging
       image-name: front
       network: nginx-staging
+
+##########################
+## DEPLOY GATE
+##########################
+  deploy-gate:
+    needs: [deploy-gateway, deploy-auth, deploy-front]
+    runs-on: ubuntu-latest
+
+    if: always()
+
+    outputs:
+      rollback-needed: ${{ steps.check.outputs.rollback_needed }}
+
+    steps:
+      - name: Check deploy results
+        id: check
+        run: |
+          echo "gateway=${{ needs.deploy-gateway.result }}"
+          echo "auth=${{ needs.deploy-auth.result }}"
+          echo "front=${{ needs.deploy-front.result }}"
+
+          for r in \
+            "${{ needs.deploy-gateway.result }}" \
+            "${{ needs.deploy-auth.result }}" \
+            "${{ needs.deploy-front.result }}"; do
+
+            if [[ "$r" == "failure" ]]; then
+              echo "❌ Un déploiement a échoué → rollback nécessaire"
+              echo "rollback_needed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          echo "✅ Tous les déploiements ont réussi"
+          echo "rollback_needed=false" >> "$GITHUB_OUTPUT"
+
+##########################
+## ROLLBACKS
+##########################
+
+  rollback-gateway:
+    needs: [deploy-gateway, deploy-gate]
+
+    if: |
+      always() &&
+      needs.deploy-gate.outputs.rollback-needed == 'true' &&
+      needs.deploy-gateway.result != 'skipped'
+
+    uses: ./.github/workflows/rollback.yml
+
+    secrets: inherit
+
+    with:
+      compose-directory: /opt/event-app/staging
+      compose-service: staging-gateway
+      environment: staging
+      target-sha: ${{ needs.deploy-gateway.outputs.previous-sha }}
+
+  rollback-auth:
+    needs: [deploy-auth, deploy-gate]
+
+    if: |
+      always() &&
+      needs.deploy-gate.outputs.rollback-needed == 'true' &&
+      needs.deploy-auth.result != 'skipped'
+
+    uses: ./.github/workflows/rollback.yml
+
+    secrets: inherit
+
+    with:
+      compose-directory: /opt/event-app/staging
+      compose-service: staging-ms-auth
+      environment: staging
+      target-sha: ${{ needs.deploy-auth.outputs.previous-sha }}
+
+  rollback-front:
+    needs: [deploy-front, deploy-gate]
+
+    if: |
+      always() &&
+      needs.deploy-gate.outputs.rollback-needed == 'true' &&
+      needs.deploy-front.result != 'skipped'
+
+    uses: ./.github/workflows/rollback.yml
+
+    secrets: inherit
+
+    with:
+      compose-directory: /opt/event-app/staging
+      compose-service: staging-front
+      environment: staging
+      target-sha: ${{ needs.deploy-front.outputs.previous-sha }}
+
+##########################
+## ROLLBACK GATE (vérifie que les rollbacks ont bien fonctionné)
+##########################
+  rollback-gate:
+    needs: [rollback-gateway, rollback-auth, rollback-front]
+    runs-on: ubuntu-latest
+
+    if: always() && needs.deploy-gate.outputs.rollback-needed == 'true'
+
+    steps:
+      - name: Check rollback results
+        run: |
+          echo "rollback-gateway=${{ needs.rollback-gateway.result }}"
+          echo "rollback-auth=${{ needs.rollback-auth.result }}"
+          echo "rollback-front=${{ needs.rollback-front.result }}"
+
+          FAILED=false
+
+          for r in \
+            "${{ needs.rollback-gateway.result }}" \
+            "${{ needs.rollback-auth.result }}" \
+            "${{ needs.rollback-front.result }}"; do
+
+            if [[ "$r" == "failure" ]]; then
+              FAILED=true
+            fi
+          done
+
+          if [ "$FAILED" = "true" ]; then
+            echo "::error::🚨 ROLLBACK FAILED — l'infra est dans un état incohérent, intervention manuelle requise immédiatement"
+            exit 1
+          fi
+
+          echo "✅ Rollback réussi sur tous les services concernés — infra revenue à un état cohérent"

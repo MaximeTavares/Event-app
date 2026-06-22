@@ -31,8 +31,6 @@ export function PreferenceForm({
 
     return (
         <form className="flex max-w-xl flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-            <h2 className="text-xl font-semibold">Préférences</h2>
-
             <h3 className="text-sm font-semibold uppercase tracking-wide text-base-content/60">
                 Affichage
             </h3>
@@ -149,7 +147,7 @@ export function PreferenceForm({
             {error && <p className="text-error text-sm">{error}</p>}
 
             <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Enregistrement…' : 'Sauvegarder'}
+                {isSubmitting ? 'Enregistrement…' : 'Enregister'}
             </Button>
         </form>
     );

@@ -16,7 +16,7 @@ import {
     SecuritySchema,
     SETTINGS_SUBJECTS,
 } from '@app/contracts';
-import { ZodValidationPipe } from 'src/utils/zod-validation.pipe';
+import { ZodValidationPipe } from '../utils/zod-validation.pipe';
 
 @Controller('me')
 export class SettingsController {

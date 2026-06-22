@@ -1,52 +1,10 @@
-import type { Participant } from '../../event/types/participant.type';
+import { SlotStatus } from '@app/contracts';
 import type { ParticipationStatus } from '../../participation/types/participation.types';
-
-export type SlotStatus = 'OPEN' | 'FULL' | 'CLOSED' | 'CANCELLED';
-
-export const slotStatusLabel: Record<SlotStatus, string> = {
-    OPEN: 'Ouvert',
-    CANCELLED: 'Annulé',
-    CLOSED: 'Fermé',
-    FULL: 'Complet',
-};
-
-export const slotStatusColor: Record<SlotStatus, string> = {
-    OPEN: 'badge-success',
-    FULL: 'badge-accent',
-    CANCELLED: 'badge-error',
-    CLOSED: 'badge-error',
-};
-
-export interface Slot {
-    id: number;
-    start_at: Date;
-    end_at: Date;
-    max_participant: number;
-    status: SlotStatus;
-    participants: Participant[];
-}
-
 export interface BaseSlot {
     id: number;
     start_at: Date;
     end_at: Date;
     max_participant: number;
-    status: SlotStatus;
-}
-
-export interface CreateSlotDto {
-    start_at: string;
-    end_at: string;
-    max_participant: number;
-}
-
-export interface SlotFromEventDetails {
-    id: number;
-    start_at: Date;
-    end_at: Date;
-    max_participants: number;
-    current_participants: number;
-    available_place: number;
     status: SlotStatus;
 }
 

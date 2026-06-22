@@ -1,23 +1,19 @@
 import { SlotMapper } from './../slot/dto/mapper/slot.mapper';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ParticipationWithStatusAndOrganizer } from './type/participation.types';
-import { ParticipationDTO } from './dto/participation.dto';
-import { SlotDTO } from 'src/slot/dto/slot.dto';
-import { EventDTO } from 'src/event/dto/event.dto';
-import { ParticipationPolicyService } from './policy/participationPolicy.service.';
-import { SlotPolicyService } from './policy/slotPolicy.service';
-import { UpdateParticipationDto } from './dto/update-participation.dto';
-import { PARTICIPATION_ACTION_CONFIG } from './policy/participations.policy';
+import {
+    PARTICIPATION_TRANSITIONS,
+    TransitionName,
+} from './policy/participations.transition';
 import { prisma, Prisma } from '@app/db';
-import { Mission } from 'src/mission/types/types';
+import { EventDto, MissionDto, ParticipantDto, SlotDto } from '@app/contracts';
+import { assertCanCreateOrRejoin } from './policy/participation.guards';
+import { assertCanJoin } from './policy/slot.guards';
+import { toMissionDto } from '../mission/mapper/mission.mapper';
+import { participationQuery } from './query/participation.query';
 
 @Injectable()
 export class ParticipationService {
-    constructor(
-        private readonly participationPolicy: ParticipationPolicyService,
-        private readonly slotPolicy: SlotPolicyService,
-    ) {}
-
     /**
      * Create a participation on a slot :
      *  - Check if slot exist
@@ -36,7 +32,7 @@ export class ParticipationService {
     async create(
         currentUserId: string,
         slotId: number,
-    ): Promise<ParticipationDTO> {
+    ): Promise<ParticipantDto> {
         return await prisma.$transaction(async (tx) => {
             //Check if slot exist
             const slot = await this.getSlotOrThrow(tx, slotId);
@@ -49,8 +45,8 @@ export class ParticipationService {
             );
 
             //Policies
-            this.participationPolicy.assertCanCreateOrRejoin(existing);
-            this.slotPolicy.assertCanJoin(slot, currentParticipants);
+            assertCanCreateOrRejoin(existing);
+            assertCanJoin(slot, currentParticipants);
 
             //Update or Create participation
             const participation = await this.createOrRejointParticipation(
@@ -102,8 +98,8 @@ export class ParticipationService {
         tx: Prisma.TransactionClient,
         currentUserId: string,
         slotId: number,
-        existing: ParticipationDTO | null,
-    ) {
+        existing: ParticipantDto | null,
+    ): Promise<ParticipantDto> {
         //Update existing participation with status "CANCELLED"
         if (existing?.status === 'CANCELLED') {
             return tx.participation.update({
@@ -118,6 +114,7 @@ export class ParticipationService {
                     decision_at: null,
                     cancelled_at: null,
                 },
+                ...participationQuery,
             });
         }
 
@@ -128,14 +125,15 @@ export class ParticipationService {
                 slot_id: slotId,
                 status: 'PENDING',
             },
+            ...participationQuery,
         });
     }
 
-    async findAll(): Promise<ParticipationDTO[]> {
+    async findAll(): Promise<ParticipantDto[]> {
         return await prisma.participation.findMany();
     }
 
-    async findOne(id: number): Promise<ParticipationDTO> {
+    async findOne(id: number): Promise<ParticipantDto> {
         const participation = await prisma.participation.findUnique({
             where: { id },
         });
@@ -146,7 +144,7 @@ export class ParticipationService {
         return participation;
     }
 
-    async getMyParticipations(userId: string): Promise<ParticipationDTO[]> {
+    async getMyParticipations(userId: string): Promise<ParticipantDto[]> {
         const participations = await prisma.participation.findMany({
             where: { user_id: userId },
         });
@@ -171,17 +169,28 @@ export class ParticipationService {
      * @throws {NotFoundException} If no slots are found (optional, depending on your implementation)
     
      */
-    async getMySlots(userId: string): Promise<SlotDTO[]> {
+    async getMySlots(userId: string): Promise<SlotDto[]> {
         const participations = await prisma.participation.findMany({
             where: { user_id: userId },
             select: {
                 Slot: {
                     select: {
                         id: true,
+                        mission_id: true,
                         start_at: true,
                         end_at: true,
                         max_participant: true,
                         status: true,
+                        Mission: {
+                            select: {
+                                Event: {
+                                    select: { organizer_id: true },
+                                },
+                            },
+                        },
+                        Participation: {
+                            select: { user_id: true, status: true, id: true },
+                        },
                     },
                 },
             },
@@ -243,7 +252,7 @@ export class ParticipationService {
         });
 
         return slots.map((slot) =>
-            SlotMapper.MapSlot(slot, countMap.get(slot.id) ?? 0),
+            SlotMapper.toSlotDto(userId, slot, countMap.get(slot.id) ?? 0),
         );
     }
 
@@ -256,13 +265,26 @@ export class ParticipationService {
         return [...itemMap.values()];
     }
 
-    async getMyMissions(userId: string): Promise<Mission[]> {
+    async getMyMissions(userId: string): Promise<MissionDto[]> {
         const participations = await prisma.participation.findMany({
             where: { user_id: userId },
             select: {
                 Slot: {
                     select: {
-                        Mission: true,
+                        Mission: {
+                            select: {
+                                id: true,
+                                event_id: true,
+                                title: true,
+                                description: true,
+                                status: true,
+                                Event: {
+                                    select: {
+                                        organizer_id: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -271,15 +293,17 @@ export class ParticipationService {
         if (participations.length === 0)
             throw new NotFoundException("You don't have any participations");
 
-        return this.uniqueBy(
+        const missions = this.uniqueBy(
             participations.map((p) => p.Slot.Mission),
             'id',
         );
+
+        return missions.map((m) => toMissionDto(m));
     }
 
     async getMyEvents(
         userId: string,
-    ): Promise<Omit<EventDTO, 'user' | 'address'>[]> {
+    ): Promise<Omit<EventDto, 'address' | 'missions'>[]> {
         const participations = await prisma.participation.findMany({
             where: { user_id: userId },
             select: {
@@ -304,84 +328,40 @@ export class ParticipationService {
         );
     }
 
-    async acceptParticipation(
-        currentUserId: string,
+    async transition(
+        userId: string,
         participationId: number,
-    ): Promise<ParticipationDTO> {
+        action: TransitionName,
+    ): Promise<ParticipantDto> {
         return prisma.$transaction((tx) =>
-            this.updateParticipation(
-                tx,
-                currentUserId,
-                participationId,
-                'ACCEPT',
-            ),
+            this.applyTransition(tx, userId, participationId, action),
         );
     }
 
-    async rejectParticipation(
-        currentUserId: string,
-        participationId: number,
-    ): Promise<ParticipationDTO> {
-        return prisma.$transaction((tx) =>
-            this.updateParticipation(
-                tx,
-                currentUserId,
-                participationId,
-                'REJECT',
-            ),
-        );
-    }
-
-    async cancelParticipation(
-        currentUserId: string,
-        participationId: number,
-    ): Promise<ParticipationDTO> {
-        return prisma.$transaction((tx) =>
-            this.updateParticipation(
-                tx,
-                currentUserId,
-                participationId,
-                'CANCEL',
-            ),
-        );
-    }
-
-    async updateParticipation(
+    private async applyTransition(
         tx: Prisma.TransactionClient,
-        currentUserId: string,
+        userId: string,
         participationId: number,
-        action: 'ACCEPT' | 'REJECT' | 'CANCEL',
-    ) {
+        action: TransitionName,
+    ): Promise<ParticipantDto> {
         const participation = await this.findWithContextOrThrow(
             tx,
             participationId,
         );
+        const transition = PARTICIPATION_TRANSITIONS[action];
 
-        const config = PARTICIPATION_ACTION_CONFIG[action];
-        // Policy
-        config.applyPolicy(
-            this.participationPolicy,
-            currentUserId,
-            participation,
-        );
+        // une seule fonction qui vérifie À LA FOIS le rôle ET l'état de départ
+        transition.guard(userId, participation);
 
-        // Data
-        const data: UpdateParticipationDto = {
-            status: config.status,
-            cancelled_at: config.cancelled_at(),
-            decision_at: config.decision_at(),
-        };
-
-        // Update
-        const updated = await tx.participation.update({
+        return tx.participation.update({
             where: { id: participationId },
-            data,
+            data: {
+                status: transition.toStatus,
+                decision_at: transition.decision_at(),
+                cancelled_at: transition.cancelled_at(),
+            },
+            ...participationQuery,
         });
-
-        // Sync
-        await this.slotPolicy.syncSlotStatus(tx, updated.slot_id);
-
-        return updated;
     }
 
     async findWithContextOrThrow(

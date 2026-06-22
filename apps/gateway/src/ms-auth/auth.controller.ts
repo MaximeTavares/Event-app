@@ -13,7 +13,7 @@ import {
     SignupRequestDto,
     SignupRequestSchema,
 } from '@app/contracts';
-import { ZodValidationPipe } from 'src/utils/zod-validation.pipe';
+import { ZodValidationPipe } from '../utils/zod-validation.pipe';
 
 @Controller('ms/auth')
 export class AuthController {

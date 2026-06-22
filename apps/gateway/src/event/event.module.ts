@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { GeoapifyModule } from 'src/geoapify/geoapify.module';
 import { EventController } from './event.controller';
 import { EventService } from './event.service';
-import { NatsModule } from 'src/nats/nats.module';
+import { GeoapifyModule } from '../geoapify/geoapify.module';
+import { NatsModule } from '../nats/nats.module';
 
 @Module({
     imports: [GeoapifyModule, NatsModule],

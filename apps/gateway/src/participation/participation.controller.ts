@@ -1,86 +1,77 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Patch,
-    Param,
-    ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, ParseIntPipe } from '@nestjs/common';
 import { ParticipationService } from './participation.service';
-import { User } from 'src/ms-auth/decorators/user.decorator';
+import { User } from '../ms-auth/decorators/user.decorator';
+import { EventDto, MissionDto, ParticipantDto, SlotDto } from '@app/contracts';
 
 @Controller()
 export class ParticipationController {
     constructor(private readonly participationService: ParticipationService) {}
 
     @Post('slots/:id/participate')
-    create(
+    async create(
         @User('id') userId: string,
         @Param('id', ParseIntPipe) slotId: number,
-    ) {
+    ): Promise<ParticipantDto> {
         return this.participationService.create(userId, slotId);
     }
 
     @Get('participations')
-    findAll() {
+    async findAll(): Promise<ParticipantDto[]> {
         return this.participationService.findAll();
     }
 
     @Get('participations/:id')
-    findOne(@Param('id', ParseIntPipe) id: number) {
+    async findOne(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<ParticipantDto> {
         return this.participationService.findOne(id);
     }
 
     @Get('me/participations')
-    getMyParticipations(@User('id') userId: string) {
+    async getMyParticipations(
+        @User('id') userId: string,
+    ): Promise<ParticipantDto[]> {
         return this.participationService.getMyParticipations(userId);
     }
 
     @Get('me/slots')
-    getMySlots(@User('id') userId: string) {
+    async getMySlots(@User('id') userId: string): Promise<SlotDto[]> {
         return this.participationService.getMySlots(userId);
     }
 
     @Get('me/missions')
-    getMyMissions(@User('id') userId: string) {
+    async getMyMissions(@User('id') userId: string): Promise<MissionDto[]> {
         return this.participationService.getMyMissions(userId);
     }
 
     @Get('me/events')
-    getMyEvents(@User('id') userId: string) {
+    async getMyEvents(
+        @User('id') userId: string,
+    ): Promise<Omit<EventDto, 'address' | 'missions'>[]> {
         return this.participationService.getMyEvents(userId);
     }
 
-    @Patch('participations/:id/accept')
-    acceptParticipation(
+    @Post('participations/:id/accept')
+    async accept(
         @User('id') userId: string,
-        @Param('id', ParseIntPipe) participationId: number,
-    ) {
-        return this.participationService.acceptParticipation(
-            userId,
-            participationId,
-        );
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<ParticipantDto> {
+        return this.participationService.transition(userId, id, 'ACCEPT');
     }
 
-    @Patch('participations/:id/reject')
-    rejectParticipation(
+    @Post('participations/:id/reject')
+    async reject(
         @User('id') userId: string,
-        @Param('id', ParseIntPipe) participationId: number,
-    ) {
-        return this.participationService.rejectParticipation(
-            userId,
-            participationId,
-        );
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<ParticipantDto> {
+        return this.participationService.transition(userId, id, 'REJECT');
     }
 
-    @Patch('participations/:id/cancel')
-    cancelParticipation(
+    @Post('participations/:id/cancel')
+    async cancel(
         @User('id') userId: string,
-        @Param('id', ParseIntPipe) participationId: number,
-    ) {
-        return this.participationService.cancelParticipation(
-            userId,
-            participationId,
-        );
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<ParticipantDto> {
+        return this.participationService.transition(userId, id, 'CANCEL');
     }
 }

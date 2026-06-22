@@ -30,8 +30,6 @@ export function ProfileForm({
 
     return (
         <form className="flex max-w-xl flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-            <h2 className="text-xl font-semibold">Profil</h2>
-
             <FormField
                 label="Prénom"
                 error={errors.firstName?.message}
@@ -62,7 +60,7 @@ export function ProfileForm({
                 {...register('bio')}
             />
 
-            <fieldset className="flex flex-col gap-3 rounded-lg border border-base-300 p-4">
+            <fieldset className="flex flex-col gap-3 rounded-lg border border-base-300 shadow p-4">
                 <legend className="px-1 text-sm font-medium">Adresse</legend>
 
                 <div className="grid grid-cols-2 gap-3">

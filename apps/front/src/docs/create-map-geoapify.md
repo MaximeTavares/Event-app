@@ -391,7 +391,7 @@ async create(
 	});
 
 	return {
-		data: mapEvent(newEvent),
+		data: toEventWithAddress(newEvent),
 	};
 }
 ```

@@ -1,5 +1,4 @@
 import { formatInTimeZone } from 'date-fns-tz';
-import { slotStatusColor, slotStatusLabel, type SlotDetailsApiResponse } from '../types/slot.type';
 import { ParticipantItem } from '../../participation/components/ParticipantItem';
 import { HeaderDetails } from '../../../shared/components/UI/HeaderDetails';
 import { DeleteModal } from '../../../shared/components/UI/DeleteModal';
@@ -10,14 +9,22 @@ import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema
 import { SlotMapper } from '../mapper/SlotMapper';
 import { Modal2 } from '../../../shared/components/UI/Modal2';
 import { Card } from '../../../shared/layout/Card';
+import { SlotDetails, slotStatusColor, slotStatusLabel } from '@app/contracts';
+import { HandleParticipantItem } from '../../participation/components/HandleParticipantItem';
+import {
+    TransitionAction,
+    useParticipationTransitions,
+} from '../../participation/hooks/use_participationTransition';
 
 type SlotDetailsProps = {
-    slot: SlotDetailsApiResponse;
+    slot: SlotDetails;
 };
 
-export function SlotDetails({ slot }: Readonly<SlotDetailsProps>) {
+export function SlotDetailsComponent({ slot }: Readonly<SlotDetailsProps>) {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+    const [isParticipantModalOpen, setIsParticipantModalOpen] = useState<boolean>(false);
+    const isFull = slot.available_place === 0;
 
     const {
         acceptedParticipants,
@@ -31,6 +38,13 @@ export function SlotDetails({ slot }: Readonly<SlotDetailsProps>) {
     const onUpdate = async (data: SlotCreationOutputValues) => {
         setIsEditModalOpen(false);
         await handleUpdate(data);
+    };
+
+    const { /* isPending, */ handleAction } = useParticipationTransitions(slot.id);
+
+    const onParticipantAction = async (action: TransitionAction, participationId: number) => {
+        setIsParticipantModalOpen(false);
+        await handleAction(action, participationId);
     };
 
     return (
@@ -82,7 +96,32 @@ export function SlotDetails({ slot }: Readonly<SlotDetailsProps>) {
                         />
                     </div>
                 )}
+
+                {canEdit && (
+                    <div className="pt-2">
+                        <button
+                            className="text-sm text-blue-600 hover:underline"
+                            onClick={() => setIsParticipantModalOpen(true)}
+                        >
+                            Gérer les participants
+                        </button>
+                    </div>
+                )}
             </div>
+
+            {/*  MODAL PARTICIPANTS */}
+            <Modal2
+                isOpen={isParticipantModalOpen}
+                onClose={() => setIsParticipantModalOpen(false)}
+                size="md"
+                title="Gestion des participants"
+            >
+                <HandleParticipantItem
+                    participations={slot.participants}
+                    isFull={isFull}
+                    onAction={onParticipantAction}
+                />
+            </Modal2>
 
             {/* EDIT MODAL */}
             <Modal2 isOpen={isEditModalOpen} size="lg" onClose={() => setIsEditModalOpen(false)}>

@@ -3,7 +3,6 @@ import {
     missionStatusColor,
     missionStatusLabel,
     missionStatusOptions,
-    type MissionDetailsApiResponse,
 } from '../types/mission.type';
 import { DeleteModal } from '../../../shared/components/UI/DeleteModal';
 import { HeaderDetails } from '../../../shared/components/UI/HeaderDetails';
@@ -16,9 +15,10 @@ import { useMissionDetails } from '../hooks/useMissionDetails';
 import type { SlotCreationOutputValues } from '../../mission_slot/validation/SlotCreation.schema';
 import { AddIcon } from '../../../shared/components/UI/icons/icons';
 import { Card } from '../../../shared/layout/Card';
+import { MissionDetailsDto } from '@app/contracts';
 
 type MissionDetailsProps = {
-    mission: MissionDetailsApiResponse;
+    mission: MissionDetailsDto;
 };
 
 export function MissionDetails({ mission }: Readonly<MissionDetailsProps>) {
@@ -32,7 +32,7 @@ export function MissionDetails({ mission }: Readonly<MissionDetailsProps>) {
         setIsCreateSlotModalOpen(false);
         await handleSlotSubmit(data);
     };
-
+    console.log(mission);
     return (
         <>
             <div className="card bg-base-100 shadow p-4">
@@ -91,7 +91,12 @@ export function MissionDetails({ mission }: Readonly<MissionDetailsProps>) {
                     </div>
                     <div className="flex gap-2 p-2">
                         {mission.slots.map((s) => (
-                            <SlotItem key={s.id} slot={s} />
+                            <SlotItem
+                                key={s.id}
+                                slot={s}
+                                eventId={mission.event_id}
+                                missionId={mission.id}
+                            />
                         ))}
                     </div>
                 </div>

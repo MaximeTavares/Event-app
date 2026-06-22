@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { Modal2 } from '../../../shared/components/UI/Modal2';
 import { formatDate } from '../../../shared/utils/formatDate';
-import {
-    eventStatusColor,
-    eventStatusLabel,
-    type EventDetailsApiResponse,
-} from '../types/event.type';
+import { eventStatusColor, eventStatusLabel } from '../types/event.type';
 import { EventUpdateForm } from './EventUpdateForm';
 import { useNavigate } from 'react-router';
 import { useDeleteEvent, useUpdateEvent } from '../hooks/use_event.service';
@@ -24,9 +20,10 @@ import { useCreateMission } from '../../mission/hooks/use_mission.service';
 import { AddIcon } from '../../../shared/components/UI/icons/icons';
 import { useMe } from '../../auth/hooks/use_auth.service';
 import { Card } from '../../../shared/layout/Card';
+import { EventDto } from '@app/contracts';
 
 interface EventDetailsProps {
-    event: EventDetailsApiResponse;
+    event: EventDto;
 }
 
 export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
@@ -49,7 +46,7 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
             data: EventMapper.toUpdateEvent(data),
         });
 
-        toast.promise(promise, {
+        await toast.promise(promise, {
             loading: 'Chargement...',
             success: 'Événement mis à jour avec succés.',
             error: (err: AxiosError<ApiError>) => {
@@ -59,7 +56,7 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
 
         try {
             await promise;
-            navigate(`/events/${event.id}`);
+            await navigate(`/events/${event.id}`);
         } catch {
             // L'erreur est déjà gérée par toast.promise
         }
@@ -78,7 +75,7 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
             mission: data,
         });
 
-        toast.promise(promise, {
+        await toast.promise(promise, {
             loading: 'Chargement...',
             success: 'Mission créée avec succès',
             error: (err: AxiosError<ApiError>) => {
@@ -104,7 +101,7 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
 
         const promise = deleteMutation.mutateAsync({ id: event.id });
 
-        toast.promise(promise, {
+        await toast.promise(promise, {
             loading: 'Chargement...',
             success: 'Événement supprimé avec succés.',
             error: 'Erreur lors de la suppression',
@@ -112,7 +109,7 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
 
         try {
             await promise;
-            navigate('/');
+            await navigate('/');
         } catch {
             // L'erreur est déjà gérée par toast.promise
         }

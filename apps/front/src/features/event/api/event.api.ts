@@ -3,10 +3,10 @@ import {
     type CreateEventInput,
     type UpdateEventInput,
     type BaseEvent,
-    type EventDetailsApiResponse,
     type PaginatedEventsApiResponse,
 } from '../types/event.type';
 import { api } from '../../../shared/utils/axios-client';
+import { EventDto } from '@app/contracts';
 
 export async function getEvents(filters?: EventFilters): Promise<PaginatedEventsApiResponse> {
     const { data } = await api.get<PaginatedEventsApiResponse>(`/events`, {
@@ -16,8 +16,8 @@ export async function getEvents(filters?: EventFilters): Promise<PaginatedEvents
     return data;
 }
 
-export async function getEventById(id: number): Promise<EventDetailsApiResponse> {
-    const { data } = await api.get<EventDetailsApiResponse>(`/events/${id}?details=true`);
+export async function getEventById(id: number) {
+    const { data } = await api.get<EventDto>(`/events/${id}?details=true`);
     return data;
 }
 

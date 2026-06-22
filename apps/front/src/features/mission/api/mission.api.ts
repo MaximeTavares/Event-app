@@ -1,9 +1,6 @@
+import { MissionDetailsDto } from '@app/contracts';
 import { api } from '../../../shared/utils/axios-client';
-import type {
-    BaseMission,
-    MissionDetailsApiResponse,
-    UpdateMissionInput,
-} from '../types/mission.type';
+import type { BaseMission, UpdateMissionInput } from '../types/mission.type';
 import type { MissionCreationFormValues } from '../validation/MissionCreation.schema';
 
 export class MissionApi {
@@ -16,7 +13,7 @@ export class MissionApi {
     }
 
     static async getMissionById(id: number) {
-        const { data } = await api.get<MissionDetailsApiResponse>(`/missions/${id}?details=true`);
+        const { data } = await api.get<MissionDetailsDto>(`/missions/${id}?details=true`);
         return data;
     }
 

@@ -4,6 +4,8 @@ import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { ChangePasswordForm } from './ChangePasswordForm';
 import { SecurityForm } from './SecurityForm';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
+import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
+import { FormLayout } from '../../../shared/layout/FormLayout';
 
 export default function SecuritySettings() {
     const { data, isPending, isError } = useSettings();
@@ -11,7 +13,7 @@ export default function SecuritySettings() {
     const changePassword = useChangePassword();
 
     if (isPending) {
-        return <p>Chargement...</p>;
+        return <SkeletonLoading />;
     }
 
     if (isError || !data) {
@@ -19,7 +21,7 @@ export default function SecuritySettings() {
     }
 
     return (
-        <div className="p-4">
+        <FormLayout title="Securité" width="xl">
             <ChangePasswordForm
                 onSubmit={async (data) => {
                     await toastMutation(changePassword.mutateAsync(data), {
@@ -48,6 +50,6 @@ export default function SecuritySettings() {
                     updateSecurity.isError ? "Impossible d'enregistrer les changements" : undefined
                 }
             />
-        </div>
+        </FormLayout>
     );
 }

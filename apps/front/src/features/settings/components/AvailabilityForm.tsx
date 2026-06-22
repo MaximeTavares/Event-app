@@ -1,8 +1,7 @@
-import { AvailabilityDto, availabilitySchema } from '@app/contracts';
+import { AvailabilityDto, availabilitySchema, WEEK_DAYS, WeekDay } from '@app/contracts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import Button from '../../../shared/components/UI/Button';
-import { WeekDay, WEEK_DAYS } from '../types/types';
 
 const DAY_LABELS: Record<WeekDay, string> = {
     monday: 'Lundi',
@@ -34,7 +33,6 @@ export function AvailabilityForm({
 
     return (
         <form className="flex max-w-xl flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-            <h2 className="text-xl font-semibold">Mes disponibilités</h2>
             <p className="text-sm text-base-content/70">
                 Indiquez les jours où vous êtes généralement disponible.
             </p>

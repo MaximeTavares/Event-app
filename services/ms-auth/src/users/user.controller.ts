@@ -21,7 +21,7 @@ export class UserController {
         return this.userService.findAll();
     }
 
-    @MessagePattern('users.profiles')
+    @MessagePattern(USER_SUBJECTS.GET_PROFILES)
     getProfiles(data: { userIds: string[] }) {
         return this.userService.findManyByIds(data.userIds);
     }

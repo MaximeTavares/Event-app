@@ -1,22 +1,18 @@
 import { useNavigate } from 'react-router';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
-import type { SlotDetailsApiResponse } from '../types/slot.type';
 import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema';
 import { useUpdateSlot, useDeleteSlot } from './use_slot.service';
 import { useMe } from '../../auth/hooks/use_auth.service';
+import { SlotDetails } from '@app/contracts';
 
-export function useSlotDetails(slot: SlotDetailsApiResponse) {
+export function useSlotDetails(slot: SlotDetails) {
     const { data: user } = useMe();
 
     const navigate = useNavigate();
 
-    const pendingParticipants = slot.participants.filter(
-        (p) => p.participation_status === 'PENDING',
-    );
+    const pendingParticipants = slot.participants.filter((p) => p.status === 'PENDING');
 
-    const acceptedParticipants = slot.participants.filter(
-        (p) => p.participation_status === 'ACCEPTED',
-    );
+    const acceptedParticipants = slot.participants.filter((p) => p.status === 'ACCEPTED');
 
     // Check if user can edit
     const canEdit = user?.id === slot.organizer_id;

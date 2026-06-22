@@ -36,13 +36,9 @@ const EventCard = ({ eventData }: IEventComponent) => {
                     </span>
                 </div>
 
-                <div className="card-actions w-full justify-between mt-2">
-                    <Button as={Link} to={`/events/${eventData.id}`} variant="ghost">
-                        Voir
-                    </Button>
-
-                    <Button variant="primary" disabled>
-                        S'inscrire
+                <div className="card-actions w-full justify-end mt-2">
+                    <Button as={Link} to={`/events/${eventData.id}`} variant="primary">
+                        Détails...{' '}
                     </Button>
                 </div>
             </div>

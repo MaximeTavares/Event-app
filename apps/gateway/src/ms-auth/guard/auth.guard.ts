@@ -7,9 +7,9 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from 'src/ms-auth/decorators/public.decorator';
 import { Algorithm } from 'jsonwebtoken';
 import { JwtPayload } from '../type/auth.type';
+// import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -18,27 +18,64 @@ export class AuthGuard implements CanActivate {
         private readonly reflector: Reflector,
     ) {}
 
+    //* Avec @Public()
+    // async canActivate(context: ExecutionContext): Promise<boolean> {
+    //     //Vérifie si la route est public
+    //     const isPublic = this.reflector.getAllAndOverride<boolean>(
+    //         IS_PUBLIC_KEY,
+    //         [context.getHandler(), context.getClass()],
+    //     );
+    //     if (isPublic) {
+    //         return true;
+    //     }
+
+    //     //Récupère le request
+    //     const request = context.switchToHttp().getRequest<Request>();
+
+    //     //Recupère le token du header
+    //     const token = this.extractTokenFromHeader(request);
+
+    //     if (!token) {
+    //         throw new UnauthorizedException();
+    //     }
+    //     try {
+    //         //Verifie le token et récupère le payload
+    //         const payload = await this.jwtService.verifyAsync<JwtPayload>(
+    //             token,
+    //             {
+    //                 algorithms: [
+    //                     (process.env.JWTALGORITHM as Algorithm) ?? 'HS512',
+    //                 ],
+    //                 secret: process.env.JWT_ACCESS_SECRET,
+    //             },
+    //         );
+    //         // Assignation du payload à la request afin qu'elle soit accessible sur nos routes
+    //         // @ts-expect-error En attendant de trouver le typage
+    //         request.user = {
+    //             id: payload.sub,
+    //             email: payload.email,
+    //             role: payload.role,
+    //         };
+    //     } catch {
+    //         throw new UnauthorizedException();
+    //     }
+    //     return true;
+    // }
+
+    //* Sans @Public()
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        //Vérifie si la route est public
-        const isPublic = this.reflector.getAllAndOverride<boolean>(
-            IS_PUBLIC_KEY,
-            [context.getHandler(), context.getClass()],
-        );
-        if (isPublic) {
+        const request = context.switchToHttp().getRequest<Request>();
+
+        const token = this.extractTokenFromHeader(request);
+
+        // 👇 IMPORTANT : pas de token → user undefined mais on continue
+        if (!token) {
+            // @ts-expect-error test
+            request.user = undefined;
             return true;
         }
 
-        //Récupère le request
-        const request = context.switchToHttp().getRequest<Request>();
-
-        //Recupère le token du header
-        const token = this.extractTokenFromHeader(request);
-
-        if (!token) {
-            throw new UnauthorizedException();
-        }
         try {
-            //Verifie le token et récupère le payload
             const payload = await this.jwtService.verifyAsync<JwtPayload>(
                 token,
                 {
@@ -48,17 +85,18 @@ export class AuthGuard implements CanActivate {
                     secret: process.env.JWT_ACCESS_SECRET,
                 },
             );
-            // Assignation du payload à la request afin qu'elle soit accessible sur nos routes
-            // @ts-expect-error En attendant de trouver le typage
+
+            // @ts-expect-error test
             request.user = {
                 id: payload.sub,
                 email: payload.email,
                 role: payload.role,
             };
+
+            return true;
         } catch {
             throw new UnauthorizedException();
         }
-        return true;
     }
 
     private extractTokenFromHeader(request: Request): string | undefined {
