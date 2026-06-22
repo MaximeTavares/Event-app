@@ -37,8 +37,6 @@ export function NotificationsForm({
 
     return (
         <form className="flex max-w-xl flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
-            <h2 className="text-xl font-semibold">Notifications</h2>
-
             <ul className="flex flex-col gap-4">
                 {rows.map(({ key, label, description }) => (
                     <li
@@ -67,7 +65,7 @@ export function NotificationsForm({
             {error && <p className="text-error text-sm">{error}</p>}
 
             <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Enregistrement…' : 'Sauvegarder'}
+                {isSubmitting ? 'Enregistrement…' : 'Enregister'}
             </Button>
         </form>
     );

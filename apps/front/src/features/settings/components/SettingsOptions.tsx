@@ -1,8 +1,13 @@
 import { NavLink } from 'react-router';
-import { useSettingsStore } from '../store/settings.store';
 
 export default function SettingsOptions() {
-    const { navOptions } = useSettingsStore();
+    const navOptions = [
+        { id: 'profil', label: 'Profil', path: 'profil' },
+        { id: 'disponibilites', label: 'Mes disponibilités', path: 'disponibilites' },
+        { id: 'securite', label: 'Sécurité', path: 'securite' },
+        { id: 'notifications', label: 'Notifications', path: 'notifications' },
+        { id: 'preferences', label: 'Préférences', path: 'preferences' },
+    ];
 
     return (
         <nav>
