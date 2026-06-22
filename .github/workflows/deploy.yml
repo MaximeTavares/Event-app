@@ -58,15 +58,17 @@ jobs:
             cd ${{ inputs.compose-directory }}
             SHA_FILE=".deployed-${{ inputs.compose-service }}-sha"
             if [ -f "$SHA_FILE" ]; then
-              cat "$SHA_FILE"
+              SHA_CONTENT=$(cat "$SHA_FILE")
             else
-              echo ""
+              SHA_CONTENT=""
             fi
+            echo "PREVIOUS_SHA_MARKER::${SHA_CONTENT}::END_MARKER"
 
       - name: Parse previous SHA
         id: parse
         run: |
-          PREVIOUS_SHA=$(echo "${{ steps.read-sha.outputs.stdout }}" | tr -d '[:space:]')
+          RAW="${{ steps.read-sha.outputs.stdout }}"
+          PREVIOUS_SHA=$(echo "$RAW" | grep -o 'PREVIOUS_SHA_MARKER::[^:]*::END_MARKER' | sed 's/PREVIOUS_SHA_MARKER:://;s/::END_MARKER//')
           echo "previous_sha=$PREVIOUS_SHA" >> "$GITHUB_OUTPUT"
           echo "Previous SHA: ${PREVIOUS_SHA:-none}"
 
