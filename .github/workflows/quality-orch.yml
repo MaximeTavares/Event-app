@@ -45,7 +45,6 @@ jobs:
 
     with:
       package: gateway
-      prisma-generate: true
       sonar-source: apps/gateway
       sonar-project-key: ${{ vars.SONAR_GATEWAY_PROJECT_KEY }}
 
