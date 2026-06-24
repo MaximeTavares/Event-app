@@ -1,7 +1,7 @@
+import { CardEventImage } from '@/components/card-event-image';
 import Pagination from '../../../shared/components/UI/Pagination';
-import { Grid } from '../../../shared/layout/Grid';
 import type { BaseEvent } from '../types/event.type';
-import EventCard from './EventCard';
+import { Grid } from '@/components/layout/grid';
 
 type HomeEventsListProps = {
     listStatusMessage: string | null;
@@ -31,9 +31,9 @@ export default function HomeEventsList({
             {listStatusMessage ? (
                 <div>{listStatusMessage}</div>
             ) : (
-                <Grid>
+                <Grid cols={3}>
                     {listEvent.map((event) => (
-                        <EventCard key={event.id} eventData={event} />
+                        <CardEventImage key={event.id} eventData={event} />
                     ))}
                 </Grid>
             )}
