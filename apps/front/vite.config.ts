@@ -12,6 +12,7 @@ export default defineConfig({
     resolve: {
         alias: {
             '@app/contracts': path.resolve(__dirname, '../../packages/contracts/src'),
+            '@': path.resolve(__dirname, './src'),
         },
     },
 });
