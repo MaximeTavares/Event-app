@@ -15,6 +15,7 @@ import {
     SecurityDto,
     SecuritySchema,
     SETTINGS_SUBJECTS,
+    USER_SUBJECTS,
 } from '@app/contracts';
 import { ZodValidationPipe } from '../utils/zod-validation.pipe';
 
@@ -22,9 +23,10 @@ import { ZodValidationPipe } from '../utils/zod-validation.pipe';
 export class SettingsController {
     constructor(private readonly natsService: NatsService) {}
 
-    @Get('settings')
-    async get(@User('id') userId: string) {
-        return this.natsService.send(SETTINGS_SUBJECTS.GET_SETTINGS, {
+    //PROFILE
+    @Get('profile')
+    async getProfile(@User('id') userId: string) {
+        return this.natsService.send(USER_SUBJECTS.GET_PROFILE, {
             userId,
         });
     }
@@ -40,6 +42,14 @@ export class SettingsController {
         });
     }
 
+    // AVAILABILITY
+    @Get('availability')
+    async getAvailability(@User('id') userId: string) {
+        return this.natsService.send(SETTINGS_SUBJECTS.GET_AVAILABILITY, {
+            userId,
+        });
+    }
+
     @Patch('availability')
     async updateAvailability(
         @User('id') userId: string,
@@ -48,6 +58,14 @@ export class SettingsController {
         return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_AVAILABILITY, {
             userId,
             body,
+        });
+    }
+
+    // PREFERENCES
+    @Get('preferences')
+    async getPreferences(@User('id') userId: string) {
+        return this.natsService.send(SETTINGS_SUBJECTS.GET_PREFERENCES, {
+            userId,
         });
     }
 
@@ -62,6 +80,14 @@ export class SettingsController {
         });
     }
 
+    // NOTIFICATIONS
+    @Get('notifications')
+    async getNotifications(@User('id') userId: string) {
+        return this.natsService.send(SETTINGS_SUBJECTS.GET_NOTIFICATIONS, {
+            userId,
+        });
+    }
+
     @Patch('notifications')
     async updateNotifications(
         @User('id') userId: string,
@@ -70,6 +96,14 @@ export class SettingsController {
         return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_NOTIFICATIONS, {
             userId,
             body,
+        });
+    }
+
+    // SECURITY
+    @Get('security')
+    async getSecurity(@User('id') userId: string) {
+        return this.natsService.send(SETTINGS_SUBJECTS.GET_SECURITY, {
+            userId,
         });
     }
 
@@ -84,6 +118,7 @@ export class SettingsController {
         });
     }
 
+    // PASSWORDCHANGE
     @Post('password')
     async changePassword(
         @User('id') userId: string,

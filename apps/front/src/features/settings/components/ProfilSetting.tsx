@@ -1,13 +1,13 @@
-import { useSettings, useUpdateProfile } from '../hooks/use_settings.service';
 import { ProfileDto } from '@app/contracts';
 import { ProfileForm } from './ProfileForm';
 import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
 import { FormLayout } from '../../../shared/layout/FormLayout';
+import { useProfile, useUpdateProfile } from '../hooks/use-profile';
 
 export default function ProfilSetting() {
-    const { data, isPending, isError } = useSettings();
+    const { data: profile, isPending, isError } = useProfile();
     const updateProfile = useUpdateProfile();
 
     const handleFormSubmit = async (data: ProfileDto) => {
@@ -32,14 +32,14 @@ export default function ProfilSetting() {
         return <SkeletonLoading />;
     }
 
-    if (isError || !data) {
+    if (isError || !profile) {
         return <ErrorAlert message="Impossible de charger votre profil" />;
     }
 
     return (
         <FormLayout title="Profil" width="xl">
             <ProfileForm
-                defaultValues={data.profile}
+                defaultValues={profile}
                 onSubmit={handleFormSubmit}
                 error={
                     updateProfile.isError

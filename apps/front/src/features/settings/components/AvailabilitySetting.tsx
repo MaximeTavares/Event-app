@@ -1,12 +1,12 @@
-import { useSettings, useUpdateAvailability } from '../hooks/use_settings.service';
 import { AvailabilityForm } from './AvailabilityForm';
 import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
 import { FormLayout } from '../../../shared/layout/FormLayout';
+import { useAvailability, useUpdateAvailability } from '../hooks/use-availability';
 
 export default function AvailabilitySetting() {
-    const { data, isPending, isError } = useSettings();
+    const { data: availability, isPending, isError } = useAvailability();
 
     const updateAvailability = useUpdateAvailability();
 
@@ -14,14 +14,14 @@ export default function AvailabilitySetting() {
         return <SkeletonLoading />;
     }
 
-    if (isError || !data) {
+    if (isError || !availability) {
         return <ErrorAlert message="Impossible de charger les disponibilités." />;
     }
 
     return (
         <FormLayout title="Mes disponibilité" width="xl">
             <AvailabilityForm
-                defaultValues={data.availability}
+                defaultValues={availability}
                 onSubmit={async (data) => {
                     await toastMutation(updateAvailability.mutateAsync(data), {
                         loading: 'Chargement...',

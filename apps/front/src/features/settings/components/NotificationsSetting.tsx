@@ -2,25 +2,25 @@ import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
 import { FormLayout } from '../../../shared/layout/FormLayout';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
-import { useSettings, useUpdateNotifications } from '../hooks/use_settings.service';
+import { useNotifications, useUpdateNotifications } from '../hooks/use-notifications';
 import { NotificationsForm } from './NotificationsForm';
 
 export default function NotificationsSetting() {
-    const { data, isPending, isError } = useSettings();
+    const { data: notifications, isPending, isError } = useNotifications();
     const updateNotifications = useUpdateNotifications();
 
     if (isPending) {
         return <SkeletonLoading />;
     }
 
-    if (isError || !data) {
+    if (isError || !notifications) {
         return <ErrorAlert message="Impossible de charger vos informations." />;
     }
 
     return (
         <FormLayout title="Notifications" width="xl">
             <NotificationsForm
-                defaultValues={data?.notifications}
+                defaultValues={notifications}
                 onSubmit={async (data) => {
                     await toastMutation(updateNotifications.mutateAsync(data), {
                         loading: 'Chargement...',

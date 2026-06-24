@@ -26,3 +26,5 @@ export const meSettingsSchema = z.object({
 });
 
 export type MeSettingsDto = z.infer<typeof meSettingsSchema>;
+
+export type SettingsList = 'profile' | 'security' | 'notifications' | 'preferences' | 'availability'
