@@ -16,7 +16,7 @@ import HomeEventsList from '../features/event/components/HomeEventsList';
 import type { EventStatus } from '../features/event/types/event.type';
 import { PageContainer } from '../shared/layout/PageContainer';
 import { Section } from '../shared/layout/Section';
-import { useSettings } from '../features/settings/hooks/use_settings.service';
+import { useProfile } from '@/features/settings/hooks/use-profile';
 
 const statusOptions: { label: string; value: EventStatus }[] = [
     { label: 'Ouvert', value: 'OPEN' },
@@ -47,13 +47,21 @@ export default function Home() {
     //     error: userError,
     // } = useGetCurrentUserWithProfileAndAddress();
 
+    //* OLD
+    // const {
+    //     // data: currentUser,
+    //     isLoading: isUserLoading,
+    //     isError: isUserError,
+    //     error: userError,
+    // } = useSettings();
+
     //* NEW
     const {
         // data: currentUser,
         isLoading: isUserLoading,
         isError: isUserError,
         error: userError,
-    } = useSettings();
+    } = useProfile();
 
     // État derive pour savoir si une ville a ete renseignée.
     const hasCityFilter = location.city.trim().length > 0;

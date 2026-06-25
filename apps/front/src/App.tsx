@@ -59,10 +59,8 @@ function App() {
             <TooltipProvider>
                 <Routes>
                     {/* AUTH */}
-                    <Route element={<AuthLayout />}>
-                        <Route path="/auth/signup" element={<SignupPage />} />
-                        <Route path="/auth/signin" element={<SigninPage />} />
-                    </Route>
+                    <Route path="/auth/signup" element={<SignupPage />} />
+                    <Route path="/auth/signin" element={<SigninPage />} />
 
                     {/* VISITOR - Allow different layout for pages shared by an User with a role and Visitors */}
                     <Route
