@@ -1,6 +1,7 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Outlet } from 'react-router';
+import Footer from '../components/UI/Footer';
 
 export function PrivateLayout() {
     return (
@@ -15,6 +16,7 @@ export function PrivateLayout() {
                 <main className="flex-1 w-full p-4">
                     <Outlet />
                 </main>
+                <Footer />
             </SidebarInset>
         </SidebarProvider>
     );

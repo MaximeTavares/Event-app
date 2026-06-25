@@ -26,6 +26,7 @@ import SettingsPage from './pages/SettingsPage';
 import NotificationsSetting from './features/settings/components/NotificationsSetting';
 import { TooltipProvider } from './components/ui/tooltip';
 import { PrivateLayout } from './shared/layout/PrivateLayout';
+import { ThemeProvider } from './components/theme-provider';
 
 function useAuthBootstrap() {
     const accessToken = useAuthStore((s) => s.accessToken);
@@ -54,51 +55,62 @@ function App() {
 
     return (
         <>
-            <Toaster />
-            <TooltipProvider>
-                <Routes>
-                    {/* AUTH */}
-                    <Route path="/auth/signup" element={<SignupPage />} />
-                    <Route path="/auth/signin" element={<SigninPage />} />
+            <ThemeProvider>
+                <Toaster />
+                <TooltipProvider>
+                    <Routes>
+                        {/* AUTH */}
+                        <Route path="/auth/signup" element={<SignupPage />} />
+                        <Route path="/auth/signin" element={<SigninPage />} />
 
-                    {/* VISITOR - Allow different layout for pages shared by an User with a role and Visitors */}
-                    <Route
-                        element={
-                            <RoleBasedLayout
-                                layouts={{
-                                    USER: PrivateLayout,
-                                }}
-                                fallback={VisitorLayout}
-                            />
-                        }
-                    >
-                        <Route path="/" element={<Home />} />
-                        <Route path="/events/:eventId" element={<EventDetailsPage />} />
-                    </Route>
+                        {/* VISITOR - Allow different layout for pages shared by an User with a role and Visitors */}
+                        <Route
+                            element={
+                                <RoleBasedLayout
+                                    layouts={{
+                                        USER: PrivateLayout,
+                                    }}
+                                    fallback={VisitorLayout}
+                                />
+                            }
+                        >
+                            <Route path="/" element={<Home />} />
+                            <Route path="/events/:eventId" element={<EventDetailsPage />} />
+                        </Route>
 
-                    {/* PRIVATE - ONLY USER */}
-                    <Route element={<PrivateRoute allowedRoles={['USER']} />}>
-                        <Route element={<PrivateLayout />}>
-                            <Route path="/me/events" element={<Event />} />
-                            <Route path="/events/create" element={<EventCreationPage />} />
-                            <Route path="/missions/:missionId" element={<MissionDetailsPage />} />
-                            <Route path="/slots/:slotId" element={<SlotDetailsPage />} />
-                            <Route path="/settings" element={<SettingsPage />}>
-                                <Route index element={<Navigate to="profil" replace />} />
-                                <Route path="profil" element={<ProfilSetting />} />
-                                <Route path="disponibilites" element={<AvailabilitySetting />} />
-                                <Route path="securite" element={<SecuritySettings />} />
-                                <Route path="notifications" element={<NotificationsSetting />} />
-                                <Route path="preferences" element={<PreferencesSetting />} />
+                        {/* PRIVATE - ONLY USER */}
+                        <Route element={<PrivateRoute allowedRoles={['USER']} />}>
+                            <Route element={<PrivateLayout />}>
+                                <Route path="/me/events" element={<Event />} />
+                                <Route path="/events/create" element={<EventCreationPage />} />
+                                <Route
+                                    path="/missions/:missionId"
+                                    element={<MissionDetailsPage />}
+                                />
+                                <Route path="/slots/:slotId" element={<SlotDetailsPage />} />
+                                <Route path="/settings" element={<SettingsPage />}>
+                                    <Route index element={<Navigate to="profil" replace />} />
+                                    <Route path="profil" element={<ProfilSetting />} />
+                                    <Route
+                                        path="disponibilites"
+                                        element={<AvailabilitySetting />}
+                                    />
+                                    <Route path="securite" element={<SecuritySettings />} />
+                                    <Route
+                                        path="notifications"
+                                        element={<NotificationsSetting />}
+                                    />
+                                    <Route path="preferences" element={<PreferencesSetting />} />
+                                </Route>
                             </Route>
                         </Route>
-                    </Route>
 
-                    {/* OTHER PAGES */}
-                    <Route path="/unauthorized" element={<UnauthorizedPage />} />
-                    <Route path="/*" element={<NotFoundPage />} />
-                </Routes>
-            </TooltipProvider>
+                        {/* OTHER PAGES */}
+                        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+                        <Route path="/*" element={<NotFoundPage />} />
+                    </Routes>
+                </TooltipProvider>
+            </ThemeProvider>
             <ReactQueryDevtools />
         </>
     );

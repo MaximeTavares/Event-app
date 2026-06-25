@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import Footer from '../components/UI/Footer';
 
 export function VisitorLayout() {
     return (
@@ -15,6 +16,7 @@ export function VisitorLayout() {
                 <main className="flex-1 w-full p-4">
                     <Outlet />
                 </main>
+                <Footer />
             </SidebarInset>
         </SidebarProvider>
     );
