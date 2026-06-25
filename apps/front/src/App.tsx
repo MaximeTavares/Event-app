@@ -9,7 +9,6 @@ import NotFoundPage from './pages/NotFound.page';
 import { VisitorLayout } from './shared/layout/VisitorLayout';
 import SignupPage from './pages/auth/Signup.page';
 import SigninPage from './pages/auth/Signin.page';
-import { AuthLayout } from './shared/layout/AuthLayout';
 import { EventCreationPage } from './features/event/components/EventCreationPage';
 import { Toaster } from 'react-hot-toast';
 import RoleBasedLayout from './shared/layout/RoleBasedLayout';
@@ -25,8 +24,8 @@ import ProfilSetting from './features/settings/components/ProfilSetting';
 import SecuritySettings from './features/settings/components/SecuritySetting';
 import SettingsPage from './pages/SettingsPage';
 import NotificationsSetting from './features/settings/components/NotificationsSetting';
-import PrivateLayout from './shared/layout/PrivateLayout';
 import { TooltipProvider } from './components/ui/tooltip';
+import { PrivateLayout } from './shared/layout/PrivateLayout';
 
 function useAuthBootstrap() {
     const accessToken = useAuthStore((s) => s.accessToken);
