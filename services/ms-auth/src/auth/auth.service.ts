@@ -74,11 +74,15 @@ export class AuthService {
         };
     }
 
-    async googleSignin(idToken: string) {
-        // 1. Verify google token
+    async googleSignin(code: string) {
+        // 1. Échange le code contre un id_token Google
+        const idToken =
+            await this.googleAuthService.exchangeCodeForIdToken(code);
+
+        // 2. Verify google token (inchangé)
         const payload = await this.googleAuthService.verifyToken(idToken);
 
-        // 2. Find or create user
+        // 3. Find or create user (inchangé)
         const user = await this.userService.findOrCreateGoogleUser({
             email: payload.email!,
             googleSub: payload.sub,
@@ -87,7 +91,7 @@ export class AuthService {
             avatarUrl: payload.picture,
         });
 
-        // 3. JWT Token generation
+        // 4. JWT Token generation (inchangé)
         const accessToken = await this.jwtTokenService.generateAccessToken({
             id: user.id,
             email: user.email,
@@ -100,16 +104,9 @@ export class AuthService {
 
         await this.refreshTokenService.save(user.id, refreshToken);
 
-        // 4. Return information
-
         return {
             accessToken,
             refreshToken,
-            // user: {
-            //     id: user.id,
-            //     email: user.email,
-            //     role: user.role,
-            // },
         };
     }
 

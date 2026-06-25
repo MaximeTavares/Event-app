@@ -21,7 +21,7 @@ export function useGoogleSignin() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: { idToken: string }) => AuthApi.googleSignin(payload.idToken),
+        mutationFn: (payload: { code: string }) => AuthApi.googleSignin(payload.code),
         onSuccess: async (res) => {
             setAccessToken(res.accessToken);
             await queryClient.invalidateQueries({ queryKey: ['me'] });

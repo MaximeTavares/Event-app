@@ -16,9 +16,9 @@ export class AuthApi {
         return data;
     }
 
-    static async googleSignin(idToken: string) {
+    static async googleSignin(code: string) {
         const { data } = await api.post<Omit<LoginResponseDto, 'refreshToken'>>('ms/auth/google', {
-            idToken,
+            code,
         });
 
         return data;
