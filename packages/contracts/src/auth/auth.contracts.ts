@@ -42,6 +42,8 @@ export const passwordRules = (password: string) => ({
 
 // SIGNUP
 export const SignupRequestSchema = z.object({
+	firstName: z.string().trim().min(1, "Le prénom est requis."),
+	lastName: z.string().trim().min(1, "Le nom est requis."),
 	email: z.string().email(),
 	password: PasswordSchema,
 });
@@ -63,7 +65,7 @@ export type SignupFormDto = z.infer<typeof SignupFormSchema>;
 // SIGNIN
 export const LoginRequestSchema = z.object({
 	email: z.string().email("Adresse email invalide"),
-	password: z.string(),
+	password: z.string().min(1, "Le mot de passe est requis."),
 });
 
 export const LoginResponseSchema = z.object({

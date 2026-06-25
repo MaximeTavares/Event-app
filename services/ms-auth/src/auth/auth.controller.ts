@@ -19,7 +19,7 @@ export class AuthController {
     ) {}
 
     @MessagePattern(AUTH_SUBJECTS.SIGNUP)
-    signup(data: SignupRequestDto) {
+    signup(data: SignupRequestDto): Promise<{ success: true }> {
         return this.authService.signup(data);
     }
 

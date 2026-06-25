@@ -36,7 +36,7 @@ export class AuthController {
     @Post('signup')
     async signup(
         @Body(ZodValidationPipe(SignupRequestSchema)) dto: SignupRequestDto,
-    ) {
+    ): Promise<{ success: true }> {
         return this.natsService.send(AUTH_SUBJECTS.SIGNUP, dto);
     }
 

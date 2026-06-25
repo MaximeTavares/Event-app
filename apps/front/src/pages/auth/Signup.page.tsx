@@ -1,23 +1,11 @@
-import { GoogleLogin } from '@react-oauth/google';
-import { SignUpForm } from '../../features/auth/components/SignUpForm';
-import { Card } from '../../shared/layout/Card';
-import { PageContainer } from '../../shared/layout/PageContainer';
-import { useGoogleAuth } from '../../features/auth/hooks/useGoogleAuth';
+import { SignupForm } from '@/components/signup-form';
 
-export default function SignupPage() {
-    const { googleLogin } = useGoogleAuth();
-
+export default function SigninPage() {
     return (
-        <PageContainer>
-            <Card title="S'inscrire" size="lg">
-                <SignUpForm />
-                <div className="flex justify-center items-center p-3">
-                    <GoogleLogin
-                        onSuccess={(credentialsResponse) => googleLogin(credentialsResponse)}
-                        onError={() => console.log('Login failed')}
-                    ></GoogleLogin>
-                </div>
-            </Card>
-        </PageContainer>
+        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+            <div className="flex w-full max-w-sm flex-col gap-6">
+                <SignupForm />
+            </div>
+        </div>
     );
 }
