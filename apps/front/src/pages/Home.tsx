@@ -13,20 +13,13 @@ import {
 } from '../shared/utils/map/mapUiMessages';
 import HomeMapSection from '../shared/components/UI/map/HomeMapSection';
 import HomeEventsList from '../features/event/components/HomeEventsList';
-import type { EventStatus } from '../features/event/types/event.type';
-import { PageContainer } from '../shared/layout/PageContainer';
-import { Section } from '../shared/layout/Section';
 import { useProfile } from '@/features/settings/hooks/use-profile';
-
-const statusOptions: { label: string; value: EventStatus }[] = [
-    { label: 'Ouvert', value: 'OPEN' },
-    { label: 'Fermé', value: 'CLOSED' },
-    { label: 'Annulé', value: 'CANCELLED' },
-];
+import { Container } from '@/components/layout/Container';
+import { Section } from '@/components/layout/Section';
 
 export default function Home() {
     // État local des filtres, de l'affichage carte et de la pagination.
-    const [status, setStatus] = useState<EventStatus | null>(null);
+    const [search, setSearch] = useState('');
     const [location, setLocation] = useState<LocationState>({
         city: '',
         distanceKm: 0,
@@ -39,29 +32,7 @@ export default function Home() {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 12;
 
-    //* OLD
-    // const {
-    //     data: currentUser,
-    //     isLoading: isUserLoading,
-    //     isError: isUserError,
-    //     error: userError,
-    // } = useGetCurrentUserWithProfileAndAddress();
-
-    //* OLD
-    // const {
-    //     // data: currentUser,
-    //     isLoading: isUserLoading,
-    //     isError: isUserError,
-    //     error: userError,
-    // } = useSettings();
-
-    //* NEW
-    const {
-        // data: currentUser,
-        isLoading: isUserLoading,
-        isError: isUserError,
-        error: userError,
-    } = useProfile();
+    const { isLoading: isUserLoading, isError: isUserError, error: userError } = useProfile();
 
     // État derive pour savoir si une ville a ete renseignée.
     const hasCityFilter = location.city.trim().length > 0;
@@ -83,12 +54,12 @@ export default function Home() {
     const effectiveOrigin = cityCoordinates ?? userOrigin;
 
     // Filtres paginés utilisés pour la liste affichée dans la Home.
+    // Seuls les évènements OPEN sont affichés sur la Home, le filtre statut a ete retire.
     const filters = useMemo<EventFilters>(() => {
         const hasRadiusFilter = location.city.trim().length > 0 && location.distanceKm > 0;
 
         return {
-            // filtre de statut, ou pas de filtre si aucune sélectionnée
-            statuses: status ? [status] : undefined,
+            statuses: ['OPEN'],
             startDate: filterDateValue.start ?? undefined,
             endDate: filterDateValue.end ?? undefined,
 
@@ -104,7 +75,7 @@ export default function Home() {
             page: currentPage,
             limit: pageSize,
         };
-    }, [status, filterDateValue, location, currentPage, effectiveOrigin]);
+    }, [filterDateValue, location, currentPage, effectiveOrigin]);
 
     // Chargement des donnees évènements, avec et sans pagination, plus l'utilisateur courant.
     const {
@@ -114,10 +85,21 @@ export default function Home() {
         error: eventsError,
     } = useGetEvents(filters);
 
-    const events = data?.items;
-    const openEvents = events?.filter((e) => e.status === 'OPEN');
+    const events = data?.items ?? [];
     const total = data?.total ?? 0;
     const limit = data?.limit ?? pageSize;
+
+    // Recherche texte appliquée côté client sur les évènements déjà chargés (titre/description).
+    const searchedEvents = useMemo(() => {
+        const term = search.trim().toLowerCase();
+        if (!term) return events;
+
+        return events.filter((event) => {
+            const title = event.title?.toLowerCase() ?? '';
+            const description = event.description?.toLowerCase() ?? '';
+            return title.includes(term) || description.includes(term);
+        });
+    }, [events, search]);
 
     const totalPages = useMemo(() => {
         return Math.max(1, Math.ceil(total / limit));
@@ -125,9 +107,8 @@ export default function Home() {
 
     // Données dérivées pour la carte et la pagination de la liste.
     const eventMapPoints = useMemo(() => {
-        if (!openEvents) return [];
-        return toEventMapPoints(openEvents);
-    }, [openEvents]);
+        return toEventMapPoints(searchedEvents);
+    }, [searchedEvents]);
 
     // Messages dérivés affichés dans la carte et la liste.
     const mapStatusMessage = useMemo(() => {
@@ -158,22 +139,18 @@ export default function Home() {
             isEventsLoading,
             isEventsError,
             eventsErrorMessage: eventsError?.message,
-            displayedEventsCount: openEvents?.length ?? 0,
+            displayedEventsCount: searchedEvents.length,
             radiusMeters: location.distanceKm * 1000,
             showRadiusEmptyMessage: Boolean(location.distanceKm),
         });
-    }, [openEvents, isEventsLoading, isEventsError, eventsError, location.distanceKm]);
+    }, [searchedEvents, isEventsLoading, isEventsError, eventsError, location.distanceKm]);
 
     return (
-        <PageContainer>
-            <Section>
+        <Container align={'center'} size={'4'}>
+            <Section size={'1'}>
                 <HomeFilters
-                    statusOptions={statusOptions}
-                    status={status}
-                    onStatusChange={(value) => {
-                        setCurrentPage(1);
-                        setStatus(value);
-                    }}
+                    search={search}
+                    onSearchChange={setSearch}
                     location={location}
                     onLocationChange={(updater) => {
                         setCurrentPage(1);
@@ -188,12 +165,12 @@ export default function Home() {
                     onToggleMap={() => setIsMapVisible((prev) => !prev)}
                     onReset={() => {
                         setCurrentPage(1);
-                        setStatus(null);
                         setFilterDateValue({ start: null, end: null });
                         setLocation({ city: '', distanceKm: 0 });
                     }}
                 />
-
+            </Section>
+            <Section size={'1'}>
                 <HomeMapSection
                     mapWarningMessage={mapWarningMessage}
                     isMapVisible={isMapVisible}
@@ -204,15 +181,16 @@ export default function Home() {
                     eventMapPoints={eventMapPoints}
                     radiusMeters={location.distanceKm * 1000}
                 />
-
+            </Section>
+            <Section size={'1'}>
                 <HomeEventsList
                     listStatusMessage={listStatusMessage}
-                    events={openEvents ?? []}
+                    events={searchedEvents}
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={setCurrentPage}
                 />
             </Section>
-        </PageContainer>
+        </Container>
     );
 }

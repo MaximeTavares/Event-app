@@ -3,8 +3,8 @@ import { ProfileForm } from './ProfileForm';
 import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
-import { FormLayout } from '../../../shared/layout/FormLayout';
 import { useProfile, useUpdateProfile } from '../hooks/use-profile';
+import { PageContainer } from '@/components/layout/Container';
 
 export default function ProfilSetting() {
     const { data: profile, isPending, isError } = useProfile();
@@ -37,17 +37,13 @@ export default function ProfilSetting() {
     }
 
     return (
-        <FormLayout title="Profil" width="xl">
-            <ProfileForm
-                defaultValues={profile}
-                onSubmit={handleFormSubmit}
-                error={
-                    updateProfile.isError
-                        ? "Impossible d'enregistrer les modifications."
-                        : undefined
-                }
-                isSubmitting={updateProfile.isPending}
-            />
-        </FormLayout>
+        <ProfileForm
+            defaultValues={profile}
+            onSubmit={handleFormSubmit}
+            error={
+                updateProfile.isError ? "Impossible d'enregistrer les modifications." : undefined
+            }
+            isSubmitting={updateProfile.isPending}
+        />
     );
 }

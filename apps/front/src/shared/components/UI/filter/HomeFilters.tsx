@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { GoFilter, GoSearch } from 'react-icons/go';
-import Button from '../Button';
+import { GoFilter } from 'react-icons/go';
+import { SearchIcon } from 'lucide-react';
 
 import FilterDate from './FilterDate';
 import FilterDistance from './FilterDistance';
 import FilterLocation from './FilterLocation';
-import FilterStatus from './FilterStatus';
-import type { EventStatus } from '../../../../features/event/types/event.type';
+import { Field, FieldLabel } from '@/components/ui/field';
+import { InputGroup, InputGroupInput, InputGroupAddon } from '@/components/ui/input-group';
+import { Button } from '@/components/ui/button';
 
 export type LocationState = {
     city: string;
@@ -18,15 +19,9 @@ export type FilterDateValue = {
     end: string | null;
 };
 
-export type StatusOption = {
-    label: string;
-    value: EventStatus;
-};
-
 type HomeFiltersProps = {
-    statusOptions: StatusOption[];
-    status: EventStatus | null;
-    onStatusChange: (statuses: EventStatus | null) => void;
+    search: string;
+    onSearchChange: (search: string) => void;
     location: LocationState;
     onLocationChange: (updater: (prev: LocationState) => LocationState) => void;
     filterDateValue: FilterDateValue;
@@ -37,9 +32,8 @@ type HomeFiltersProps = {
 };
 
 export default function HomeFilters({
-    statusOptions,
-    status,
-    onStatusChange,
+    search,
+    onSearchChange,
     location,
     onLocationChange,
     filterDateValue,
@@ -47,68 +41,84 @@ export default function HomeFilters({
     isMapVisible,
     onToggleMap,
     onReset,
-}: HomeFiltersProps) {
-    const [showForm, setShowForm] = useState(false);
+}: Readonly<HomeFiltersProps>) {
+    const [showFilters, setShowFilters] = useState(false);
+
+    const handleReset = () => {
+        onSearchChange('');
+        onReset();
+    };
 
     return (
-        <div className="w-full space-y-3">
-            <label className="input w-full">
-                <GoSearch className="my-1.5 inline-block size-5" />
-                <input type="search" placeholder="Rechercher" />
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    onClick={() => setShowForm((prev) => !prev)}
+        <div className="flex flex-col gap-2">
+            <Field>
+                <FieldLabel htmlFor="event-search" className="sr-only">
+                    Rechercher un événement
+                </FieldLabel>
+                <InputGroup className="bg-card">
+                    <InputGroupAddon align="inline-start">
+                        <SearchIcon className="text-muted-foreground" />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                        id="event-search"
+                        placeholder="Rechercher un événement..."
+                        value={search}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                    />
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        type="button"
+                        aria-pressed={showFilters}
+                        aria-label="Afficher les filtres"
+                        onClick={() => setShowFilters((prev) => !prev)}
+                    >
+                        <GoFilter className="size-5" />
+                    </Button>
+                </InputGroup>
+            </Field>
+
+            {showFilters && (
+                <form
+                    className="flex flex-wrap items-end gap-3 rounded-md border bg-card p-3"
+                    onReset={handleReset}
                 >
-                    <GoFilter className="my-1.5 inline-block size-5" />
-                </Button>
-            </label>
+                    <FilterLocation
+                        city={location.city}
+                        onChange={(city) => {
+                            onLocationChange((prev) => ({
+                                ...prev,
+                                city,
+                                distanceKm: city.trim() ? prev.distanceKm : 0,
+                            }));
+                        }}
+                    />
 
-            <form
-                className={`flex flex-wrap gap-2 items-center ${showForm ? '' : 'hidden'}`}
-                onReset={onReset}
-            >
-                <FilterStatus
-                    label="Status"
-                    options={statusOptions}
-                    status={status}
-                    onChange={onStatusChange}
-                />
+                    <FilterDistance
+                        city={location.city}
+                        distanceKm={location.distanceKm}
+                        onChange={(distanceKm) => {
+                            onLocationChange((prev) => ({ ...prev, distanceKm }));
+                        }}
+                    />
 
-                <FilterLocation
-                    city={location.city}
-                    onChange={(city) => {
-                        onLocationChange((prev) => ({
-                            ...prev,
-                            city,
-                            distanceKm: city.trim() ? prev.distanceKm : 0,
-                        }));
-                    }}
-                />
+                    <FilterDate value={filterDateValue} onChange={onFilterDateValueChange} />
 
-                <FilterDistance
-                    city={location.city}
-                    distanceKm={location.distanceKm}
-                    onChange={(distanceKm) => {
-                        onLocationChange((prev) => ({ ...prev, distanceKm }));
-                    }}
-                />
+                    <Field>
+                        <FieldLabel>Carte</FieldLabel>
+                        <Button type="button" variant="secondary" onClick={onToggleMap}>
+                            {isMapVisible ? 'Masquer la carte' : 'Afficher la carte'}
+                        </Button>
+                    </Field>
 
-                <FilterDate value={filterDateValue} onChange={onFilterDateValueChange} />
-
-                <label className="flex flex-col items-start">
-                    <span className="label text-xs">Carte</span>
-                    <button type="button" className="btn" onClick={onToggleMap}>
-                        {isMapVisible ? 'Masquer' : 'Afficher'}
-                    </button>
-                </label>
-
-                <label className="flex flex-col items-start">
-                    <span className="label text-xs">Reset</span>
-                    <input className="btn btn-square" type="reset" value="x" />
-                </label>
-            </form>
+                    <Field>
+                        <FieldLabel className="sr-only">Réinitialiser</FieldLabel>
+                        <Button type="reset" variant="ghost">
+                            Réinitialiser
+                        </Button>
+                    </Field>
+                </form>
+            )}
         </div>
     );
 }

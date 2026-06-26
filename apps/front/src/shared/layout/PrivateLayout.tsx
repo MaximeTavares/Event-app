@@ -13,7 +13,7 @@ export function PrivateLayout() {
                         <SidebarTrigger className="-ml-1" />
                     </div>
                 </header>
-                <main className="flex-1 w-full p-4">
+                <main className="p-4">
                     <Outlet />
                 </main>
                 <Footer />

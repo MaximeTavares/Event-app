@@ -22,11 +22,11 @@ import AvailabilitySetting from './features/settings/components/AvailabilitySett
 import PreferencesSetting from './features/settings/components/PreferencesSetting';
 import ProfilSetting from './features/settings/components/ProfilSetting';
 import SecuritySettings from './features/settings/components/SecuritySetting';
-import SettingsPage from './pages/SettingsPage';
 import NotificationsSetting from './features/settings/components/NotificationsSetting';
 import { TooltipProvider } from './components/ui/tooltip';
 import { PrivateLayout } from './shared/layout/PrivateLayout';
 import { ThemeProvider } from './components/theme-provider';
+import SettingsPage from './pages/SettingsPage';
 
 function useAuthBootstrap() {
     const accessToken = useAuthStore((s) => s.accessToken);

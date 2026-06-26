@@ -8,9 +8,12 @@ import {
 import { api } from '../../../shared/utils/axios-client';
 import { EventDto } from '@app/contracts';
 
+import qs from 'qs';
+
 export async function getEvents(filters?: EventFilters): Promise<PaginatedEventsApiResponse> {
     const { data } = await api.get<PaginatedEventsApiResponse>(`/events`, {
         params: filters,
+        paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
     });
 
     return data;

@@ -1,4 +1,12 @@
 import type { EventStatus } from '../../../../features/event/types/event.type';
+import { Field, FieldLabel } from '@/components/ui/field';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 export type FilterOption = {
     label: string;
@@ -13,30 +21,35 @@ export type FilterStatusProps = {
     className?: string;
 };
 
+const ALL_VALUE = 'all';
+
 export default function FilterStatus({
     options,
     status,
     onChange,
     label,
-    className = '',
-}: FilterStatusProps) {
+    className,
+}: Readonly<FilterStatusProps>) {
+    const handleValueChange = (value: string) => {
+        onChange(value === ALL_VALUE ? null : (value as EventStatus));
+    };
+
     return (
-        <div className={className}>
-            <label className="flex flex-col items-start">
-                <span className="label text-xs">{label || 'Status'}</span>
-                <select
-                    className="select"
-                    value={status ?? ''}
-                    onChange={(e) => onChange((e.target.value as EventStatus) || null)}
-                >
-                    <option value="">Tous</option>
+        <Field className={className}>
+            <FieldLabel>{label || 'Status'}</FieldLabel>
+            <Select value={status ?? ALL_VALUE} onValueChange={handleValueChange}>
+                <SelectTrigger className="w-full max-w-xs">
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value={ALL_VALUE}>Tous</SelectItem>
                     {options.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
+                        <SelectItem key={opt.value} value={opt.value}>
                             {opt.label}
-                        </option>
+                        </SelectItem>
                     ))}
-                </select>
-            </label>
-        </div>
+                </SelectContent>
+            </Select>
+        </Field>
     );
 }
