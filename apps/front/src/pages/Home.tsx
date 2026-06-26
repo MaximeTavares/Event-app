@@ -5,7 +5,7 @@ import { useGetEvents } from '../features/event/hooks/use_event.service';
 import type { EventFilters } from '../shared/components/UI/filter/eventsFilters.interface';
 import HomeFilters, { type LocationState } from '../shared/components/UI/filter/HomeFilters';
 import { toEventMapPoints } from '../shared/components/UI/map/map-data';
-import { geocodeCity, type Coordinates } from '../shared/utils/map/GeocodeGeoapify';
+import { geocodeCity } from '../shared/utils/map/GeocodeGeoapify';
 import {
     buildListStatusMessage,
     buildMapStatusMessage,
@@ -16,6 +16,7 @@ import HomeEventsList from '../features/event/components/HomeEventsList';
 import { useProfile } from '@/features/settings/hooks/use-profile';
 import { Container } from '@/components/layout/Container';
 import { Section } from '@/components/layout/Section';
+import { useUserMapOrigin } from '@/shared/components/UI/map/useUserMapOrigin';
 
 export default function Home() {
     // État local des filtres, de l'affichage carte et de la pagination.
@@ -32,7 +33,12 @@ export default function Home() {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 12;
 
-    const { isLoading: isUserLoading, isError: isUserError, error: userError } = useProfile();
+    const {
+        data: currentUser,
+        isLoading: isUserLoading,
+        isError: isUserError,
+        error: userError,
+    } = useProfile();
 
     // État derive pour savoir si une ville a ete renseignée.
     const hasCityFilter = location.city.trim().length > 0;
@@ -44,17 +50,14 @@ export default function Home() {
         enabled: hasCityFilter,
     });
 
-    // Origine géographique et paramètres spatiaux utilisés pour la carte et le filtrage par rayon.
-    // const userOrigin = useUserMapOrigin(currentUser);
-    const userOrigin: Coordinates | null | undefined = {
-        lat: 123,
-        lon: 123,
-    }; /* currentUser?.profile.address. */
-
+    // Origine géographique : coordonnées du profil utilisateur (geocodees a la
+    // sauvegarde du profil cote backend), utilisees comme repli si aucune ville
+    // n'est recherchee explicitement.
+    const userOrigin = useUserMapOrigin(currentUser);
     const effectiveOrigin = cityCoordinates ?? userOrigin;
 
     // Filtres paginés utilisés pour la liste affichée dans la Home.
-    // Seuls les évènements OPEN sont affichés sur la Home, le filtre statut a ete retire.
+    // Seuls les évènements OPEN sont affichés sur la Home
     const filters = useMemo<EventFilters>(() => {
         const hasRadiusFilter = location.city.trim().length > 0 && location.distanceKm > 0;
 
@@ -77,7 +80,7 @@ export default function Home() {
         };
     }, [filterDateValue, location, currentPage, effectiveOrigin]);
 
-    // Chargement des donnees évènements, avec et sans pagination, plus l'utilisateur courant.
+    // Chargement des donnees évènements, avec et sans pagination.
     const {
         data,
         isLoading: isEventsLoading,
@@ -111,39 +114,33 @@ export default function Home() {
     }, [searchedEvents]);
 
     // Messages dérivés affichés dans la carte et la liste.
-    const mapStatusMessage = useMemo(() => {
-        return buildMapStatusMessage({
-            hasCityFilter,
-            isCityGeocoding: false,
-            isCityGeocodingError: false,
-            isCityNotFound: false,
-            isUserLoading,
-            isUserError,
-            userErrorMessage: userError?.message,
-            hasUserOrigin: Boolean(userOrigin),
-            hasEffectiveOrigin: Boolean(effectiveOrigin),
-        });
-    }, [hasCityFilter, isUserLoading, isUserError, userError, userOrigin, effectiveOrigin]);
+    const mapStatusMessage = buildMapStatusMessage({
+        hasCityFilter,
+        isCityGeocoding: false,
+        isCityGeocodingError: false,
+        isCityNotFound: false,
+        isUserLoading,
+        isUserError,
+        userErrorMessage: userError?.message,
+        hasUserOrigin: Boolean(userOrigin),
+        hasEffectiveOrigin: Boolean(effectiveOrigin),
+    });
 
-    const mapWarningMessage = useMemo(() => {
-        return buildMapWarningMessage({
-            hasCityFilter,
-            isCityGeocodingError: false,
-            isCityNotFound: false,
-            hasUserOrigin: Boolean(userOrigin),
-        });
-    }, [hasCityFilter, userOrigin]);
+    const mapWarningMessage = buildMapWarningMessage({
+        hasCityFilter,
+        isCityGeocodingError: false,
+        isCityNotFound: false,
+        hasUserOrigin: Boolean(userOrigin),
+    });
 
-    const listStatusMessage = useMemo(() => {
-        return buildListStatusMessage({
-            isEventsLoading,
-            isEventsError,
-            eventsErrorMessage: eventsError?.message,
-            displayedEventsCount: searchedEvents.length,
-            radiusMeters: location.distanceKm * 1000,
-            showRadiusEmptyMessage: Boolean(location.distanceKm),
-        });
-    }, [searchedEvents, isEventsLoading, isEventsError, eventsError, location.distanceKm]);
+    const listStatusMessage = buildListStatusMessage({
+        isEventsLoading,
+        isEventsError,
+        eventsErrorMessage: eventsError?.message,
+        displayedEventsCount: searchedEvents.length,
+        radiusMeters: location.distanceKm * 1000,
+        showRadiusEmptyMessage: Boolean(location.distanceKm),
+    });
 
     return (
         <Container align={'center'} size={'4'}>
