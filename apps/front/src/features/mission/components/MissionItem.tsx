@@ -1,44 +1,46 @@
-import { SlotItem } from '../../mission_slot/components/SlotItem';
-import { missionStatusColor, missionStatusLabel } from '../types/mission.type';
 import { useNavigate } from 'react-router';
-import Button from '../../../shared/components/UI/Button';
-import { MoreDetailsIcon } from '../../../shared/components/UI/icons/icons';
-import { MissionDetailsDto } from '@app/contracts';
+import { SlotItem } from '../../mission_slot/components/SlotItem';
+import { MissionDetailsDto, missionStatusColor, missionStatusLabel } from '@app/contracts';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Flex } from '@/components/layout/flex';
+import { ArrowRightIcon } from 'lucide-react';
 
 type MissionItemProps = {
     mission: MissionDetailsDto;
 };
 
 export function MissionItem({ mission }: Readonly<MissionItemProps>) {
-    console.log('Détails de la mission sur Mission Item :', mission);
     const navigate = useNavigate();
-    return (
-        <div className="card bg-base-100 border border-base-300 shadow-sm group hover:shadow-md transition-all duration-200 rounded-xl">
-            <div className="card-body">
-                {/* HEADER */}
-                <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                        <h2 className="card-title">{mission.title}</h2>
 
-                        <span className={`badge ${missionStatusColor[mission.status]}`}>
+    return (
+        <Card className="group transition-shadow hover:shadow-sm">
+            <CardHeader className="pb-3">
+                <Flex justify="between" align="start">
+                    <Flex align="center" gap="2" className="min-w-0">
+                        <CardTitle className="truncate text-base">{mission.title}</CardTitle>
+                        <Badge variant="outline" className={missionStatusColor[mission.status]}>
                             {missionStatusLabel[mission.status]}
-                        </span>
-                    </div>
+                        </Badge>
+                    </Flex>
 
                     <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
                         onClick={() => navigate(`/missions/${mission.id}`)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-400 hover:bg-base-200"
+                        aria-label="Voir le détail de la mission"
                     >
-                        <MoreDetailsIcon size={25} />
+                        <ArrowRightIcon className="h-4 w-4" />
                     </Button>
-                </div>
+                </Flex>
 
-                <p className="text-gray-500">{mission.description}</p>
+                <p className="text-sm text-muted-foreground">{mission.description}</p>
+            </CardHeader>
 
-                {/* SLOTS */}
-                <div className="flex flex-col gap-3">
+            {mission.slots.length > 0 && (
+                <CardContent className="flex flex-col gap-3">
                     {mission.slots.map((s) => (
                         <SlotItem
                             key={s.id}
@@ -47,9 +49,8 @@ export function MissionItem({ mission }: Readonly<MissionItemProps>) {
                             missionId={mission.id}
                         />
                     ))}
-                </div>
-                <div className="card-actions justify-end"></div>
-            </div>
-        </div>
+                </CardContent>
+            )}
+        </Card>
     );
 }

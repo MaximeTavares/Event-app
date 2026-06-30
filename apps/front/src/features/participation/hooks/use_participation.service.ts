@@ -3,13 +3,17 @@ import { queryKeys } from '../../../shared/tanstack/QueryKeys';
 import { TransitionAction } from './use_participationTransition';
 import { ParticipationsApi } from '../api/participation.api';
 
-export const useParticipateMutation = (eventId: number, missionId?: number) => {
+export const useParticipateMutation = (slotId: number, eventId: number, missionId?: number) => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (slotId: number) => ParticipationsApi.create(slotId),
 
         onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.slot(slotId),
+            });
+
             await queryClient.invalidateQueries({
                 queryKey: queryKeys.event(eventId),
             });
@@ -25,11 +29,13 @@ export const useParticipateMutation = (eventId: number, missionId?: number) => {
 
 interface UseParticipationTransitionParams {
     slotId: number;
+    missionId: number;
+    eventId: number;
 }
 
 export function useParticipationUpdate(
     action: TransitionAction,
-    { slotId }: UseParticipationTransitionParams,
+    { slotId, missionId, eventId }: UseParticipationTransitionParams,
 ) {
     const queryClient = useQueryClient();
 
@@ -45,6 +51,12 @@ export function useParticipationUpdate(
                 }),
                 queryClient.invalidateQueries({
                     queryKey: queryKeys.slots,
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: queryKeys.mission(missionId),
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: queryKeys.event(eventId),
                 }),
             ]);
         },

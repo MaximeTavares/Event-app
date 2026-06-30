@@ -1,10 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { FormField } from '../../../shared/components/UI/formField/FormField';
-import { eventStatusLabel, eventStatusOptions } from '../types/event.type';
 import { toDateInputValue } from '../../../shared/utils/formatDate';
 import { type EventUpdateFormValues, eventUpdateSchema } from '../validation/eventUpdate.schema';
-import { EventDto } from '@app/contracts';
+import { EventDto, eventStatusLabel, eventStatusOptions } from '@app/contracts';
 
 type EventUpdateFormProps = {
     event: EventDto;

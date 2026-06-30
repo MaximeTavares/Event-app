@@ -1,26 +1,23 @@
-import {
-    ParticipantDetailsDto,
-    SlotDetails,
-    SlotDto,
-    SlotWithParticipationsQuery,
-} from '@app/contracts';
+import { ParticipantDetailsDto, SlotDetails, SlotDto } from '@app/contracts';
 import { SlotWithParticipationStatusQuery } from '../../query/SlotWithParticipationStatus.query';
 
 export class SlotMapper {
     static toSlotWithParticipations(
         userId: string,
-        slot: SlotWithParticipationsQuery,
+        slot: SlotWithParticipationStatusQuery,
         participants: ParticipantDetailsDto[],
         currentParticipants: number,
     ): SlotDetails {
         return {
             id: slot.id,
+            eventId: slot.Mission.Event.id,
+            missionId: slot.mission_id,
             organizer_id: slot.Mission.Event.organizer_id,
             start_at: slot.start_at,
             end_at: slot.end_at,
             current_participants: currentParticipants,
             available_place: slot.max_participant - currentParticipants,
-            max_participants: slot.max_participant,
+            max_participant: slot.max_participant,
             status: slot.status,
             is_participating: slot.Participation.some(
                 (p) => p.user_id === userId,
@@ -49,10 +46,12 @@ export class SlotMapper {
 
         return {
             id: slot.id,
+            eventId: slot.Mission.Event.id,
+            missionId: slot.mission_id,
             organizer_id: slot.Mission.Event.organizer_id,
             start_at: slot.start_at,
             end_at: slot.end_at,
-            max_participants: slot.max_participant,
+            max_participant: slot.max_participant,
             current_participants,
             available_place: slot.max_participant - current_participants,
             status: slot.status,

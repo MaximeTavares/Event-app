@@ -5,10 +5,8 @@ import {
     type UseMutationResult,
     type UseQueryResult,
 } from '@tanstack/react-query';
-import type { BaseMission, UpdateMissionInput } from '../types/mission.type';
 import { MissionApi } from '../api/mission.api';
-import type { MissionCreationFormValues } from '../validation/MissionCreation.schema';
-import { MissionDetailsDto } from '@app/contracts';
+import { MissionCreationFormValues, MissionDetailsDto } from '@app/contracts';
 import { queryKeys } from '../../../shared/tanstack/QueryKeys';
 
 export function useGetMissionById(id: number): UseQueryResult<MissionDetailsDto, Error> {
@@ -20,7 +18,7 @@ export function useGetMissionById(id: number): UseQueryResult<MissionDetailsDto,
 }
 
 export function useCreateMission(): UseMutationResult<
-    BaseMission,
+    MissionCreationFormValues,
     Error,
     { eventId: number; mission: MissionCreationFormValues }
 > {
@@ -38,17 +36,21 @@ export function useCreateMission(): UseMutationResult<
 }
 
 export function useUpdateMission(): UseMutationResult<
-    BaseMission,
+    MissionCreationFormValues,
     Error,
-    { id: number; data: UpdateMissionInput }
+    { eventId: number; missionId: number; data: MissionCreationFormValues }
 > {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (variables) => MissionApi.updateMission(variables.id, variables.data),
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: queryKeys.missions });
+        mutationFn: (variables) => MissionApi.updateMission(variables.missionId, variables.data),
+        onSuccess: async (_, variables) => {
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.mission(variables.missionId),
+            });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.event(variables.eventId) });
         },
+
         onError: (error) => {
             console.error('Échec de la mise à jour :', error.message);
         },

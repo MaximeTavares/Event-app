@@ -1,11 +1,7 @@
 import { z } from "zod";
+import { coordinatesSchema } from "../types/event/event.contracts.js";
 
-export const coordinatesSchema = z.object({
-	lat: z.number(),
-	lon: z.number(),
-});
-
-export const addressSchema = z.object({
+export const addressProfileSchema = z.object({
 	streetNumber: z.string().optional(),
 	streetName: z.string().optional(),
 	addressLine2: z.string().optional(),
@@ -30,7 +26,7 @@ export const profileSchema = z
 
 		bio: z.string().max(1000, "La biographie est trop longue.").optional(),
 
-		address: addressSchema.optional(),
+		address: addressProfileSchema.optional(),
 	})
 	.superRefine((data, ctx) => {
 		if (!data.address) return;

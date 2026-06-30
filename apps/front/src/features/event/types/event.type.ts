@@ -1,21 +1,11 @@
+import { EventStatus } from '@app/contracts';
 import type {
     Address,
     AddressForCreateEvent,
     AddressForUpdateEvent,
 } from '../../address/types/address.type';
-import type { UserWithProfileAndAddress } from '../../user_profile/types/types';
 
-export interface Event {
-    id: number;
-    title: string;
-    description: string;
-    program: string;
-    start_date: Date;
-    end_date: Date;
-    user?: UserWithProfileAndAddress;
-    address: Address | null;
-    status: EventStatus;
-}
+
 
 export interface BaseEvent {
     id: number;
@@ -48,24 +38,6 @@ export interface UpdateEventInput {
     address?: AddressForUpdateEvent;
     status?: EventStatus;
 }
-
-export type EventStatus = keyof typeof eventStatusLabel;
-
-export const eventStatusOptions: EventStatus[] = ['OPEN', 'CANCELLED', 'DRAFT', 'CLOSED'];
-
-export const eventStatusLabel = {
-    DRAFT: 'Brouillon',
-    OPEN: 'Ouvert',
-    CLOSED: 'Fermé',
-    CANCELLED: 'Annulé',
-} as const;
-
-export const eventStatusColor: Record<EventStatus, string> = {
-    OPEN: 'badge-success',
-    CLOSED: 'badge-neutral',
-    DRAFT: 'badge-warning',
-    CANCELLED: 'badge-error',
-};
 
 export interface EventApiResponse {
     id: number;
@@ -136,7 +108,7 @@ export interface EventDetailsApiResponse {
             id: number;
             start_at: Date;
             end_at: Date;
-            max_participants: number;
+            max_participant: number;
             current_participants: number;
             available_place: number;
             status: 'OPEN' | 'FULL' | 'CLOSED' | 'CANCELLED';

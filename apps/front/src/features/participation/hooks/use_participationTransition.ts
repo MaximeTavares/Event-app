@@ -9,10 +9,10 @@ const TRANSITION_MESSAGES: Record<TransitionAction, { success: string }> = {
     cancel: { success: 'Participation annulée avec succés' },
 };
 
-export function useParticipationTransitions(slotId: number) {
-    const accept = useParticipationUpdate('accept', { slotId });
-    const reject = useParticipationUpdate('reject', { slotId });
-    const cancel = useParticipationUpdate('cancel', { slotId });
+export function useParticipationTransitions(slotId: number, missionId: number, eventId: number) {
+    const accept = useParticipationUpdate('accept', { slotId, missionId, eventId });
+    const reject = useParticipationUpdate('reject', { slotId, missionId, eventId });
+    const cancel = useParticipationUpdate('cancel', { slotId, missionId, eventId });
 
     const mutations = { accept, reject, cancel };
 

@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import {
     eventCreationSchema,
     type EventCreationFormValues,
@@ -16,47 +16,56 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { eventStatusLabel, eventStatusOptions } from '@app/contracts';
 
-type EventCreationFormProps = {
+type EventFormProps = {
     onSubmit: (data: EventCreationFormValues) => Promise<void>;
     isSubmitting?: boolean;
-    error?: string | null;
+    error?: string | null | boolean;
+    defaultValues?: Partial<EventCreationFormValues>;
+    mode?: 'create' | 'edit';
 };
 
-export function EventCreationForm({
+export function EventForm({
     onSubmit,
     isSubmitting,
     error,
+    defaultValues,
+    mode = 'create',
     className,
     ...props
-}: Readonly<EventCreationFormProps & Omit<React.ComponentProps<'div'>, 'onSubmit'>>) {
+}: Readonly<EventFormProps & Omit<React.ComponentProps<'div'>, 'onSubmit'>>) {
     const {
         register,
+        control,
         handleSubmit,
-        watch,
-        setValue,
         formState: { errors, isDirty, isValid },
     } = useForm<EventCreationFormValues>({
         resolver: zodResolver(eventCreationSchema),
         mode: 'onChange',
         defaultValues: {
             status: 'DRAFT',
+            ...defaultValues,
         },
     });
 
-    const status = watch('status');
+    const isEdit = mode === 'edit';
 
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
             <Card>
                 <CardHeader className="text-center">
-                    <CardTitle className="text-xl">Créer un évènement</CardTitle>
+                    <CardTitle className="text-xl">
+                        {isEdit ? "Modifier l'évènement" : 'Créer un évènement'}
+                    </CardTitle>
                 </CardHeader>
-                <form onSubmit={handleSubmit(onSubmit)}>
+
+                <form id="event-form" onSubmit={handleSubmit(onSubmit)}>
                     <CardContent>
                         <FieldGroup>
+                            {/* INFORMATIONS GÉNÉRALES */}
                             <Field data-invalid={!!errors.title}>
                                 <FieldLabel htmlFor="title">Titre</FieldLabel>
                                 <Input
@@ -88,6 +97,7 @@ export function EventCreationForm({
                                 {errors.program && <FieldError errors={[errors.program]} />}
                             </Field>
 
+                            {/* DATES */}
                             <Field className="grid grid-cols-2 gap-4">
                                 <Field data-invalid={!!errors.start_date}>
                                     <FieldLabel htmlFor="start_date">Date de début</FieldLabel>
@@ -115,39 +125,42 @@ export function EventCreationForm({
                                 </Field>
                             </Field>
 
-                            <Field data-invalid={!!errors.status}>
-                                <FieldLabel>Statut</FieldLabel>
-                                <Select
-                                    value={status}
-                                    onValueChange={(value) =>
-                                        setValue(
-                                            'status',
-                                            value as EventCreationFormValues['status'],
-                                            { shouldValidate: true, shouldDirty: true },
-                                        )
-                                    }
-                                >
-                                    <SelectTrigger
-                                        className="w-full"
-                                        aria-invalid={!!errors.status}
-                                    >
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {eventStatusOptions.map((value) => (
-                                            <SelectItem key={value} value={value}>
-                                                {eventStatusLabel[value]}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.status && <FieldError errors={[errors.status]} />}
-                            </Field>
+                            {/* STATUT */}
+                            <Controller
+                                name="status"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>Statut</FieldLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger
+                                                id={field.name}
+                                                aria-invalid={fieldState.invalid}
+                                            >
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {eventStatusOptions.map((value) => (
+                                                    <SelectItem key={value} value={value}>
+                                                        {eventStatusLabel[value]}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
 
-                            <fieldset className="flex flex-col gap-3 rounded-lg border border-base-300 shadow p-4">
+                            <Separator />
+
+                            {/* ADRESSE */}
+                            <fieldset className="flex flex-col gap-3 rounded-lg border p-4">
                                 <legend className="px-1 text-sm font-medium">Adresse</legend>
 
-                                <div className="grid grid-cols-2 gap-3">
+                                <Field className="grid grid-cols-2 gap-3">
                                     <Field data-invalid={!!errors.address?.street_number}>
                                         <FieldLabel htmlFor="address.street_number">
                                             Numéro
@@ -162,6 +175,7 @@ export function EventCreationForm({
                                             <FieldError errors={[errors.address.street_number]} />
                                         )}
                                     </Field>
+
                                     <Field data-invalid={!!errors.address?.street_name}>
                                         <FieldLabel htmlFor="address.street_name">
                                             Nom de rue
@@ -176,7 +190,7 @@ export function EventCreationForm({
                                             <FieldError errors={[errors.address.street_name]} />
                                         )}
                                     </Field>
-                                </div>
+                                </Field>
 
                                 <Field data-invalid={!!errors.address?.address_line_2}>
                                     <FieldLabel htmlFor="address.address_line_2">
@@ -193,7 +207,7 @@ export function EventCreationForm({
                                     )}
                                 </Field>
 
-                                <div className="grid grid-cols-2 gap-3">
+                                <Field className="grid grid-cols-2 gap-3">
                                     <Field data-invalid={!!errors.address?.postal_code}>
                                         <FieldLabel htmlFor="address.postal_code">
                                             Code postal
@@ -208,6 +222,7 @@ export function EventCreationForm({
                                             <FieldError errors={[errors.address.postal_code]} />
                                         )}
                                     </Field>
+
                                     <Field data-invalid={!!errors.address?.city}>
                                         <FieldLabel htmlFor="address.city">Ville</FieldLabel>
                                         <Input
@@ -220,7 +235,7 @@ export function EventCreationForm({
                                             <FieldError errors={[errors.address.city]} />
                                         )}
                                     </Field>
-                                </div>
+                                </Field>
 
                                 <Field data-invalid={!!errors.address?.country}>
                                     <FieldLabel htmlFor="address.country">Pays</FieldLabel>
@@ -236,16 +251,29 @@ export function EventCreationForm({
                                 </Field>
                             </fieldset>
 
-                            {error && <p className="text-error text-sm">{error}</p>}
+                            {error && (
+                                <p className="text-sm text-destructive">
+                                    {typeof error === 'string' ? error : 'Une erreur est survenue.'}
+                                </p>
+                            )}
                         </FieldGroup>
                     </CardContent>
+
                     <CardFooter className="mt-4">
                         <Button
+                            type="submit"
+                            form="event-form"
                             className="w-full"
                             data-cy="submit-event"
                             disabled={isSubmitting || !isDirty || !isValid}
                         >
-                            {isSubmitting ? 'Création...' : "Créer l'évènement"}
+                            {isSubmitting
+                                ? isEdit
+                                    ? 'Mise à jour...'
+                                    : 'Création...'
+                                : isEdit
+                                  ? "Mettre à jour l'évènement"
+                                  : "Créer l'évènement"}
                         </Button>
                     </CardFooter>
                 </form>

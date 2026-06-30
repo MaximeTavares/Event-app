@@ -1,11 +1,24 @@
+import { useState } from 'react';
 import { formatInTimeZone } from 'date-fns-tz';
 import { Link } from 'react-router';
-import Button from '../../../shared/components/UI/Button';
-import { useState } from 'react';
-import { ConfirmModal } from '../../../shared/components/UI/ConfirmModal';
 import { useParticipateMutation } from '../../participation/hooks/use_participation.service';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { ParticipationStatus, SlotDto, slotStatusColor, slotStatusLabel } from '@app/contracts';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Flex } from '@/components/layout/flex';
+import { UsersIcon, CalendarIcon } from 'lucide-react';
 
 type SlotItemProps = {
     slot: SlotDto;
@@ -13,91 +26,96 @@ type SlotItemProps = {
     missionId?: number;
 };
 
-type ParticipationButtonConfig = {
-    label: string;
-    disabled: boolean;
-};
-
-const participationButtonConfig: Record<ParticipationStatus | 'NONE', ParticipationButtonConfig> = {
-    NONE: {
-        label: "S'inscrire",
-        disabled: false,
-    },
-    PENDING: {
-        label: 'Demande en attente',
-        disabled: true,
-    },
-    ACCEPTED: {
-        label: 'Déjà inscrit',
-        disabled: true,
-    },
-    REJECTED: {
-        label: 'Demande rejetée',
-        disabled: true,
-    },
-    CANCELLED: {
-        label: "S'inscrire",
-        disabled: false,
-    },
+const participationConfig: Record<
+    ParticipationStatus | 'NONE',
+    { label: string; disabled: boolean }
+> = {
+    NONE: { label: "S'inscrire", disabled: false },
+    PENDING: { label: 'Demande en attente', disabled: true },
+    ACCEPTED: { label: 'Déjà inscrit', disabled: true },
+    REJECTED: { label: 'Demande rejetée', disabled: true },
+    CANCELLED: { label: "S'inscrire", disabled: false },
 };
 
 export function SlotItem({ slot, eventId, missionId }: Readonly<SlotItemProps>) {
-    const [isSlotParticipationOpen, setIsSlotParticipationOpen] = useState<boolean>(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     const status = slot.participation_status ?? 'NONE';
-    const config = participationButtonConfig[status];
+    const config = participationConfig[status];
 
-    const participationMutation = useParticipateMutation(eventId, missionId);
+    const participationMutation = useParticipateMutation(slot.id, eventId, missionId);
 
     const handleParticipation = async () => {
         await toastMutation(participationMutation.mutateAsync(slot.id), {
             loading: 'Chargement...',
-            success: 'Inscription prise en compte',
+            success: 'Inscription prise en compte.',
             error: 'Une erreur est survenue, veuillez recommencer.',
         });
-
-        setIsSlotParticipationOpen(false);
+        setIsConfirmOpen(false);
     };
 
     return (
-        <div className="p-2 border border-primary rounded-md">
-            <span className={`badge ${slotStatusColor[slot.status]}`}>
-                {slotStatusLabel[slot.status]}
-            </span>
+        <>
+            <Card>
+                <CardContent className="flex flex-col gap-3 pt-4">
+                    {/* Statut */}
+                    <Badge variant="outline" className={slotStatusColor[slot.status]}>
+                        {slotStatusLabel[slot.status]}
+                    </Badge>
 
-            <p className="mt-1 text-sm">
-                De {formatInTimeZone(slot.start_at, 'Europe/Paris', 'HH:mm')} à{' '}
-                {formatInTimeZone(slot.end_at, 'Europe/Paris', 'HH:mm')}
-            </p>
+                    {/* Horaires */}
+                    <Flex align="center" gap="2" className="text-sm text-muted-foreground">
+                        <CalendarIcon className="h-4 w-4 shrink-0" />
+                        <span>
+                            {formatInTimeZone(slot.start_at, 'Europe/Paris', 'HH:mm')}
+                            {' → '}
+                            {formatInTimeZone(slot.end_at, 'Europe/Paris', 'HH:mm')}
+                        </span>
+                    </Flex>
 
-            <p className="text-sm text-gray-500">
-                {slot.current_participants} inscrits · {slot.available_place} places restantes
-            </p>
+                    {/* Participants */}
+                    <Flex align="center" gap="2" className="text-sm text-muted-foreground">
+                        <UsersIcon className="h-4 w-4 shrink-0" />
+                        <span>
+                            {slot.current_participants} inscrits · {slot.available_place} place
+                            {slot.available_place > 1 ? 's' : ''} restante
+                            {slot.available_place > 1 ? 's' : ''}
+                        </span>
+                    </Flex>
 
-            <div className="card-actions w-full justify-between mt-2">
-                <Button size="sm" as={Link} to={`/slots/${slot.id}`} variant="ghost">
-                    Voir
-                </Button>
+                    {/* Actions */}
+                    <Flex justify="between" align="center" className="mt-1">
+                        <Button variant="ghost" size="sm" asChild>
+                            <Link to={`/slots/${slot.id}`}>Voir le détail</Link>
+                        </Button>
+                        <Button
+                            size="sm"
+                            onClick={() => setIsConfirmOpen(true)}
+                            disabled={config.disabled}
+                        >
+                            {config.label}
+                        </Button>
+                    </Flex>
+                </CardContent>
+            </Card>
 
-                <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => setIsSlotParticipationOpen(true)}
-                    disabled={config.disabled}
-                >
-                    {config.label}
-                </Button>
-            </div>
-            {/* PARTICIPATION MODAL */}
-
-            <ConfirmModal
-                key={slot.id}
-                message="Souhaitez vous confirmer votre inscription sur ce créneau ?"
-                onConfirm={handleParticipation}
-                isOpen={isSlotParticipationOpen}
-                size="md"
-                onClose={() => setIsSlotParticipationOpen(false)}
-            ></ConfirmModal>
-        </div>
+            {/* Confirmation inscription */}
+            <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer l'inscription</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Souhaitez-vous confirmer votre inscription sur ce créneau ?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleParticipation}>
+                            Confirmer
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }

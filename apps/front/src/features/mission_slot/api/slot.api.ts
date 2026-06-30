@@ -1,7 +1,6 @@
-import { SlotDetails } from '@app/contracts';
+import { SlotDetails, SlotFormValues } from '@app/contracts';
 import { api } from '../../../shared/utils/axios-client';
-import type { BaseSlot} from '../types/slot.type';
-import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema';
+import type { BaseSlot } from '../types/slot.type';
 
 export class SlotApi {
     static async getSlotById(slotId: number) {
@@ -9,12 +8,12 @@ export class SlotApi {
         return data;
     }
 
-    static async createSlot(missionId: number, slot: SlotCreationOutputValues): Promise<BaseSlot> {
+    static async createSlot(missionId: number, slot: SlotFormValues) {
         const { data } = await api.post<BaseSlot>(`/missions/${missionId}/slots`, slot);
         return data;
     }
 
-    static async updateSlot(slotId: number, slot: SlotCreationOutputValues): Promise<BaseSlot> {
+    static async updateSlot(slotId: number, slot: SlotFormValues) {
         const { data } = await api.patch<BaseSlot>(`/slots/${slotId}`, slot);
         return data;
     }

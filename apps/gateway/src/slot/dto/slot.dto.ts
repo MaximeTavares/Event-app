@@ -1,13 +1,11 @@
 import { ParticipationStatus, SlotStatus } from '@app/contracts';
 
-
-
 export interface SlotWithParticipationDto {
     id: number;
     organizer_id: string;
     start_at: Date;
     end_at: Date;
-    max_participants: number;
+    max_participant: number;
     current_participants: number;
     available_place: number;
     status: SlotStatus;

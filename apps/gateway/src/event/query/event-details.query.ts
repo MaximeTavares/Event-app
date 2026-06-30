@@ -20,6 +20,7 @@ export const eventDetailsQuery = {
                 Slot: {
                     select: {
                         id: true,
+                        mission_id: true,
                         start_at: true,
                         end_at: true,
                         max_participant: true,

@@ -1,7 +1,7 @@
 import { CardEventImage } from '@/components/card-event-image';
 import Pagination from '../../../shared/components/UI/Pagination';
 import type { BaseEvent } from '../types/event.type';
-import { Grid } from '@/components/layout/Grid';
+import { Grid } from '@/components/layout/grid';
 import { UiMessage } from '@/shared/utils/map/mapUiMessages';
 import UiMessageAlert from '@/components/ui-message-alert';
 

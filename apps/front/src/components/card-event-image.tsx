@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import { BaseEvent } from '@/features/event/types/event.type';
 import { formatDate } from '@/shared/utils/formatDate';
+import { eventStatusColor, eventStatusLabel } from '@app/contracts';
 import { GrMap, GrSchedule } from 'react-icons/gr';
 import { useNavigate } from 'react-router';
 
@@ -30,7 +31,9 @@ export function CardEventImage({ eventData }: Readonly<CardEventImageProps>) {
             />
             <CardHeader>
                 <CardAction>
-                    <Badge variant="secondary">{eventData.status}</Badge>
+                    <Badge variant="secondary" className={eventStatusColor[eventData.status]}>
+                        {eventStatusLabel[eventData.status]}
+                    </Badge>
                 </CardAction>
 
                 <CardTitle>{eventData.title}</CardTitle>

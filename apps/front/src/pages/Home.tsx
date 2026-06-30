@@ -10,8 +10,8 @@ import { buildListStatusMessage, buildMapStatusMessage } from '../shared/utils/m
 import HomeMapSection from '../shared/components/UI/map/HomeMapSection';
 import HomeEventsList from '../features/event/components/HomeEventsList';
 import { useProfile } from '@/features/settings/hooks/use-profile';
-import { Container } from '@/components/layout/Container';
-import { Section } from '@/components/layout/Section';
+import { Container } from '@/components/layout/container';
+import { Section } from '@/components/layout/section';
 import { useUserMapOrigin } from '@/shared/components/UI/map/useUserMapOrigin';
 
 export default function Home() {

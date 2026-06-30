@@ -57,9 +57,11 @@ export function toEventDetails(
                 return {
                     id: s.id,
                     organizer_id: event.organizer_id,
+                    eventId: event.id,
+                    missionId: s.mission_id,
                     start_at: s.start_at,
                     end_at: s.end_at,
-                    max_participants: s.max_participant,
+                    max_participant: s.max_participant,
                     status: s.status,
                     current_participants,
                     available_place: s.max_participant - current_participants,

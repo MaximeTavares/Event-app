@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router';
 import { SettingsNav } from '@/components/settings-nav';
-import { Container } from '@/components/layout/Container';
+import { Container } from '@/components/layout/container';
 
 export default function SettingsPage() {
     return (

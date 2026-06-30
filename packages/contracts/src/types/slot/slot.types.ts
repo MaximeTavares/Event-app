@@ -1,7 +1,7 @@
 import { ParticipantDetailsDto, ParticipationStatus } from "../participation/participant.types.js";
 
-
-export type SlotStatus = "OPEN" | "FULL" | "CLOSED" | "CANCELLED";
+export const SLOT_STATUS = ["OPEN", "FULL", "CLOSED", "CANCELLED"] as const;
+export type SlotStatus = (typeof SLOT_STATUS)[number];
 
 export const slotStatusLabel: Record<SlotStatus, string> = {
 	OPEN: "Ouvert",
@@ -11,10 +11,10 @@ export const slotStatusLabel: Record<SlotStatus, string> = {
 };
 
 export const slotStatusColor: Record<SlotStatus, string> = {
-	OPEN: "badge-success",
-	FULL: "badge-accent",
-	CANCELLED: "badge-error",
-	CLOSED: "badge-error",
+	OPEN: "bg-green-100 text-green-800 border-green-200",
+	FULL: "bg-blue-100 text-blue-800 border-blue-200",
+	CANCELLED: "bg-red-100 text-red-800 border-red-200",
+	CLOSED: "bg-red-100 text-red-800 border-red-200",
 };
 
 export interface SlotDomain {
@@ -30,57 +30,23 @@ export interface SlotDomain {
 
 export interface SlotDto {
 	id: number;
+	eventId: number;
+	missionId: number;
 	organizer_id: string;
 
 	start_at: Date;
 	end_at: Date;
 
-	max_participants: number;
+	max_participant: number;
 	current_participants: number;
 	available_place: number;
 
 	status: SlotStatus;
 
-    is_participating: boolean;
-    participation_status?: ParticipationStatus
+	is_participating: boolean;
+	participation_status?: ParticipationStatus;
 }
-
-// export interface SlotWithUserIdQuery {
-// 	id: number;
-// 	Mission: {
-// 		Event: {
-// 			organizer_id: string;
-// 		};
-// 	};
-// 	mission_id: number;
-// 	start_at: Date;
-// 	end_at: Date;
-// 	max_participant: number;
-// 	status: SlotStatus;
-// 	Participation: {
-// 		user_id: string;
-// 	}[];
-// }
 
 export interface SlotDetails extends SlotDto {
 	participants: ParticipantDetailsDto[];
-}
-
-export interface SlotWithParticipationsQuery {
-	id: number;
-	mission_id: number;
-	status: SlotStatus;
-	start_at: Date;
-	end_at: Date;
-	max_participant: number;
-	Mission: {
-		Event: {
-			organizer_id: string;
-		};
-	};
-	Participation: {
-		id: number;
-		status: ParticipationStatus;
-		user_id: string;
-	}[];
 }

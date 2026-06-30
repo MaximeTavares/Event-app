@@ -15,7 +15,7 @@ export interface SlotDetailsApiResponse {
     end_at: Date;
     current_participants: number;
     available_place: number;
-    max_participants: number;
+    max_participant: number;
     status: SlotStatus;
     participants: [
         {
