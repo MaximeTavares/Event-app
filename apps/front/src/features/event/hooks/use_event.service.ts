@@ -5,17 +5,13 @@ import {
     type UseMutationResult,
     type UseQueryResult,
 } from '@tanstack/react-query';
-import type {
-    BaseEvent,
-    CreateEventInput,
-    PaginatedEvents,
-    UpdateEventInput,
-} from '../types/event.type';
+import type { BaseEvent, PaginatedEvents, UpdateEventInput } from '../types/event.type';
 import { createEvent, deleteEvent, getEventById, getEvents, updateEvent } from '../api/event.api';
 import type { EventFilters } from '../../../shared/components/UI/filter/eventsFilters.interface';
 import { EventMapper } from '../mapper/EventMapper';
 import { EventDto } from '@app/contracts';
 import { queryKeys } from '../../../shared/tanstack/QueryKeys';
+import { EventCreationFormValues } from '../validation/eventCreation.schema';
 
 //Lecture
 export function useGetEvents(filters?: EventFilters): UseQueryResult<PaginatedEvents, Error> {
@@ -43,7 +39,7 @@ export function useGetEventById(id: number): UseQueryResult<EventDto, Error> {
 }
 
 //Ecriture
-export function useCreateEvent(): UseMutationResult<BaseEvent, Error, CreateEventInput> {
+export function useCreateEvent(): UseMutationResult<BaseEvent, Error, EventCreationFormValues> {
     const queryClient = useQueryClient();
 
     return useMutation({

@@ -2,12 +2,8 @@ import { useNavigate } from 'react-router';
 import { useCreateEvent } from '../hooks/use_event.service';
 import { EventCreationForm } from './EventCreationForm';
 import type { EventCreationFormValues } from '../validation/eventCreation.schema';
-import { EventMapper } from '../mapper/EventMapper';
-import toast from 'react-hot-toast';
-import { useState } from 'react';
-import type { AxiosError } from 'axios';
-import { PageContainer } from '../../../shared/layout/PageContainer';
-import { Card } from '../../../shared/layout/Card';
+import { Container } from '@/components/layout/Container';
+import { toastMutation } from '@/shared/utils/useToastMutation';
 
 export type ApiError = {
     message: string;
@@ -17,41 +13,29 @@ export function EventCreationPage() {
     //Navigate
     const navigate = useNavigate();
 
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
     //Ecriture Tanstack Mutation
     const createMutation = useCreateEvent();
 
     const handleSubmit = async (data: EventCreationFormValues) => {
-        const promise = createMutation.mutateAsync(EventMapper.toCreateEvent(data));
-
-        await toast.promise(promise, {
-            loading: 'Chargement...',
-            success: 'Événement créé avec succès',
-            error: (err: AxiosError<ApiError>) => {
-                return err.response?.data.message || 'Erreur lors de la création.';
-            },
-        });
-
         try {
-            await promise;
+            await toastMutation(createMutation.mutateAsync(data), {
+                loading: 'Chargement...',
+                success: 'Evènement créé avec succés',
+                error: "Impossible d'enregistrer",
+            });
             await navigate('/me/events');
-        } catch (err) {
-            const error = err as AxiosError<ApiError>;
-            const message = error.response?.data.message ?? 'Erreur lors de la création.';
-            setErrorMessage(message);
+        } catch {
+            // handle by toast
         }
     };
 
     return (
-        <PageContainer>
-            <Card title="Création d'évènement" size="xl">
-                <EventCreationForm
-                    onSubmit={handleSubmit}
-                    isSubmitting={createMutation.isPending}
-                    error={errorMessage}
-                />
-            </Card>
-        </PageContainer>
+        <Container size={'3'} align={'center'}>
+            <EventCreationForm
+                onSubmit={handleSubmit}
+                isSubmitting={createMutation.isPending}
+                error={createMutation.isError ? "Impossible d'enregistrer l'évènement'" : undefined}
+            />
+        </Container>
     );
 }

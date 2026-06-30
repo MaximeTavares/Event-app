@@ -6,11 +6,7 @@ import type { EventFilters } from '../shared/components/UI/filter/eventsFilters.
 import HomeFilters, { type LocationState } from '../shared/components/UI/filter/HomeFilters';
 import { toEventMapPoints } from '../shared/components/UI/map/map-data';
 import { geocodeCity } from '../shared/utils/map/GeocodeGeoapify';
-import {
-    buildListStatusMessage,
-    buildMapStatusMessage,
-    buildMapWarningMessage,
-} from '../shared/utils/map/mapUiMessages';
+import { buildListStatusMessage, buildMapStatusMessage } from '../shared/utils/map/mapUiMessages';
 import HomeMapSection from '../shared/components/UI/map/HomeMapSection';
 import HomeEventsList from '../features/event/components/HomeEventsList';
 import { useProfile } from '@/features/settings/hooks/use-profile';
@@ -57,7 +53,9 @@ export default function Home() {
     const effectiveOrigin = cityCoordinates ?? userOrigin;
 
     // Filtres paginés utilisés pour la liste affichée dans la Home.
-    // Seuls les évènements OPEN sont affichés sur la Home
+    // Seuls les évènements OPEN sont affichés sur la Home, le filtre statut a ete retire.
+    // Calcul non trivial (plusieurs conditions, objet recree a chaque appel) et
+    // utilise comme dependance de useGetEvents : on garde le useMemo ici.
     const filters = useMemo<EventFilters>(() => {
         const hasRadiusFilter = location.city.trim().length > 0 && location.distanceKm > 0;
 
@@ -65,22 +63,15 @@ export default function Home() {
             statuses: ['OPEN'],
             startDate: filterDateValue.start ?? undefined,
             endDate: filterDateValue.end ?? undefined,
-
-            // filtre ville (texte uniquement)
             city: location.city || undefined,
-
-            // filtre géo uniquement si valide
             latitude: hasRadiusFilter ? effectiveOrigin?.lat : undefined,
             longitude: hasRadiusFilter ? effectiveOrigin?.lon : undefined,
             distanceKm: hasRadiusFilter ? location.distanceKm : undefined,
-
-            // pagination
             page: currentPage,
             limit: pageSize,
         };
     }, [filterDateValue, location, currentPage, effectiveOrigin]);
 
-    // Chargement des donnees évènements, avec et sans pagination.
     const {
         data,
         isLoading: isEventsLoading,
@@ -93,6 +84,7 @@ export default function Home() {
     const limit = data?.limit ?? pageSize;
 
     // Recherche texte appliquée côté client sur les évènements déjà chargés (titre/description).
+    // Filtrage sur un tableau : calcul reellement non trivial, useMemo justifie.
     const searchedEvents = useMemo(() => {
         const term = search.trim().toLowerCase();
         if (!term) return events;
@@ -104,33 +96,22 @@ export default function Home() {
         });
     }, [events, search]);
 
-    const totalPages = useMemo(() => {
-        return Math.max(1, Math.ceil(total / limit));
-    }, [total, limit]);
+    // Calcul trivial (une division, un arrondi) : pas besoin de useMemo.
+    const totalPages = Math.max(1, Math.ceil(total / limit));
 
-    // Données dérivées pour la carte et la pagination de la liste.
-    const eventMapPoints = useMemo(() => {
-        return toEventMapPoints(searchedEvents);
-    }, [searchedEvents]);
+    // Transformation d'un tableau d'events en points de carte : useMemo justifie.
+    const eventMapPoints = useMemo(() => toEventMapPoints(searchedEvents), [searchedEvents]);
 
     // Messages dérivés affichés dans la carte et la liste.
+    // Calculs triviaux (quelques comparaisons de booleens) : pas besoin de useMemo,
+    // le cout de memoisation depasserait celui du calcul lui-meme.
     const mapStatusMessage = buildMapStatusMessage({
         hasCityFilter,
-        isCityGeocoding: false,
-        isCityGeocodingError: false,
-        isCityNotFound: false,
         isUserLoading,
         isUserError,
         userErrorMessage: userError?.message,
         hasUserOrigin: Boolean(userOrigin),
         hasEffectiveOrigin: Boolean(effectiveOrigin),
-    });
-
-    const mapWarningMessage = buildMapWarningMessage({
-        hasCityFilter,
-        isCityGeocodingError: false,
-        isCityNotFound: false,
-        hasUserOrigin: Boolean(userOrigin),
     });
 
     const listStatusMessage = buildListStatusMessage({
@@ -169,7 +150,6 @@ export default function Home() {
             </Section>
             <Section size={'1'}>
                 <HomeMapSection
-                    mapWarningMessage={mapWarningMessage}
                     isMapVisible={isMapVisible}
                     isEventsLoading={isEventsLoading}
                     isEventsError={isEventsError}

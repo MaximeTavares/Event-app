@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { Link } from 'react-router';
 
 export default function UnauthorizedPage() {
@@ -12,8 +13,8 @@ export default function UnauthorizedPage() {
                     </p>
                 </div>
                 <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link to="/" className="btn btn-primary">
-                        Retour à l'accueil
+                    <Link to="/">
+                        <Button variant={'link'}> Retour à l'accueil</Button>
                     </Link>
                 </div>
             </div>

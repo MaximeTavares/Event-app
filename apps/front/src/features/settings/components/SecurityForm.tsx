@@ -1,7 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import Button from '../../../shared/components/UI/Button';
+import { Controller, useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { SecurityDto, SecuritySchema } from '@app/contracts';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 type SecurityFormProps = {
     onSubmit: (data: SecurityDto) => Promise<void>;
@@ -15,33 +19,68 @@ export function SecurityForm({
     isSubmitting,
     defaultValues,
     error,
-}: Readonly<SecurityFormProps>) {
-    const { register, handleSubmit } = useForm<SecurityDto>({
+    className,
+    ...props
+}: Readonly<SecurityFormProps & Omit<React.ComponentProps<'div'>, 'onSubmit'>>) {
+    const {
+        control,
+        handleSubmit,
+        formState: { isDirty },
+    } = useForm<SecurityDto>({
         resolver: zodResolver(SecuritySchema),
         defaultValues,
     });
 
     return (
-        <div className="flex max-w-xl flex-col gap-10">
-            <section className="flex flex-col gap-4">
-                <h2 className="text-xl font-semibold">Authentification à deux facteurs (2FA)</h2>
-                <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-                    <label className="flex cursor-pointer items-center gap-3">
-                        <input
-                            type="checkbox"
-                            className="toggle toggle-primary"
-                            {...register('twoFactorEnabled')}
-                        />
-                        <span>Activer l’A2F sur mon compte</span>
-                    </label>
+        <div className={cn('flex flex-col gap-6', className)} {...props}>
+            <Card>
+                <CardHeader className="text-center">
+                    <CardTitle className="text-xl">Sécurité</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form id="security-form" onSubmit={handleSubmit(onSubmit)}>
+                        <FieldGroup>
+                            <Controller
+                                name="twoFactorEnabled"
+                                control={control}
+                                render={({ field }) => (
+                                    <Field>
+                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                            <div className="flex flex-col gap-1">
+                                                <FieldLabel htmlFor={field.name}>
+                                                    Authentification à deux facteurs
+                                                </FieldLabel>
+                                                <span className="text-sm text-muted-foreground">
+                                                    Ajoute une couche de sécurité supplémentaire à
+                                                    votre compte.
+                                                </span>
+                                            </div>
+                                            <Switch
+                                                id={field.name}
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                                className="shrink-0"
+                                            />
+                                        </div>
+                                    </Field>
+                                )}
+                            />
 
-                    {error && <p className="text-error text-sm">{error}</p>}
-
-                    <Button type="submit" disabled={isSubmitting}>
+                            {error && <p className="text-sm text-destructive">{error}</p>}
+                        </FieldGroup>
+                    </form>
+                </CardContent>
+                <CardFooter>
+                    <Button
+                        className="w-full"
+                        form="security-form"
+                        type="submit"
+                        disabled={isSubmitting || !isDirty}
+                    >
                         {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
                     </Button>
-                </form>
-            </section>
+                </CardFooter>
+            </Card>
         </div>
     );
 }

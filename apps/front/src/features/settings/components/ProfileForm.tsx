@@ -1,8 +1,7 @@
 import { ProfileDto, ProfileFormValues, profileSchema } from '@app/contracts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { FormField } from '../../../shared/components/UI/formField/FormField';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -23,7 +22,7 @@ export function ProfileForm({
     defaultValues,
     className,
     ...props
-}: Readonly<ProfileFormProps & React.ComponentProps<'div'>>) {
+}: Readonly<ProfileFormProps & Omit<React.ComponentProps<'div'>, 'onSubmit'>>) {
     const {
         register,
         handleSubmit,
@@ -33,8 +32,6 @@ export function ProfileForm({
         defaultValues,
     });
 
-    // const coordinates = data?.profile.address.coordinates;
-
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
             <Card>
@@ -42,10 +39,7 @@ export function ProfileForm({
                     <CardTitle className="text-xl">Profil</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form
-                        // className="flex max-w-xl flex-col gap-4"
-                        onSubmit={handleSubmit(onSubmit)}
-                    >
+                    <form id="profile-form" onSubmit={handleSubmit(onSubmit)}>
                         <FieldGroup>
                             <Field className="grid grid-cols-2 gap-4">
                                 <Field data-invalid={!!errors.firstName}>
@@ -83,62 +77,100 @@ export function ProfileForm({
                                 {errors.bio && <FieldError errors={[errors.bio]} />}
                             </Field>
 
-                            <fieldset className="flex flex-col gap-3 rounded-lg border border-base-300 shadow p-4">
+                            <fieldset className="flex flex-col gap-3 rounded-lg border p-4">
                                 <legend className="px-1 text-sm font-medium">Adresse</legend>
 
-                                <div className="grid grid-cols-2 gap-3">
-                                    <FormField
-                                        label="N° de rue"
-                                        error={errors.address?.streetNumber?.message}
-                                        {...register('address.streetNumber')}
-                                    />
-                                    <FormField
-                                        label="Rue"
-                                        error={errors.address?.streetName?.message}
-                                        {...register('address.streetName')}
-                                    />
-                                </div>
+                                <Field className="grid grid-cols-2 gap-3">
+                                    <Field data-invalid={!!errors.address?.streetNumber}>
+                                        <FieldLabel htmlFor="streetNumber">N° de rue</FieldLabel>
+                                        <Input
+                                            {...register('address.streetNumber')}
+                                            id="streetNumber"
+                                            aria-invalid={!!errors.address?.streetNumber}
+                                        />
+                                        {errors.address?.streetNumber && (
+                                            <FieldError errors={[errors.address.streetNumber]} />
+                                        )}
+                                    </Field>
 
-                                <FormField
-                                    label="Complément"
-                                    error={errors.address?.addressLine2?.message}
-                                    {...register('address.addressLine2')}
-                                />
+                                    <Field data-invalid={!!errors.address?.streetName}>
+                                        <FieldLabel htmlFor="streetName">Rue</FieldLabel>
+                                        <Input
+                                            {...register('address.streetName')}
+                                            id="streetName"
+                                            aria-invalid={!!errors.address?.streetName}
+                                        />
+                                        {errors.address?.streetName && (
+                                            <FieldError errors={[errors.address.streetName]} />
+                                        )}
+                                    </Field>
+                                </Field>
 
-                                <div className="grid grid-cols-2 gap-3">
-                                    <FormField
-                                        label="Ville"
-                                        error={errors.address?.city?.message}
-                                        {...register('address.city')}
+                                <Field data-invalid={!!errors.address?.addressLine2}>
+                                    <FieldLabel htmlFor="addressLine2">Complément</FieldLabel>
+                                    <Input
+                                        {...register('address.addressLine2')}
+                                        id="addressLine2"
+                                        aria-invalid={!!errors.address?.addressLine2}
                                     />
-                                    <FormField
-                                        label="Code postal"
-                                        error={errors.address?.postalCode?.message}
-                                        {...register('address.postalCode')}
+                                    {errors.address?.addressLine2 && (
+                                        <FieldError errors={[errors.address.addressLine2]} />
+                                    )}
+                                </Field>
+
+                                <Field className="grid grid-cols-2 gap-3">
+                                    <Field data-invalid={!!errors.address?.city}>
+                                        <FieldLabel htmlFor="city">Ville</FieldLabel>
+                                        <Input
+                                            {...register('address.city')}
+                                            id="city"
+                                            aria-invalid={!!errors.address?.city}
+                                        />
+                                        {errors.address?.city && (
+                                            <FieldError errors={[errors.address.city]} />
+                                        )}
+                                    </Field>
+
+                                    <Field data-invalid={!!errors.address?.postalCode}>
+                                        <FieldLabel htmlFor="postalCode">Code postal</FieldLabel>
+                                        <Input
+                                            {...register('address.postalCode')}
+                                            id="postalCode"
+                                            aria-invalid={!!errors.address?.postalCode}
+                                        />
+                                        {errors.address?.postalCode && (
+                                            <FieldError errors={[errors.address.postalCode]} />
+                                        )}
+                                    </Field>
+                                </Field>
+
+                                <Field data-invalid={!!errors.address?.country}>
+                                    <FieldLabel htmlFor="country">Pays</FieldLabel>
+                                    <Input
+                                        {...register('address.country')}
+                                        id="country"
+                                        aria-invalid={!!errors.address?.country}
                                     />
-                                </div>
-
-                                <FormField
-                                    label="Pays"
-                                    error={errors.address?.country?.message}
-                                    {...register('address.country')}
-                                />
-
-                                {/* {coordinates ? (
-                        <p className="text-xs text-base-content/60">
-                            Coordonnées : {coordinates.lat.toFixed(5)}, {coordinates.lon.toFixed(5)}
-                        </p>
-                    ) : null} */}
+                                    {errors.address?.country && (
+                                        <FieldError errors={[errors.address.country]} />
+                                    )}
+                                </Field>
                             </fieldset>
 
                             {error && <p className="text-error text-sm">{error}</p>}
-
-                            <Button disabled={isSubmitting || !isDirty}>
-                                {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
-                            </Button>
                         </FieldGroup>
                     </form>
                 </CardContent>
+                <CardFooter>
+                    <Button
+                        className="w-full"
+                        type="submit"
+                        form="profile-form"
+                        disabled={isSubmitting || !isDirty}
+                    >
+                        {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
+                    </Button>
+                </CardFooter>
             </Card>
         </div>
     );

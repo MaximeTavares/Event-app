@@ -2,7 +2,6 @@ import { PreferenceForm } from './PreferenceForm';
 import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
-import { FormLayout } from '../../../shared/layout/FormLayout';
 import { usePreferences, useUpdatePreferences } from '../hooks/use-preferences';
 
 export default function PreferencesSetting() {
@@ -18,23 +17,19 @@ export default function PreferencesSetting() {
     }
 
     return (
-        <FormLayout title="Préférences" width="xl">
-            <PreferenceForm
-                defaultValues={preferences}
-                onSubmit={async (data) => {
-                    await toastMutation(updatePreferences.mutateAsync(data), {
-                        loading: 'Chargement...',
-                        success: 'Préférences modifiées',
-                        error: "Impossible d'enregistrer",
-                    });
-                }}
-                isSubmitting={updatePreferences.isPending}
-                error={
-                    updatePreferences.isError
-                        ? "Impossible d'enregistrer les préferences"
-                        : undefined
-                }
-            />
-        </FormLayout>
+        <PreferenceForm
+            defaultValues={preferences}
+            onSubmit={async (data) => {
+                await toastMutation(updatePreferences.mutateAsync(data), {
+                    loading: 'Chargement...',
+                    success: 'Préférences modifiées',
+                    error: "Impossible d'enregistrer",
+                });
+            }}
+            isSubmitting={updatePreferences.isPending}
+            error={
+                updatePreferences.isError ? "Impossible d'enregistrer les préferences" : undefined
+            }
+        />
     );
 }

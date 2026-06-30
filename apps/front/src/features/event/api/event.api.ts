@@ -1,6 +1,5 @@
 import type { EventFilters } from '../../../shared/components/UI/filter/eventsFilters.interface';
 import {
-    type CreateEventInput,
     type UpdateEventInput,
     type BaseEvent,
     type PaginatedEventsApiResponse,
@@ -9,6 +8,7 @@ import { api } from '../../../shared/utils/axios-client';
 import { EventDto } from '@app/contracts';
 
 import qs from 'qs';
+import { EventCreationFormValues } from '../validation/eventCreation.schema';
 
 export async function getEvents(filters?: EventFilters): Promise<PaginatedEventsApiResponse> {
     const { data } = await api.get<PaginatedEventsApiResponse>(`/events`, {
@@ -24,7 +24,7 @@ export async function getEventById(id: number) {
     return data;
 }
 
-export async function createEvent(event: CreateEventInput): Promise<BaseEvent> {
+export async function createEvent(event: EventCreationFormValues): Promise<BaseEvent> {
     const { data } = await api.post<BaseEvent>(`/events`, event);
 
     return data;

@@ -4,7 +4,6 @@ import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
 import { useProfile, useUpdateProfile } from '../hooks/use-profile';
-import { PageContainer } from '@/components/layout/Container';
 
 export default function ProfilSetting() {
     const { data: profile, isPending, isError } = useProfile();

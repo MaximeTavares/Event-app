@@ -1,8 +1,20 @@
 import { PreferencesDto, preferencesSchema } from '@app/contracts';
-import Button from '../../../shared/components/UI/Button';
-import { FormField } from '../../../shared/components/UI/formField/FormField';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 type PreferencesFormProps = {
     onSubmit: (data: PreferencesDto) => Promise<void>;
@@ -16,139 +28,301 @@ export function PreferenceForm({
     isSubmitting,
     defaultValues,
     error,
-}: Readonly<PreferencesFormProps>) {
+    className,
+    ...props
+}: Readonly<PreferencesFormProps & Omit<React.ComponentProps<'div'>, 'onSubmit'>>) {
     const {
         register,
+        control,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isDirty },
     } = useForm<PreferencesDto>({
         resolver: zodResolver(preferencesSchema),
-        defaultValues: {
-            ...defaultValues,
-            defaultSearchCity: '',
-        },
+        defaultValues,
     });
 
     return (
-        <form className="flex max-w-xl flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-base-content/60">
-                Affichage
-            </h3>
-            <FormField
-                as="select"
-                label="Taille du texte"
-                error={errors.fontSize?.message}
-                {...register('fontSize')}
-            >
-                <option value="sm">Petit</option>
-                <option value="md">Moyen</option>
-                <option value="lg">Grand</option>
-            </FormField>
+        <div className={cn('flex flex-col gap-6', className)} {...props}>
+            <Card>
+                <CardHeader className="text-center">
+                    <CardTitle className="text-xl">Préférences</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form id="preferences-form" onSubmit={handleSubmit(onSubmit)}>
+                        <FieldGroup>
+                            {/* AFFICHAGE */}
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Affichage
+                            </p>
 
-            <label className="flex cursor-pointer items-center gap-3">
-                <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    {...register('highContrast')}
-                />
-                <span>Mode contraste élevé</span>
-            </label>
+                            <Controller
+                                name="fontSize"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>
+                                            Taille du texte
+                                        </FieldLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger id={field.name}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="sm">Petit</SelectItem>
+                                                <SelectItem value="md">Moyen</SelectItem>
+                                                <SelectItem value="lg">Grand</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
 
-            <h3 className="mt-4 text-sm font-semibold uppercase tracking-wide text-base-content/60">
-                Formats
-            </h3>
-            <FormField
-                as="select"
-                label="Format de l’heure"
-                error={errors.timeFormat?.message}
-                {...register('timeFormat')}
-            >
-                <option value="24">24 h</option>
-                <option value="12">12 h</option>
-            </FormField>
+                            <Controller
+                                name="highContrast"
+                                control={control}
+                                render={({ field }) => (
+                                    <Field>
+                                        <div className="flex items-center justify-between">
+                                            <FieldLabel htmlFor={field.name}>
+                                                Mode contraste élevé
+                                            </FieldLabel>
+                                            <Switch
+                                                id={field.name}
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </div>
+                                    </Field>
+                                )}
+                            />
 
-            <FormField
-                as="select"
-                label="Format de date"
-                error={errors.dateFormat?.message}
-                {...register('dateFormat')}
-            >
-                <option value="eu">JJ/MM/AAAA</option>
-                <option value="us">MM/JJ/AAAA</option>
-            </FormField>
+                            <Separator />
 
-            <FormField
-                as="select"
-                label="Unité de distance"
-                error={errors.distanceUnit?.message}
-                {...register('distanceUnit')}
-            >
-                <option value="km">Kilomètres</option>
-                <option value="mi">Miles</option>
-            </FormField>
+                            {/* FORMATS */}
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Formats
+                            </p>
 
-            <FormField
-                as="select"
-                label="Langue"
-                error={errors.language?.message}
-                {...register('language')}
-            >
-                <option value="fr">Français</option>
-                <option value="en">English</option>
-            </FormField>
+                            <Controller
+                                name="timeFormat"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>
+                                            Format de l'heure
+                                        </FieldLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger id={field.name}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="24">24 h</SelectItem>
+                                                <SelectItem value="12">12 h</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
 
-            <h3 className="mt-4 text-sm font-semibold uppercase tracking-wide text-base-content/60">
-                Confidentialité
-            </h3>
-            <FormField
-                as="select"
-                label="Visibilité du profil"
-                error={errors.profileVisibility?.message}
-                {...register('profileVisibility')}
-            >
-                <option value="public">Public</option>
-                <option value="events_only">Membres de mes événements uniquement</option>
-                <option value="organizers_only">Organisateurs uniquement</option>
-            </FormField>
+                            <Controller
+                                name="dateFormat"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>Format de date</FieldLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger id={field.name}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="eu">JJ/MM/AAAA</SelectItem>
+                                                <SelectItem value="us">MM/JJ/AAAA</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
 
-            <label className="flex cursor-pointer items-center gap-3">
-                <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    {...register('showEmail')}
-                />
-                <span>Afficher mon email aux autres</span>
-            </label>
+                            <Controller
+                                name="distanceUnit"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>
+                                            Unité de distance
+                                        </FieldLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger id={field.name}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="km">Kilomètres</SelectItem>
+                                                <SelectItem value="mi">Miles</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
 
-            <label className="flex cursor-pointer items-center gap-3">
-                <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    {...register('showPhone')}
-                />
-                <span>Afficher mon téléphone aux autres</span>
-            </label>
+                            <Controller
+                                name="language"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>Langue</FieldLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger id={field.name}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="fr">Français</SelectItem>
+                                                <SelectItem value="en">English</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
 
-            <h3 className="mt-4 text-sm font-semibold uppercase tracking-wide text-base-content/60">
-                Navigation
-            </h3>
-            <FormField
-                label="Vue par défaut du calendrier"
-                error={errors.defaultCalendarView?.message}
-                {...register('defaultCalendarView')}
-            />
+                            <Separator />
 
-            <FormField
-                label="Ville ou zone de recherche par défaut"
-                error={errors.defaultSearchCity?.message}
-                {...register('defaultSearchCity')}
-            />
+                            {/* CONFIDENTIALITÉ */}
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Confidentialité
+                            </p>
 
-            {error && <p className="text-error text-sm">{error}</p>}
+                            <Controller
+                                name="profileVisibility"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>
+                                            Visibilité du profil
+                                        </FieldLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger id={field.name}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="public">Public</SelectItem>
+                                                <SelectItem value="events_only">
+                                                    Membres de mes événements uniquement
+                                                </SelectItem>
+                                                <SelectItem value="organizers_only">
+                                                    Organisateurs uniquement
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
 
-            <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Enregistrement…' : 'Enregister'}
-            </Button>
-        </form>
+                            <Controller
+                                name="showEmail"
+                                control={control}
+                                render={({ field }) => (
+                                    <Field>
+                                        <div className="flex items-center justify-between">
+                                            <FieldLabel htmlFor={field.name}>
+                                                Afficher mon email aux autres
+                                            </FieldLabel>
+                                            <Switch
+                                                id={field.name}
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </div>
+                                    </Field>
+                                )}
+                            />
+
+                            <Controller
+                                name="showPhone"
+                                control={control}
+                                render={({ field }) => (
+                                    <Field>
+                                        <div className="flex items-center justify-between">
+                                            <FieldLabel htmlFor={field.name}>
+                                                Afficher mon téléphone aux autres
+                                            </FieldLabel>
+                                            <Switch
+                                                id={field.name}
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </div>
+                                    </Field>
+                                )}
+                            />
+
+                            <Separator />
+
+                            {/* NAVIGATION */}
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Navigation
+                            </p>
+
+                            <Field data-invalid={!!errors.defaultCalendarView}>
+                                <FieldLabel htmlFor="defaultCalendarView">
+                                    Vue par défaut du calendrier
+                                </FieldLabel>
+                                <Input
+                                    {...register('defaultCalendarView')}
+                                    id="defaultCalendarView"
+                                    aria-invalid={!!errors.defaultCalendarView}
+                                />
+                                {errors.defaultCalendarView && (
+                                    <FieldError errors={[errors.defaultCalendarView]} />
+                                )}
+                            </Field>
+
+                            <Field data-invalid={!!errors.defaultSearchCity}>
+                                <FieldLabel htmlFor="defaultSearchCity">
+                                    Ville ou zone de recherche par défaut
+                                </FieldLabel>
+                                <Input
+                                    {...register('defaultSearchCity')}
+                                    id="defaultSearchCity"
+                                    aria-invalid={!!errors.defaultSearchCity}
+                                />
+                                {errors.defaultSearchCity && (
+                                    <FieldError errors={[errors.defaultSearchCity]} />
+                                )}
+                            </Field>
+
+                            {error && <p className="text-sm text-destructive">{error}</p>}
+                        </FieldGroup>
+                    </form>
+                </CardContent>
+                <CardFooter>
+                    {' '}
+                    <Button
+                        className="w-full"
+                        form="preferences-form"
+                        type="submit"
+                        disabled={isSubmitting || !isDirty}
+                    >
+                        {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
     );
 }

@@ -1,7 +1,11 @@
 import { NotificationsDto, notificationsSchema } from '@app/contracts';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import Button from '../../../shared/components/UI/Button';
+import { Controller, useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { FieldGroup } from '@/components/ui/field';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 const rows: { key: keyof NotificationsDto; label: string; description?: string }[] = [
     {
@@ -10,7 +14,7 @@ const rows: { key: keyof NotificationsDto; label: string; description?: string }
         description: 'Coupe toutes les alertes si désactivé.',
     },
     { key: 'eventActivity', label: 'Activités des événements' },
-    { key: 'eventMessages', label: 'Messages dans l’événement' },
+    { key: 'eventMessages', label: "Messages dans l'événement" },
     { key: 'documents', label: 'Documents et ressources' },
     { key: 'deadlines', label: 'Échéances et rappels' },
     { key: 'nearbyEvents', label: 'Événements à proximité' },
@@ -29,44 +33,73 @@ export function NotificationsForm({
     isSubmitting,
     defaultValues,
     error,
-}: Readonly<NotificationsFormProps>) {
-    const { register, handleSubmit } = useForm<NotificationsDto>({
+    className,
+    ...props
+}: Readonly<NotificationsFormProps & Omit<React.ComponentProps<'div'>, 'onSubmit'>>) {
+    const {
+        control,
+        handleSubmit,
+        formState: { isDirty },
+    } = useForm<NotificationsDto>({
         resolver: zodResolver(notificationsSchema),
         defaultValues,
     });
 
     return (
-        <form className="flex max-w-xl flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
-            <ul className="flex flex-col gap-4">
-                {rows.map(({ key, label, description }) => (
-                    <li
-                        key={key}
-                        className="flex flex-col gap-1 rounded-lg border border-base-300 p-4"
+        <div className={cn('flex flex-col gap-6', className)} {...props}>
+            <Card>
+                <CardHeader className="text-center">
+                    <CardTitle className="text-xl">Notifications</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form id="notifications-form" onSubmit={handleSubmit(onSubmit)}>
+                        <FieldGroup>
+                            <ul className="flex flex-col gap-3">
+                                {rows.map(({ key, label, description }) => (
+                                    <li key={key} className="rounded-lg border p-4">
+                                        <Controller
+                                            name={key}
+                                            control={control}
+                                            render={({ field }) => (
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-sm font-medium">
+                                                            {label}
+                                                        </span>
+                                                        {description && (
+                                                            <span className="text-sm text-muted-foreground">
+                                                                {description}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <Switch
+                                                        id={field.name}
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                        className="shrink-0"
+                                                    />
+                                                </div>
+                                            )}
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+
+                            {error && <p className="text-sm text-destructive">{error}</p>}
+                        </FieldGroup>
+                    </form>
+                </CardContent>
+                <CardFooter>
+                    <Button
+                        className="w-full"
+                        type="submit"
+                        form="notifications-form"
+                        disabled={isSubmitting || !isDirty}
                     >
-                        <label className="flex cursor-pointer items-start gap-3">
-                            <input
-                                type="checkbox"
-                                className="toggle toggle-primary mt-0.5 shrink-0"
-                                {...register(key)}
-                            />
-                            <span>
-                                <span className="font-medium">{label}</span>
-                                {description ? (
-                                    <span className="mt-1 block text-sm text-base-content/70">
-                                        {description}
-                                    </span>
-                                ) : null}
-                            </span>
-                        </label>
-                    </li>
-                ))}
-            </ul>
-
-            {error && <p className="text-error text-sm">{error}</p>}
-
-            <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Enregistrement…' : 'Enregister'}
-            </Button>
-        </form>
+                        {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
     );
 }

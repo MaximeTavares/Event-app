@@ -2,7 +2,6 @@ import { AvailabilityForm } from './AvailabilityForm';
 import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
-import { FormLayout } from '../../../shared/layout/FormLayout';
 import { useAvailability, useUpdateAvailability } from '../hooks/use-availability';
 
 export default function AvailabilitySetting() {
@@ -19,23 +18,21 @@ export default function AvailabilitySetting() {
     }
 
     return (
-        <FormLayout title="Mes disponibilité" width="xl">
-            <AvailabilityForm
-                defaultValues={availability}
-                onSubmit={async (data) => {
-                    await toastMutation(updateAvailability.mutateAsync(data), {
-                        loading: 'Chargement...',
-                        success: 'Disponibilités modifiées',
-                        error: "Impossible d'enregistrer",
-                    });
-                }}
-                error={
-                    updateAvailability.isError
-                        ? "Impossible d'enregistrer les disponibilités."
-                        : undefined
-                }
-                isSubmitting={updateAvailability.isPending}
-            />
-        </FormLayout>
+        <AvailabilityForm
+            defaultValues={availability}
+            onSubmit={async (data) => {
+                await toastMutation(updateAvailability.mutateAsync(data), {
+                    loading: 'Chargement...',
+                    success: 'Disponibilités modifiées',
+                    error: "Impossible d'enregistrer",
+                });
+            }}
+            error={
+                updateAvailability.isError
+                    ? "Impossible d'enregistrer les disponibilités."
+                    : undefined
+            }
+            isSubmitting={updateAvailability.isPending}
+        />
     );
 }
