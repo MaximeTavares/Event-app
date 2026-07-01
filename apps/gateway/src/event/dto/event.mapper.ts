@@ -1,6 +1,7 @@
 import { EventDto, EventWithAddress } from '@app/contracts';
 import { EventDetailsQuery } from '../query/event-details.query';
 import { EventWithAddressQuery } from '../query/event-address.query';
+import { toAddressDto } from '../../address/mapper/address.mapper';
 
 export function toEventWithAddress(
     event: EventWithAddressQuery,
@@ -15,21 +16,7 @@ export function toEventWithAddress(
         end_date: event.end_date,
         status: event.status,
         // event.mapper.ts, ligne ~34
-        address: {
-            street_number: event.Address.street_number,
-            street_name: event.Address.street_name,
-            address_line_2: event.Address.address_line_2 ?? undefined,
-            city: event.Address.city,
-            postal_code: event.Address.postal_code,
-            country: event.Address.country,
-            coordinates:
-                event.Address.coordinates_lat && event.Address.coordinates_lon
-                    ? {
-                          lat: event.Address.coordinates_lat,
-                          lon: event.Address.coordinates_lon,
-                      }
-                    : undefined,
-        },
+        address: toAddressDto(event.Address),
     };
 }
 
@@ -47,21 +34,7 @@ export function toEventDetails(
         end_date: event.end_date,
         status: event.status,
         // event.mapper.ts, ligne ~34
-        address: {
-            street_number: event.Address.street_number,
-            street_name: event.Address.street_name,
-            address_line_2: event.Address.address_line_2 ?? undefined,
-            city: event.Address.city,
-            postal_code: event.Address.postal_code,
-            country: event.Address.country,
-            coordinates:
-                event.Address.coordinates_lat && event.Address.coordinates_lon
-                    ? {
-                          lat: event.Address.coordinates_lat,
-                          lon: event.Address.coordinates_lon,
-                      }
-                    : undefined,
-        },
+        address: toAddressDto(event.Address),
 
         missions: event.Mission.map((m) => ({
             id: m.id,
