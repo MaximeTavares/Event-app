@@ -186,7 +186,9 @@ export function MissionDetails({ mission }: Readonly<MissionDetailsProps>) {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete}>Supprimer</AlertDialogAction>
+                        <AlertDialogAction variant={'destructive'} onClick={handleDelete}>
+                            Supprimer
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import { Outlet } from 'react-router';
-import type { Role } from '../../features/user/types/user.type';
 import { useMe } from '../../features/auth/hooks/use_auth.service';
+import { Role } from '@app/contracts';
 
 type Props = {
     layouts: Record<Role, ComponentType>;

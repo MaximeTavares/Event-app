@@ -50,7 +50,7 @@ const USER_ITEMS = {
             icon: <Trophy />,
         },
         {
-            name: 'Missions',
+            name: 'Missions (WIP)',
             url: '/me/missions',
             icon: <Target />,
         },

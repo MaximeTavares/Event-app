@@ -50,6 +50,7 @@ function axiosClient(): AxiosInstance {
             // RATE LIMIT (429)
             // =========================
             if (error.response?.status === 429) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const retryAfter = error.response?.headers?.['retry-after'];
                 const seconds = retryAfter ? Number.parseInt(String(retryAfter), 10) : 60;
 

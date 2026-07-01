@@ -1,4 +1,4 @@
-import Button from './Button';
+import { Button } from '@/components/ui/button';
 
 // Voir la documentation src/docs/create-pagination-generic.md
 type PaginationProps = {
@@ -20,7 +20,7 @@ export default function Pagination({
     totalPages = 1,
     onPageChange,
     className = '',
-}: PaginationProps) {
+}: Readonly<PaginationProps>) {
     const canPaginate = Boolean(onPageChange) && totalPages > 1;
 
     return (

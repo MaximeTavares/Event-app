@@ -86,11 +86,11 @@ export function NavUser({
                         <DropdownMenuGroup>
                             <DropdownMenuItem>
                                 <BadgeCheckIcon />
-                                Account
+                                Account (WIP)
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <BellIcon />
-                                Notifications
+                                Notifications (WIP)
                             </DropdownMenuItem>
 
                             <DropdownMenuSub>

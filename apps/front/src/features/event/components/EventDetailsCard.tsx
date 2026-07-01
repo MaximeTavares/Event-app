@@ -199,7 +199,9 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete}>Supprimer</AlertDialogAction>
+                        <AlertDialogAction variant={'destructive'} onClick={handleDelete}>
+                            Supprimer
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
