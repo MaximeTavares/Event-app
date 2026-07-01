@@ -15,12 +15,9 @@ export class UserPreferences {
         enum: FONT_SIZES,
         default: 'md',
     })
-    fontSize: string;
+    fontSize: (typeof FONT_SIZES)[number];
 
-    @Prop({
-        type: Boolean,
-        default: false,
-    })
+    @Prop({ type: Boolean, default: false })
     highContrast: boolean;
 
     @Prop({
@@ -28,57 +25,45 @@ export class UserPreferences {
         enum: TIME_FORMATS,
         default: '24',
     })
-    timeFormat: string;
+    timeFormat: (typeof TIME_FORMATS)[number];
 
     @Prop({
         type: String,
         enum: DATE_FORMATS,
         default: 'eu',
     })
-    dateFormat: string;
+    dateFormat: (typeof DATE_FORMATS)[number];
 
     @Prop({
         type: String,
         enum: DISTANCE_UNITS,
         default: 'km',
     })
-    distanceUnit: string;
+    distanceUnit: (typeof DISTANCE_UNITS)[number];
 
     @Prop({
         type: String,
         enum: LANGUAGES,
         default: 'fr',
     })
-    language: string;
+    language: (typeof LANGUAGES)[number];
 
     @Prop({
         type: String,
         enum: PROFILE_VISIBILITIES,
         default: 'events_only',
     })
-    profileVisibility: string;
+    profileVisibility: (typeof PROFILE_VISIBILITIES)[number];
 
-    @Prop({
-        type: Boolean,
-        default: false,
-    })
+    @Prop({ type: Boolean, default: false })
     showEmail: boolean;
 
-    @Prop({
-        type: Boolean,
-        default: false,
-    })
+    @Prop({ type: Boolean, default: false })
     showPhone: boolean;
 
-    @Prop({
-        type: String,
-        default: 'month',
-    })
+    @Prop({ type: String, default: 'month' })
     defaultCalendarView: string;
 
-    @Prop({
-        type: String,
-        default: '',
-    })
+    @Prop({ type: String, default: '' })
     defaultSearchCity: string;
 }

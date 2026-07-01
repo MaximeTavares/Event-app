@@ -1,6 +1,7 @@
 import { EventDto, EventWithAddress } from '@app/contracts';
 import { EventDetailsQuery } from '../query/event-details.query';
 import { EventWithAddressQuery } from '../query/event-address.query';
+import { toAddressDto } from '../../address/mapper/address.mapper';
 
 export function toEventWithAddress(
     event: EventWithAddressQuery,
@@ -14,7 +15,8 @@ export function toEventWithAddress(
         start_date: event.start_date,
         end_date: event.end_date,
         status: event.status,
-        address: event.Address,
+        // event.mapper.ts, ligne ~34
+        address: toAddressDto(event.Address),
     };
 }
 
@@ -31,7 +33,8 @@ export function toEventDetails(
         start_date: event.start_date,
         end_date: event.end_date,
         status: event.status,
-        address: event.Address,
+        // event.mapper.ts, ligne ~34
+        address: toAddressDto(event.Address),
 
         missions: event.Mission.map((m) => ({
             id: m.id,
@@ -57,9 +60,11 @@ export function toEventDetails(
                 return {
                     id: s.id,
                     organizer_id: event.organizer_id,
+                    eventId: event.id,
+                    missionId: s.mission_id,
                     start_at: s.start_at,
                     end_at: s.end_at,
-                    max_participants: s.max_participant,
+                    max_participant: s.max_participant,
                     status: s.status,
                     current_participants,
                     available_place: s.max_participant - current_participants,

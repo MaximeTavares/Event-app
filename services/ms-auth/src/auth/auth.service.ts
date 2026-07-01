@@ -1,12 +1,16 @@
 import { JwtTokenService } from './../jwt/jwt.service';
 import { Injectable } from '@nestjs/common';
-import { SigninDto, SignupDto } from 'src/dto/auth.dto';
+import { SigninDto } from 'src/dto/auth.dto';
 import { RpcException } from '@nestjs/microservices';
 import { compare, hash } from 'src/utils/password.util';
 import { UserService } from 'src/users/user.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
 import { GoogleAuthService } from 'src/google/google-auth.service';
-import { ChangePasswordDto, LoginResponseDto } from '@app/contracts';
+import {
+    ChangePasswordDto,
+    LoginResponseDto,
+    SignupRequestDto,
+} from '@app/contracts';
 
 @Injectable()
 export class AuthService {
@@ -17,26 +21,29 @@ export class AuthService {
         private readonly refreshTokenService: RefreshTokenService,
     ) {}
 
-    async signup(data: SignupDto) {
+    async signup(data: SignupRequestDto): Promise<{ success: true }> {
         console.log('Appel du ms signup');
         const existing = await this.userService.findByEmail(data.email);
 
         if (existing)
             throw new RpcException({
-                statusCode: 400,
-                message: 'Email ou mot de passe incorrect',
+                statusCode: 409,
+                message: 'Un compte existe déjà pour cette email',
             });
 
         const hashedPassword = await hash(data.password);
 
-        const user = await this.userService.create({
-            ...data,
+        await this.userService.create({
+            email: data.email,
             password: hashedPassword,
+            profile: {
+                firstName: data.firstName,
+                lastName: data.lastName,
+            },
         });
 
         return {
-            id: user._id,
-            email: user.email,
+            success: true,
         };
     }
 
@@ -74,11 +81,15 @@ export class AuthService {
         };
     }
 
-    async googleSignin(idToken: string) {
-        // 1. Verify google token
+    async googleSignin(code: string) {
+        // 1. Échange le code contre un id_token Google
+        const idToken =
+            await this.googleAuthService.exchangeCodeForIdToken(code);
+
+        // 2. Verify google token (inchangé)
         const payload = await this.googleAuthService.verifyToken(idToken);
 
-        // 2. Find or create user
+        // 3. Find or create user (inchangé)
         const user = await this.userService.findOrCreateGoogleUser({
             email: payload.email!,
             googleSub: payload.sub,
@@ -87,7 +98,7 @@ export class AuthService {
             avatarUrl: payload.picture,
         });
 
-        // 3. JWT Token generation
+        // 4. JWT Token generation (inchangé)
         const accessToken = await this.jwtTokenService.generateAccessToken({
             id: user.id,
             email: user.email,
@@ -100,16 +111,9 @@ export class AuthService {
 
         await this.refreshTokenService.save(user.id, refreshToken);
 
-        // 4. Return information
-
         return {
             accessToken,
             refreshToken,
-            // user: {
-            //     id: user.id,
-            //     email: user.email,
-            //     role: user.role,
-            // },
         };
     }
 

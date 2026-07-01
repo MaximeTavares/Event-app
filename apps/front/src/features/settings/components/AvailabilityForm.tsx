@@ -1,7 +1,11 @@
 import { AvailabilityDto, availabilitySchema, WEEK_DAYS, WeekDay } from '@app/contracts';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import Button from '../../../shared/components/UI/Button';
+import { Controller, useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { FieldGroup } from '@/components/ui/field';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 const DAY_LABELS: Record<WeekDay, string> = {
     monday: 'Lundi',
@@ -25,38 +29,70 @@ export function AvailabilityForm({
     isSubmitting,
     error,
     defaultValues,
-}: Readonly<AvailabilityFormProps>) {
-    const { register, handleSubmit } = useForm<AvailabilityDto>({
+    className,
+    ...props
+}: Readonly<AvailabilityFormProps & Omit<React.ComponentProps<'div'>, 'onSubmit'>>) {
+    const {
+        control,
+        handleSubmit,
+        formState: { isDirty },
+    } = useForm<AvailabilityDto>({
         resolver: zodResolver(availabilitySchema),
         defaultValues,
     });
 
     return (
-        <form className="flex max-w-xl flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-            <p className="text-sm text-base-content/70">
-                Indiquez les jours où vous êtes généralement disponible.
-            </p>
+        <div className={cn('flex flex-col gap-6', className)} {...props}>
+            <Card>
+                <CardHeader className="text-center">
+                    <CardTitle className="text-xl">Disponibilités</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form id="availability-form" onSubmit={handleSubmit(onSubmit)}>
+                        <FieldGroup>
+                            <p className="text-sm text-muted-foreground">
+                                Indiquez les jours où vous êtes généralement disponible.
+                            </p>
 
-            <ul className="flex flex-col gap-3">
-                {WEEK_DAYS.map((day) => (
-                    <li key={day}>
-                        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-base-300 px-4 py-3">
-                            <span className="font-medium">{DAY_LABELS[day]}</span>
-                            <input
-                                type="checkbox"
-                                className="toggle toggle-primary"
-                                {...register(day)}
-                            />
-                        </label>
-                    </li>
-                ))}
-            </ul>
+                            <ul className="flex flex-col gap-3">
+                                {WEEK_DAYS.map((day) => (
+                                    <li key={day}>
+                                        <Controller
+                                            name={day}
+                                            control={control}
+                                            render={({ field }) => (
+                                                <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                                                    <span className="text-sm font-medium">
+                                                        {DAY_LABELS[day]}
+                                                    </span>
+                                                    <Switch
+                                                        id={field.name}
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                    />
+                                                </div>
+                                            )}
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
 
-            {error && <p className="text-error text-sm">{error}</p>}
+                            {error && <p className="text-sm text-destructive">{error}</p>}
+                        </FieldGroup>
+                    </form>
+                </CardContent>
 
-            <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
-            </Button>
-        </form>
+                <CardFooter>
+                    <Button
+                        className="w-full"
+                        type="submit"
+                        form="availability-form"
+                        disabled={isSubmitting || !isDirty}
+                    >
+                        {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
     );
 }

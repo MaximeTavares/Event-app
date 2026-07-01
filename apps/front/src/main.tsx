@@ -8,7 +8,14 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App';
 import { AuthProvider } from './features/auth/components/auth.provider';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 60 * 1000, // 1 min par défaut, override-able par hook
+            refetchOnWindowFocus: false,
+        },
+    },
+});
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>

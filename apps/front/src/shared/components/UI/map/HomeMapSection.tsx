@@ -1,20 +1,20 @@
 // Voir src/docs/create-map-geoapify.md, étapes 5.4 et 5.5, pour l'explication detaillee de l'affichage conditionnel de la carte.
+import UiMessageAlert from '@/components/ui-message-alert';
 import type { EventMapPoint, UserOrigin } from './map-data';
 import UserEventsMap from './UserEventsMap';
+import { UiMessage } from '@/shared/utils/map/mapUiMessages';
 
 type HomeMapSectionProps = {
-    mapWarningMessage: string | null;
     isMapVisible: boolean;
     isEventsLoading: boolean;
     isEventsError: boolean;
-    mapStatusMessage: string | null;
+    mapStatusMessage: UiMessage;
     effectiveOrigin: UserOrigin | null | undefined;
     eventMapPoints: EventMapPoint[];
     radiusMeters: number;
 };
 
 export default function HomeMapSection({
-    mapWarningMessage,
     isMapVisible,
     isEventsLoading,
     isEventsError,
@@ -25,8 +25,6 @@ export default function HomeMapSection({
 }: Readonly<HomeMapSectionProps>) {
     return (
         <>
-            {mapWarningMessage ? <div>{mapWarningMessage}</div> : null}
-
             {isMapVisible &&
             !isEventsLoading &&
             !isEventsError &&
@@ -38,7 +36,9 @@ export default function HomeMapSection({
                     radiusMeters={radiusMeters}
                 />
             ) : isMapVisible && mapStatusMessage ? (
-                <div>{mapStatusMessage}</div>
+                <div>
+                    <UiMessageAlert message={mapStatusMessage} />
+                </div>
             ) : null}
         </>
     );

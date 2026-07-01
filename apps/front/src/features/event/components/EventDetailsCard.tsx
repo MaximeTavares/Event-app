@@ -1,221 +1,210 @@
-import { useState } from 'react';
-import { Modal2 } from '../../../shared/components/UI/Modal2';
 import { formatDate } from '../../../shared/utils/formatDate';
-import { eventStatusColor, eventStatusLabel } from '../types/event.type';
-import { EventUpdateForm } from './EventUpdateForm';
-import { useNavigate } from 'react-router';
-import { useDeleteEvent, useUpdateEvent } from '../hooks/use_event.service';
-import type { EventUpdateFormValues } from '../validation/eventUpdate.schema';
 import { EventMapper } from '../mapper/EventMapper';
-import toast from 'react-hot-toast';
-import type { AxiosError } from 'axios';
-import type { ApiError } from './EventCreationPage';
 import { MissionItem } from '../../mission/components/MissionItem';
-import { HeaderDetails } from '../../../shared/components/UI/HeaderDetails';
-import { DeleteModal } from '../../../shared/components/UI/DeleteModal';
-import Button from '../../../shared/components/UI/Button';
-import { MissionCreationForm } from '../../mission/components/MissionCreationForm';
-import type { MissionCreationFormValues } from '../../mission/validation/MissionCreation.schema';
-import { useCreateMission } from '../../mission/hooks/use_mission.service';
-import { AddIcon } from '../../../shared/components/UI/icons/icons';
-import { useMe } from '../../auth/hooks/use_auth.service';
-import { Card } from '../../../shared/layout/Card';
-import { EventDto } from '@app/contracts';
+import { EventDto, eventStatusColor, eventStatusLabel } from '@app/contracts';
+import { EventForm } from './EventForm';
+import { MissionForm } from '../../mission/components/MissionForm';
+import { useEventDetails } from '../hooks/useEventDetails';
+
+// shadcn
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+// layout primitives
+import { Grid } from '@/components/layout/grid';
+import { Flex } from '@/components/layout/flex';
+
+// icons
+import { PencilIcon, Trash2Icon, PlusIcon } from 'lucide-react';
 
 interface EventDetailsProps {
     event: EventDto;
 }
 
 export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
-    const { data: user } = useMe();
-
-    const navigate = useNavigate();
-
-    // Check is the current User is the organizer
-    const canEdit = user?.id && event.organizer_id ? user.id === event.organizer_id : false;
-
-    // Event update
-    const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-    const updateMutation = useUpdateEvent();
-
-    const handleSubmit = async (data: EventUpdateFormValues) => {
-        setIsEditModalOpen(false);
-
-        const promise = updateMutation.mutateAsync({
-            id: event.id,
-            data: EventMapper.toUpdateEvent(data),
-        });
-
-        await toast.promise(promise, {
-            loading: 'Chargement...',
-            success: 'Événement mis à jour avec succés.',
-            error: (err: AxiosError<ApiError>) => {
-                return err.response?.data.message || 'Erreur lors de la mise à jour.';
-            },
-        });
-
-        try {
-            await promise;
-            await navigate(`/events/${event.id}`);
-        } catch {
-            // L'erreur est déjà gérée par toast.promise
-        }
-    };
-
-    // Mission creation
-    const [isCreateMissionModalOpen, setIsCreateMissionModalOpen] = useState<boolean>(false);
-    const createMissionMutation = useCreateMission();
-    const [missionErrorMessage, setMissionErrorMessage] = useState<string | null>(null);
-
-    const handleMissionSubmit = async (data: MissionCreationFormValues) => {
-        setIsCreateMissionModalOpen(false);
-
-        const promise = createMissionMutation.mutateAsync({
-            eventId: event.id,
-            mission: data,
-        });
-
-        await toast.promise(promise, {
-            loading: 'Chargement...',
-            success: 'Mission créée avec succès',
-            error: (err: AxiosError<ApiError>) => {
-                return err.response?.data.message || 'Erreur lors de la création';
-            },
-        });
-
-        try {
-            await promise;
-        } catch (err) {
-            const error = err as AxiosError<ApiError>;
-            const message = error.response?.data.message ?? 'Erreur lors de la création.';
-            setMissionErrorMessage(message);
-        }
-    };
-
-    // Event delete
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-    const deleteMutation = useDeleteEvent();
-
-    const handleDelete = async () => {
-        setIsDeleteModalOpen(false);
-
-        const promise = deleteMutation.mutateAsync({ id: event.id });
-
-        await toast.promise(promise, {
-            loading: 'Chargement...',
-            success: 'Événement supprimé avec succés.',
-            error: 'Erreur lors de la suppression',
-        });
-
-        try {
-            await promise;
-            await navigate('/');
-        } catch {
-            // L'erreur est déjà gérée par toast.promise
-        }
-    };
-
-    if (!event) return null;
+    const {
+        canEdit,
+        isEditOpen,
+        setIsEditOpen,
+        updateMutation,
+        handleUpdate,
+        isCreateMissionOpen,
+        setIsCreateMissionOpen,
+        createMissionMutation,
+        handleCreateMission,
+        isDeleteOpen,
+        setIsDeleteOpen,
+        handleDelete,
+    } = useEventDetails(event);
 
     return (
         <>
-            <div className="card bg-base-100 border border-base-300 shadow-sm p-4">
+            <Card>
                 {/* HEADER */}
-                <HeaderDetails
-                    key={event.id}
-                    entity={event}
-                    status={eventStatusLabel[event.status]}
-                    statusColor={eventStatusColor}
-                    canEdit={canEdit}
-                    onEdit={() => setIsEditModalOpen(true)}
-                    onDelete={() => setIsDeleteModalOpen(true)}
-                />
+                <CardHeader>
+                    <Flex justify="between" align="start">
+                        <div className="flex flex-col gap-1">
+                            <CardTitle className="text-2xl">{event.title}</CardTitle>
+                            <CardDescription>{event.description}</CardDescription>
+                        </div>
 
-                {/* DESCRIPTION */}
-                <p className="text-gray-500">{event.description}</p>
+                        <Flex align="center" gap="2">
+                            <Badge variant="outline" className={eventStatusColor[event.status]}>
+                                {eventStatusLabel[event.status]}
+                            </Badge>
 
-                <div className="divider" />
+                            {canEdit && (
+                                <>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setIsEditOpen(true)}
+                                        aria-label="Modifier l'événement"
+                                    >
+                                        <PencilIcon className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setIsDeleteOpen(true)}
+                                        aria-label="Supprimer l'événement"
+                                        className="text-destructive hover:text-destructive"
+                                    >
+                                        <Trash2Icon className="h-4 w-4" />
+                                    </Button>
+                                </>
+                            )}
+                        </Flex>
+                    </Flex>
+                </CardHeader>
 
-                <section>
-                    <h2 className="text-xl font-semibold mb-2 text-primary">Dates</h2>
-                    <p>
-                        Du {formatDate(event.start_date)} au {formatDate(event.end_date)}
-                    </p>
-                </section>
+                <CardContent className="flex flex-col gap-6">
+                    <Separator />
 
-                <section>
-                    <h2 className="text-xl font-semibold mb-2 text-primary">Programme</h2>
-                    <p>{event.program}</p>
-                </section>
+                    {/* DATES */}
+                    <section className="flex flex-col gap-1">
+                        <h2 className="text-base font-semibold">Dates</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Du {formatDate(event.start_date)} au {formatDate(event.end_date)}
+                        </p>
+                    </section>
 
-                <section>
-                    <h2 className="text-xl font-semibold mb-2 text-primary">Adresse</h2>
-                    <p>
-                        {event.address.street_number} {event.address.street_name}
-                    </p>
-                    <p>
-                        {event.address.postal_code} {event.address.city}
-                    </p>
-                    <p>{event.address.country}</p>
-                </section>
+                    <Separator />
 
-                <section>
-                    <div className="flex">
-                        <h2 className="text-xl font-semibold mb-2 text-primary">Missions</h2>{' '}
-                        {canEdit && (
-                            <Button
-                                onClick={() => setIsCreateMissionModalOpen(true)}
-                                variant="ghost"
-                                size="xs"
-                            >
-                                <AddIcon size={20} />
-                            </Button>
+                    {/* PROGRAMME */}
+                    <section className="flex flex-col gap-1">
+                        <h2 className="text-base font-semibold">Programme</h2>
+                        <p className="text-sm text-muted-foreground">{event.program}</p>
+                    </section>
+
+                    <Separator />
+
+                    {/* ADRESSE */}
+                    <section className="flex flex-col gap-1">
+                        <h2 className="text-base font-semibold">Adresse</h2>
+                        <p className="text-sm text-muted-foreground">
+                            {event.address.street_number} {event.address.street_name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                            {event.address.postal_code} {event.address.city}
+                        </p>
+                        <p className="text-sm text-muted-foreground">{event.address.country}</p>
+                    </section>
+
+                    <Separator />
+
+                    {/* MISSIONS */}
+                    <section className="flex flex-col gap-3">
+                        <Flex justify="between" align="center">
+                            <h2 className="text-base font-semibold">Missions</h2>
+                            {canEdit && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setIsCreateMissionOpen(true)}
+                                >
+                                    <PlusIcon className="mr-1 h-4 w-4" />
+                                    Ajouter une mission
+                                </Button>
+                            )}
+                        </Flex>
+
+                        {event.missions.length > 0 ? (
+                            <Grid cols={2} gap="md">
+                                {event.missions.map((mission) => (
+                                    <MissionItem key={mission.id} mission={mission} />
+                                ))}
+                            </Grid>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">
+                                Aucune mission pour cet événement.
+                            </p>
                         )}
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {event.missions.map((mission) => (
-                            <MissionItem key={mission.id} mission={mission} />
-                        ))}
-                    </div>
-                </section>
-            </div>
+                    </section>
+                </CardContent>
+            </Card>
 
-            {/* EDIT MODAL */}
-            <Modal2 isOpen={isEditModalOpen} size="lg" onClose={() => setIsEditModalOpen(false)}>
-                <Card title="Modification d'évènement" size="full">
-                    <EventUpdateForm
-                        event={event}
-                        onSubmit={handleSubmit}
+            {/* DIALOG — modifier l'événement */}
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle> </DialogTitle>
+                    </DialogHeader>
+                    <EventForm
+                        mode="edit"
+                        defaultValues={EventMapper.toFormValues(event)}
+                        onSubmit={handleUpdate}
                         isSubmitting={updateMutation.isPending}
                         error={updateMutation.isError}
                     />
-                </Card>
-            </Modal2>
+                </DialogContent>
+            </Dialog>
 
-            {/* CREATE MISSION MODAL */}
-            <Modal2
-                isOpen={isCreateMissionModalOpen}
-                size="lg"
-                onClose={() => setIsCreateMissionModalOpen(false)}
-            >
-                <Card title="Création de mission" size="full">
-                    <MissionCreationForm
-                        onSubmit={handleMissionSubmit}
+            {/* DIALOG — créer une mission */}
+            <Dialog open={isCreateMissionOpen} onOpenChange={setIsCreateMissionOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Créer une mission</DialogTitle>
+                    </DialogHeader>
+                    <MissionForm
+                        onSubmit={handleCreateMission}
                         isSubmitting={createMissionMutation.isPending}
-                        error={missionErrorMessage}
+                        error={createMissionMutation.isError}
                     />
-                </Card>
-            </Modal2>
+                </DialogContent>
+            </Dialog>
 
-            {/* DELETE MODAL */}
-            <DeleteModal
-                key={event.id}
-                message="Voulez vous vraiment supprimer cet évènement ?"
-                size="sm"
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                onDelete={handleDelete}
-            />
+            {/* ALERT DIALOG — confirmer la suppression */}
+            <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Supprimer cet événement ?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Cette action est irréversible. L'événement et toutes ses missions seront
+                            définitivement supprimés.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction variant={'destructive'} onClick={handleDelete}>
+                            Supprimer
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }

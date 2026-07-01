@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { Link } from 'react-router';
 
 export default function NotFoundPage() {
@@ -12,9 +13,9 @@ export default function NotFoundPage() {
                     </p>
                 </div>
                 <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link to="/" className="btn btn-primary">
-                        Retour à l'accueil
-                    </Link>
+                    <Button variant={'default'} asChild>
+                        <Link to="/">Retour à l'accueil</Link>
+                    </Button>
                 </div>
             </div>
         </div>

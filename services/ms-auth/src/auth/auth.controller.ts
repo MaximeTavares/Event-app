@@ -19,7 +19,7 @@ export class AuthController {
     ) {}
 
     @MessagePattern(AUTH_SUBJECTS.SIGNUP)
-    signup(data: SignupRequestDto) {
+    signup(data: SignupRequestDto): Promise<{ success: true }> {
         return this.authService.signup(data);
     }
 
@@ -29,8 +29,8 @@ export class AuthController {
     }
 
     @MessagePattern(AUTH_SUBJECTS.AUTH_GOOGLE)
-    googleSignin(@Payload() data: { idToken: string }) {
-        return this.authService.googleSignin(data.idToken);
+    googleSignin(@Payload() data: { code: string }) {
+        return this.authService.googleSignin(data.code);
     }
 
     @MessagePattern(AUTH_SUBJECTS.SIGNOUT)

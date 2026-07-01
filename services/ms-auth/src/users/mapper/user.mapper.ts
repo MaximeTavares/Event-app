@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PublicUserDto } from 'src/users/dto/user.dto';
 import { UserDocument } from '../schema/user.schema';
-import { UpdateProfileDto } from '../dto/update-profile.dto';
-import { UpdateProfileDomain } from '../domain/update-profile.domain';
+import { UserProfile } from '../schema/userProfile.schema';
+import { ProfileDto } from '@app/contracts';
 
 @Injectable()
 export class UserMapper {
@@ -20,16 +20,25 @@ export class UserMapper {
         };
     }
 
-    static toProfileDomain(dto: UpdateProfileDto): UpdateProfileDomain {
+    static toProfileDomain(dto: ProfileDto): UserProfile {
         return {
-            profile: {
-                firstName: dto.firstName,
-                lastName: dto.lastName,
-                bio: dto.bio,
-                phone: dto.phone,
-                avatarUrl: dto.avatarUrl,
-                address: dto.address,
-            },
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            bio: dto.bio,
+            phone: dto.phone,
+            avatarUrl: dto.avatarUrl,
+            address: dto.address,
+        };
+    }
+
+    static toProfileDto(dto: UserProfile): ProfileDto {
+        return {
+            firstName: dto.firstName ?? '',
+            lastName: dto.lastName ?? '',
+            bio: dto.bio,
+            phone: dto.phone,
+            avatarUrl: dto.avatarUrl,
+            address: dto.address,
         };
     }
 }

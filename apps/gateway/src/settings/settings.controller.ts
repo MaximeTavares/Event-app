@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Patch, Post } from '@nestjs/common';
 import { NatsService } from '../nats/nats.service';
 import { User } from '../ms-auth/decorators/user.decorator';
 import {
@@ -15,16 +15,24 @@ import {
     SecurityDto,
     SecuritySchema,
     SETTINGS_SUBJECTS,
+    USER_SUBJECTS,
 } from '@app/contracts';
 import { ZodValidationPipe } from '../utils/zod-validation.pipe';
+import { GeoapifyService } from '../geoapify/geoapify.service';
 
 @Controller('me')
 export class SettingsController {
-    constructor(private readonly natsService: NatsService) {}
+    private readonly logger = new Logger(SettingsController.name);
 
-    @Get('settings')
-    async get(@User('id') userId: string) {
-        return this.natsService.send(SETTINGS_SUBJECTS.GET_SETTINGS, {
+    constructor(
+        private readonly natsService: NatsService,
+        private readonly geoapifyService: GeoapifyService,
+    ) {}
+
+    //PROFILE
+    @Get('profile')
+    async getProfile(@User('id') userId: string) {
+        return this.natsService.send(USER_SUBJECTS.GET_PROFILE, {
             userId,
         });
     }
@@ -34,9 +42,57 @@ export class SettingsController {
         @User('id') userId: string,
         @Body(ZodValidationPipe(profileSchema)) body: ProfileDto,
     ) {
+        const enrichedBody = await this.enrichAddressWithCoordinates(
+            body,
+            userId,
+        );
+
         return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_PROFILE, {
             userId,
-            body,
+            body: enrichedBody,
+        });
+    }
+
+    private async enrichAddressWithCoordinates(
+        body: ProfileDto,
+        userId: string,
+    ): Promise<ProfileDto> {
+        if (!body.address) return body;
+
+        try {
+            const coordinates = await this.geoapifyService.geocodeAddress({
+                street_number: body.address.streetNumber,
+                street_name: body.address.streetName,
+                address_line_2: body.address.addressLine2,
+                postal_code: body.address.postalCode,
+                city: body.address.city,
+                country: body.address.country,
+            });
+
+            return {
+                ...body,
+                address: {
+                    ...body.address,
+                    coordinates: coordinates ?? undefined,
+                },
+            };
+        } catch (error) {
+            // Le geocoding est tolerant aux pannes : on sauvegarde le profil
+            // sans coordonnees plutot que de bloquer toute la mise a jour.
+            this.logger.warn(
+                `Geocoding echoue pour userId=${userId}, profil sauvegarde sans coordinates`,
+                error instanceof Error ? error.message : error,
+            );
+
+            return body;
+        }
+    }
+
+    // AVAILABILITY
+    @Get('availability')
+    async getAvailability(@User('id') userId: string) {
+        return this.natsService.send(SETTINGS_SUBJECTS.GET_AVAILABILITY, {
+            userId,
         });
     }
 
@@ -51,6 +107,14 @@ export class SettingsController {
         });
     }
 
+    // PREFERENCES
+    @Get('preferences')
+    async getPreferences(@User('id') userId: string) {
+        return this.natsService.send(SETTINGS_SUBJECTS.GET_PREFERENCES, {
+            userId,
+        });
+    }
+
     @Patch('preferences')
     async updatePreferences(
         @User('id') userId: string,
@@ -59,6 +123,14 @@ export class SettingsController {
         return this.natsService.send(SETTINGS_SUBJECTS.UPDATE_PREFERENCES, {
             userId,
             body,
+        });
+    }
+
+    // NOTIFICATIONS
+    @Get('notifications')
+    async getNotifications(@User('id') userId: string) {
+        return this.natsService.send(SETTINGS_SUBJECTS.GET_NOTIFICATIONS, {
+            userId,
         });
     }
 
@@ -73,6 +145,14 @@ export class SettingsController {
         });
     }
 
+    // SECURITY
+    @Get('security')
+    async getSecurity(@User('id') userId: string) {
+        return this.natsService.send(SETTINGS_SUBJECTS.GET_SECURITY, {
+            userId,
+        });
+    }
+
     @Patch('security')
     async updateSecurity(
         @User('id') userId: string,
@@ -84,6 +164,7 @@ export class SettingsController {
         });
     }
 
+    // PASSWORDCHANGE
     @Post('password')
     async changePassword(
         @User('id') userId: string,

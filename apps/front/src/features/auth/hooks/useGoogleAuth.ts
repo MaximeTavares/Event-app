@@ -1,4 +1,4 @@
-import type { CredentialResponse } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { useGoogleSignin } from './use_auth.service';
@@ -8,12 +8,8 @@ export function useGoogleAuth() {
     const queryClient = useQueryClient();
     const signin = useGoogleSignin();
 
-    const googleLogin = async (credentialsResponse: CredentialResponse) => {
-        const idToken = credentialsResponse.credential;
-
-        if (!idToken) throw new Error('Missing google token');
-
-        await signin.mutateAsync({ idToken });
+    const handleSuccess = async (codeResponse: { code: string }) => {
+        await signin.mutateAsync({ code: codeResponse.code });
         await queryClient.invalidateQueries({
             queryKey: ['me'],
         });
@@ -21,8 +17,14 @@ export function useGoogleAuth() {
         await navigate('/');
     };
 
+    const googleLogin = useGoogleLogin({
+        flow: 'auth-code',
+        onSuccess: handleSuccess,
+        onError: () => console.error('Échec de connexion Google'),
+    });
+
     return {
-        googleLogin,
+        googleLogin, // appelle directement googleLogin() au clic
         isLoading: signin.isPending,
     };
 }

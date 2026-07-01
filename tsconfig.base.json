@@ -5,12 +5,6 @@
     "target": "ES2023",
     "lib": ["ES2023"],
 
-    // "paths": {
-    //     "@app/contracts": ["packages/contracts/src/index.ts"],
-    //     "@app/db": ["packages/database/src/index.ts"]
-
-    // },
-
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
 

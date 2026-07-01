@@ -60,5 +60,5 @@ jobs:
             ghcr.io/${{ env.OWNER }}/${{ inputs.image-name }}:${{ github.sha }}
             ghcr.io/${{ env.OWNER }}/${{ inputs.image-name }}:latest
 
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha, scope=${{ inputs.image-name }}
+          cache-to: type=gha,mode=max, scope=${{ inputs.image-name }}

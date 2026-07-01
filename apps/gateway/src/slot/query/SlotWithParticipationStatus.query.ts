@@ -12,6 +12,7 @@ export const slotWithParticipationStatusQuery = {
             select: {
                 Event: {
                     select: {
+                        id: true,
                         organizer_id: true,
                     },
                 },

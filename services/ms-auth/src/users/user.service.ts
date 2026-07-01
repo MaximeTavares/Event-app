@@ -1,16 +1,30 @@
+import { UserMapper } from './mapper/user.mapper';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { Model, UpdateQuery } from 'mongoose';
 import { RpcException } from '@nestjs/microservices';
-import { UpdateProfileDomain } from './domain/update-profile.domain';
 import {
     AvailabilityDto,
     NotificationsDto,
     PreferencesDto,
+    ProfileDto,
     SecurityDto,
 } from '@app/contracts';
+import { UserProfile } from './schema/userProfile.schema';
 
+type SimpleSettingsSection =
+    | 'availability'
+    | 'preferences'
+    | 'notifications'
+    | 'security';
+
+interface SettingsFieldMap {
+    availability: AvailabilityDto;
+    preferences: PreferencesDto;
+    notifications: NotificationsDto;
+    security: SecurityDto;
+}
 @Injectable()
 export class UserService {
     constructor(
@@ -89,56 +103,67 @@ export class UserService {
         return user;
     }
 
+    async findSettingsSection<K extends SimpleSettingsSection>(
+        userId: string,
+        section: K,
+    ): Promise<SettingsFieldMap[K]> {
+        const user = await this.userModel.findById(userId);
+
+        if (!user)
+            throw new RpcException({
+                message: "Cette utilisateur n'existe pas ",
+                code: 404,
+            });
+
+        return user[section];
+    }
+
+    async updateSettingsSection<K extends SimpleSettingsSection>(
+        userId: string,
+        section: K,
+        data: SettingsFieldMap[K],
+    ): Promise<SettingsFieldMap[K]> {
+        const updated = await this.updateById(userId, {
+            [section]: data,
+        });
+
+        if (!updated)
+            throw new RpcException({
+                message: "Cette utilisateur n'existe pas ",
+                code: 404,
+            });
+
+        return updated[section];
+    }
+
+    // PROFILE
+    async findProfileById(id: string): Promise<ProfileDto> {
+        const user = await this.userModel.findById(id);
+
+        if (!user)
+            throw new RpcException({
+                message: "Cette utilisateur n'existe pas ",
+                code: 404,
+            });
+
+        return UserMapper.toProfileDto(user.profile);
+    }
+
     async updateProfile(
         userId: string,
-        data: UpdateProfileDomain,
-    ): Promise<void> {
-        if (!data.profile) throw new RpcException('Error');
-
-        await this.updateById(userId, {
-            profile: data.profile,
-        });
-    }
-
-    async updateAvailability(
-        userId: string,
-        data: AvailabilityDto,
-    ): Promise<void> {
+        data: UserProfile,
+    ): Promise<ProfileDto> {
         if (!data) throw new RpcException('Error');
 
-        await this.updateById(userId, {
-            availability: data,
+        const updated = await this.updateById(userId, {
+            profile: data,
         });
-    }
 
-    async updatePreferences(
-        userId: string,
-        data: PreferencesDto,
-    ): Promise<void> {
-        if (!data) throw new RpcException('Error');
+        if (!updated) {
+            throw new RpcException('User not found');
+        }
 
-        await this.updateById(userId, {
-            preferences: data,
-        });
-    }
-
-    async updateNotifications(
-        userId: string,
-        data: NotificationsDto,
-    ): Promise<void> {
-        if (!data) throw new RpcException('Error');
-
-        await this.updateById(userId, {
-            notifications: data,
-        });
-    }
-
-    async updateSecurity(userId: string, data: SecurityDto): Promise<void> {
-        if (!data) throw new RpcException('Error');
-
-        await this.updateById(userId, {
-            security: data,
-        });
+        return UserMapper.toProfileDto(updated?.profile);
     }
 
     async updateById(userId: string, update: UpdateQuery<User>) {

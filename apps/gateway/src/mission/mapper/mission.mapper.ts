@@ -40,10 +40,12 @@ export function toMissionDetails(
 
             return {
                 id: s.id,
+                eventId: mission.event_id,
+                missionId: mission.id,
                 organizer_id: mission.Event.organizer_id,
                 start_at: s.start_at,
                 end_at: s.end_at,
-                max_participants: s.max_participant,
+                max_participant: s.max_participant,
                 status: s.status,
 
                 current_participants,

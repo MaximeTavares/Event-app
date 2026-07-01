@@ -20,6 +20,9 @@ export async function toastMutation<T>(
                 return err.response?.data.message || message.error || 'Erreur';
             },
         },
-        options,
+        {
+            duration: 5000,
+            ...options,
+        },
     );
 }

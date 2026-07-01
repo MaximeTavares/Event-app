@@ -36,19 +36,19 @@ export class AuthController {
     @Post('signup')
     async signup(
         @Body(ZodValidationPipe(SignupRequestSchema)) dto: SignupRequestDto,
-    ) {
+    ): Promise<{ success: true }> {
         return this.natsService.send(AUTH_SUBJECTS.SIGNUP, dto);
     }
 
     @Public()
     @Post('google')
     async googleSignin(
-        @Body() body: { idToken: string },
+        @Body() body: { code: string },
         @Res({ passthrough: true }) response: Response,
     ): Promise<Omit<LoginResponseDto, 'refreshToken'>> {
         const result = await this.natsService.send<
             LoginResponseDto,
-            { idToken: string }
+            { code: string }
         >(AUTH_SUBJECTS.AUTH_GOOGLE, body);
 
         this.authService.insertIntoCookies(

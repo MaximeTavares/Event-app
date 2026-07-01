@@ -17,7 +17,6 @@ import { PublicUser, User } from '../ms-auth/decorators/user.decorator';
 import { Public } from '../ms-auth/decorators/public.decorator';
 import { EventDto, EventWithAddress, PaginatedEventsDto } from '@app/contracts';
 
-//TODO Refaire le tour de tous les controller pour typer les retours en fonctions des besoins du Front. Ajouter aussi ParseIntPipe pour les id
 @Controller('events')
 export class EventController {
     constructor(private readonly eventService: EventService) {}

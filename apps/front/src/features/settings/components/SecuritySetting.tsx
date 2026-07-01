@@ -1,14 +1,13 @@
-import { useChangePassword, useSettings, useUpdateSecurity } from '../hooks/use_settings.service';
-
 import { ErrorAlert } from '../../../shared/components/UI/states/ErrorAlert';
 import { ChangePasswordForm } from './ChangePasswordForm';
 import { SecurityForm } from './SecurityForm';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { SkeletonLoading } from '../../../shared/components/UI/states/SkeletonLoading';
-import { FormLayout } from '../../../shared/layout/FormLayout';
+import { useSecurity, useUpdateSecurity } from '../hooks/use-security';
+import { useChangePassword } from '../hooks/use-settings-section';
 
 export default function SecuritySettings() {
-    const { data, isPending, isError } = useSettings();
+    const { data: security, isPending, isError } = useSecurity();
     const updateSecurity = useUpdateSecurity();
     const changePassword = useChangePassword();
 
@@ -16,12 +15,12 @@ export default function SecuritySettings() {
         return <SkeletonLoading />;
     }
 
-    if (isError || !data) {
+    if (isError || !security) {
         return <ErrorAlert message="Impossible de charger vos informations." />;
     }
 
     return (
-        <FormLayout title="Securité" width="xl">
+        <>
             <ChangePasswordForm
                 onSubmit={async (data) => {
                     await toastMutation(changePassword.mutateAsync(data), {
@@ -37,7 +36,8 @@ export default function SecuritySettings() {
             />
 
             <SecurityForm
-                defaultValues={data.security}
+                className="mt-5"
+                defaultValues={security}
                 onSubmit={async (data) => {
                     await toastMutation(updateSecurity.mutateAsync(data), {
                         loading: 'Chargement...',
@@ -50,6 +50,6 @@ export default function SecuritySettings() {
                     updateSecurity.isError ? "Impossible d'enregistrer les changements" : undefined
                 }
             />
-        </FormLayout>
+        </>
     );
 }

@@ -1,12 +1,14 @@
 import { z } from "zod";
+import { coordinatesSchema } from "../types/event/event.contracts.js";
 
-export const addressSchema = z.object({
+export const addressProfileSchema = z.object({
 	streetNumber: z.string().optional(),
 	streetName: z.string().optional(),
 	addressLine2: z.string().optional(),
 	city: z.string().optional(),
 	postalCode: z.string().optional(),
 	country: z.string().optional(),
+	coordinates: coordinatesSchema.optional(),
 });
 
 export const profileSchema = z
@@ -24,12 +26,14 @@ export const profileSchema = z
 
 		bio: z.string().max(1000, "La biographie est trop longue.").optional(),
 
-		address: addressSchema.optional(),
+		address: addressProfileSchema.optional(),
 	})
 	.superRefine((data, ctx) => {
 		if (!data.address) return;
 
-		const hasAddressData = Object.values(data.address).some(
+		const { coordinates, ...addressTextFields } = data.address;
+
+		const hasAddressData = Object.values(addressTextFields).some(
 			(value) => value && value.trim() !== "",
 		);
 
@@ -54,6 +58,5 @@ export const profileSchema = z
 		}
 	});
 
-export type ProfileFormValues = z.input<typeof profileSchema>
+export type ProfileFormValues = z.input<typeof profileSchema>;
 export type ProfileDto = z.infer<typeof profileSchema>;
-

@@ -1,14 +1,9 @@
-import { MissionDetailsDto } from '@app/contracts';
+import { MissionCreationFormValues, MissionDetailsDto, MissionDto } from '@app/contracts';
 import { api } from '../../../shared/utils/axios-client';
-import type { BaseMission, UpdateMissionInput } from '../types/mission.type';
-import type { MissionCreationFormValues } from '../validation/MissionCreation.schema';
 
 export class MissionApi {
-    static async createMission(
-        eventId: number,
-        mission: MissionCreationFormValues,
-    ): Promise<BaseMission> {
-        const { data } = await api.post<BaseMission>(`events/${eventId}/missions`, mission);
+    static async createMission(eventId: number, mission: MissionCreationFormValues) {
+        const { data } = await api.post<MissionDto>(`events/${eventId}/missions`, mission);
         return data;
     }
 
@@ -17,8 +12,8 @@ export class MissionApi {
         return data;
     }
 
-    static async updateMission(id: number, mission: UpdateMissionInput): Promise<BaseMission> {
-        const { data } = await api.patch<BaseMission>(`/missions/${id}`, mission);
+    static async updateMission(id: number, mission: MissionCreationFormValues) {
+        const { data } = await api.patch<MissionDto>(`/missions/${id}`, mission);
         return data;
     }
 

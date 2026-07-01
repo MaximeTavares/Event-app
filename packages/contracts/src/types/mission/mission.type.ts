@@ -1,6 +1,8 @@
 import { SlotDto } from "../slot/slot.types.js";
 
-export type MissionStatus = "OPEN" | "FULL" | "COMPLETED";
+// mission.type.ts
+export const MISSION_STATUS = ["OPEN", "FULL", "COMPLETED"] as const;
+export type MissionStatus = (typeof MISSION_STATUS)[number]; // dérivé du const, plus de duplication
 
 export const missionStatusLabel: Record<MissionStatus, string> = {
 	OPEN: "Ouvert",
@@ -8,14 +10,10 @@ export const missionStatusLabel: Record<MissionStatus, string> = {
 	COMPLETED: "Terminée",
 };
 
-export const missionStatusOptions: MissionStatus[] = ["OPEN", "FULL", "COMPLETED"];
-
-export const MISSION_STATUS = ["OPEN", "FULL", "COMPLETED"] as const;
-
 export const missionStatusColor: Record<MissionStatus, string> = {
-	OPEN: "badge-success",
-	FULL: "badge-neutral",
-	COMPLETED: "badge-warning",
+	OPEN: "bg-green-100 text-green-800 border-green-200",
+	FULL: "bg-zinc-100 text-zinc-800 border-zinc-200",
+	COMPLETED: "bg-amber-100 text-amber-800 border-amber-200",
 };
 export interface MissionDto {
 	id: number;

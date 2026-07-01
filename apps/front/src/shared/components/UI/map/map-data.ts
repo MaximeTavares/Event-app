@@ -1,13 +1,12 @@
 // Voir src/docs/create-map-geoapify.md, section Donnees minimales nécessaires, pour l'explication detaillee des helpers de mapping carte.
-import type { Coordinates } from '../../../../features/address/types/address.type';
-import type { BaseEvent } from '../../../../features/event/types/event.type';
-import type { UserWithProfileAndAddress } from '../../../../features/user_profile/types/types';
+import type { EventWithAddress, ProfileDto } from '@app/contracts';
 
+export type Coordinates = { lat: number; lon: number };
 export type UserOrigin = Coordinates;
-export type EventMapPoint = Pick<BaseEvent, 'id' | 'title'> & Coordinates;
+export type EventMapPoint = Pick<EventWithAddress, 'id' | 'title'> & Coordinates;
 
-export function toUserOrigin(userProfile: UserWithProfileAndAddress): UserOrigin | null {
-    const coordinates = userProfile.address?.coordinates;
+export function toUserOrigin(profile: ProfileDto | null | undefined): UserOrigin | null {
+    const coordinates = profile?.address?.coordinates;
 
     if (!coordinates) return null;
 
@@ -17,13 +16,13 @@ export function toUserOrigin(userProfile: UserWithProfileAndAddress): UserOrigin
     };
 }
 
-export function toEventMapPoints(events: BaseEvent[]): EventMapPoint[] {
+export function toEventMapPoints(events: EventWithAddress[]): EventMapPoint[] {
     return events
         .filter(
             (
                 event,
-            ): event is BaseEvent & {
-                address: NonNullable<BaseEvent['address']> & {
+            ): event is EventWithAddress & {
+                address: NonNullable<EventWithAddress['address']> & {
                     coordinates: { lat: number; lon: number };
                 };
             } => !!event.address?.coordinates?.lat && !!event.address?.coordinates?.lon,
@@ -43,16 +42,11 @@ export function toEventMapPoints(events: BaseEvent[]): EventMapPoint[] {
  * en utilisant la formule de Haversine.
  *
  * Cette formule prend en compte la courbure de la Terre afin de fournir
- * une distance "à vol d’oiseau" plus précise qu’un simple calcul Euclidien.
+ * une distance "à vol d'oiseau" plus précise qu'un simple calcul Euclidien.
  *
- * Elle est adaptée pour :
- * - les recherches par rayon (ex: événements autour d’une ville)
- * - les systèmes de géolocalisation (maps, proximité, matching)
- *
- * @export
- * @param {Coordinates} origin
- * @param {Coordinates} target
- * @return {*}  {number}
+ * @param origin - Point de depart
+ * @param target - Point d'arrivee
+ * @returns distance en kilometres
  */
 export function haversineDistance(origin: Coordinates, target: Coordinates): number {
     const earthRadiusKm = 6371;
@@ -68,16 +62,6 @@ export function haversineDistance(origin: Coordinates, target: Coordinates): num
     return earthRadiusKm * c;
 }
 
-/**
- * Convertit une valeur en degrés vers des radians.
- *
- * Cette conversion est nécessaire pour les calculs trigonométriques
- * (sin, cos, tan), notamment dans les formules géographiques comme
- * la distance de Haversine.
- *
- * @param {number} value - Angle en degrés
- * @return {number} Angle converti en radians
- */
 function toRadians(value: number): number {
     return (value * Math.PI) / 180;
 }

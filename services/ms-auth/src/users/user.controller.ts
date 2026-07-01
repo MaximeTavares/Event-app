@@ -16,14 +16,10 @@ import { UserMapper } from './mapper/user.mapper';
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
+    // USERS
     @MessagePattern('users.getAll')
     getUsers() {
         return this.userService.findAll();
-    }
-
-    @MessagePattern(USER_SUBJECTS.GET_PROFILES)
-    getProfiles(data: { userIds: string[] }) {
-        return this.userService.findManyByIds(data.userIds);
     }
 
     @MessagePattern(USER_SUBJECTS.GET_USER)
@@ -31,68 +27,100 @@ export class UserController {
         return this.userService.findById(data.userId);
     }
 
-    @MessagePattern(SETTINGS_SUBJECTS.GET_SETTINGS)
-    async getSettings(data: { userId: string }) {
-        const user = await this.userService.findById(data.userId);
+    // PROFILE
+    @MessagePattern(USER_SUBJECTS.GET_PROFILE)
+    async getProfile(data: { userId: string }): Promise<ProfileDto> {
+        return this.userService.findProfileById(data.userId);
+    }
 
-        return UserMapper.toPublic(user);
+    @MessagePattern(USER_SUBJECTS.GET_PROFILES)
+    getProfiles(data: { userIds: string[] }) {
+        return this.userService.findManyByIds(data.userIds);
     }
 
     @MessagePattern(SETTINGS_SUBJECTS.UPDATE_PROFILE)
-    async updateProfile(@Payload() data: { userId: string; body: ProfileDto }) {
-        const result = await this.userService.updateProfile(
+    async updateProfile(
+        @Payload() data: { userId: string; body: ProfileDto },
+    ): Promise<ProfileDto> {
+        return this.userService.updateProfile(
             data.userId,
             UserMapper.toProfileDomain(data.body),
         );
+    }
 
-        return result ?? { ok: true };
+    // AVAILABILITY
+    @MessagePattern(SETTINGS_SUBJECTS.GET_AVAILABILITY)
+    async getAvailability(data: { userId: string }): Promise<AvailabilityDto> {
+        return this.userService.findSettingsSection(
+            data.userId,
+            'availability',
+        );
     }
 
     @MessagePattern(SETTINGS_SUBJECTS.UPDATE_AVAILABILITY)
     async updateAvailability(
         @Payload() data: { userId: string; body: AvailabilityDto },
-    ) {
-        const result = await this.userService.updateAvailability(
+    ): Promise<AvailabilityDto> {
+        return await this.userService.updateSettingsSection(
             data.userId,
+            'availability',
             data.body,
         );
+    }
 
-        return result ?? { ok: true };
+    // PREFERENCES
+    @MessagePattern(SETTINGS_SUBJECTS.GET_PREFERENCES)
+    async getPreferences(data: { userId: string }): Promise<PreferencesDto> {
+        return this.userService.findSettingsSection(data.userId, 'preferences');
     }
 
     @MessagePattern(SETTINGS_SUBJECTS.UPDATE_PREFERENCES)
     async updatePreferences(
         @Payload() data: { userId: string; body: PreferencesDto },
-    ) {
-        const result = await this.userService.updatePreferences(
+    ): Promise<PreferencesDto> {
+        return this.userService.updateSettingsSection(
             data.userId,
+            'preferences',
             data.body,
         );
+    }
 
-        return result ?? { ok: true };
+    // NOTIFICATIONS
+    @MessagePattern(SETTINGS_SUBJECTS.GET_NOTIFICATIONS)
+    async getNotifications(data: {
+        userId: string;
+    }): Promise<NotificationsDto> {
+        return this.userService.findSettingsSection(
+            data.userId,
+            'notifications',
+        );
     }
 
     @MessagePattern(SETTINGS_SUBJECTS.UPDATE_NOTIFICATIONS)
     async updateNotifications(
         @Payload() data: { userId: string; body: NotificationsDto },
-    ) {
-        const result = await this.userService.updateNotifications(
+    ): Promise<NotificationsDto> {
+        return this.userService.updateSettingsSection(
             data.userId,
+            'notifications',
             data.body,
         );
+    }
 
-        return result ?? { ok: true };
+    // SECURITY
+    @MessagePattern(SETTINGS_SUBJECTS.GET_SECURITY)
+    async getSecurity(data: { userId: string }): Promise<SecurityDto> {
+        return this.userService.findSettingsSection(data.userId, 'security');
     }
 
     @MessagePattern(SETTINGS_SUBJECTS.UPDATE_SECURITY)
     async updateSecurity(
         @Payload() data: { userId: string; body: SecurityDto },
-    ) {
-        const result = await this.userService.updateSecurity(
+    ): Promise<SecurityDto> {
+        return this.userService.updateSettingsSection(
             data.userId,
+            'security',
             data.body,
         );
-
-        return result ?? { ok: true };
     }
 }

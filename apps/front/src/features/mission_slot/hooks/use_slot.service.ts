@@ -6,9 +6,7 @@ import {
     type UseQueryResult,
 } from '@tanstack/react-query';
 import { SlotApi } from '../api/slot.api';
-import type { BaseSlot } from '../types/slot.type';
-import type { SlotCreationOutputValues } from '../validation/SlotCreation.schema';
-import { SlotDetails } from '@app/contracts';
+import { SlotDetails, SlotFormValues } from '@app/contracts';
 import { queryKeys } from '../../../shared/tanstack/QueryKeys';
 
 export function useGetSlot(id: number): UseQueryResult<SlotDetails, Error> {
@@ -20,9 +18,9 @@ export function useGetSlot(id: number): UseQueryResult<SlotDetails, Error> {
 }
 
 export function useCreateSlot(): UseMutationResult<
-    BaseSlot,
+    void,
     Error,
-    { missionId: number; slot: SlotCreationOutputValues }
+    { eventId: number; missionId: number; slot: SlotFormValues }
 > {
     const queryClient = useQueryClient();
 
@@ -32,6 +30,9 @@ export function useCreateSlot(): UseMutationResult<
             await queryClient.invalidateQueries({
                 queryKey: queryKeys.mission(variables.missionId),
             });
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.event(variables.eventId),
+            });
         },
         onError: (error) => {
             console.error('Échec de la création :', error.message);
@@ -40,16 +41,20 @@ export function useCreateSlot(): UseMutationResult<
 }
 
 export function useUpdateSlot(): UseMutationResult<
-    BaseSlot,
+    void,
     Error,
-    { slotId: number; slot: SlotCreationOutputValues }
+    { eventId: number; missionId: number; slotId: number; slot: SlotFormValues }
 > {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (variables) => SlotApi.updateSlot(variables.slotId, variables.slot),
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: queryKeys.slots });
+        onSuccess: async (_data, variables) => {
+            await queryClient.invalidateQueries({ queryKey: queryKeys.slot(variables.slotId) });
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.mission(variables.missionId),
+            });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.event(variables.eventId) });
         },
         onError: (error) => {
             console.error('Échec de la mise à jour :', error.message);
@@ -57,14 +62,21 @@ export function useUpdateSlot(): UseMutationResult<
     });
 }
 
-export function useDeleteSlot(): UseMutationResult<void, Error, { id: number }> {
+export function useDeleteSlot(): UseMutationResult<
+    void,
+    Error,
+    { eventId: number; missionId: number; slotId: number }
+> {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (variables) => SlotApi.deleteSlot(variables.id),
+        mutationFn: (variables) => SlotApi.deleteSlot(variables.slotId),
         onSuccess: async (_data, variables) => {
-            await queryClient.invalidateQueries({ queryKey: queryKeys.slots });
-            queryClient.removeQueries({ queryKey: queryKeys.slot(variables.id) });
+            queryClient.removeQueries({ queryKey: queryKeys.slot(variables.slotId) });
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.mission(variables.missionId),
+            });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.event(variables.eventId) });
         },
         onError: (error) => {
             console.error('Échec de la suppression :', error.message);

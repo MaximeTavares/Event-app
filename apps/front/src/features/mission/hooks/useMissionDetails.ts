@@ -1,11 +1,9 @@
 import { useNavigate } from 'react-router';
-import type { UpdateMissionInput } from '../types/mission.type';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { useCreateSlot } from '../../mission_slot/hooks/use_slot.service';
-import type { SlotCreationOutputValues } from '../../mission_slot/validation/SlotCreation.schema';
 import { useDeleteMission, useUpdateMission } from './use_mission.service';
 import { useMe } from '../../auth/hooks/use_auth.service';
-import { MissionDetailsDto } from '@app/contracts';
+import { MissionCreationFormValues, MissionDetailsDto, SlotFormValues } from '@app/contracts';
 
 export function useMissionDetails(mission: MissionDetailsDto) {
     const { data: user } = useMe();
@@ -18,24 +16,25 @@ export function useMissionDetails(mission: MissionDetailsDto) {
     // Handle Mission delete
     const deleteMission = useDeleteMission();
     const handleDelete = async () => {
-        await toastMutation(deleteMission.mutateAsync({ id: mission.id }), {
-            loading: 'Chargement...',
-            success: 'Mission supprimée avec succés',
-            error: 'Erreur lors de la suppréssion.',
-        });
+        await toastMutation(
+            deleteMission.mutateAsync({ eventId: mission.event_id, missionId: mission.id }),
+            {
+                loading: 'Chargement...',
+                success: 'Mission supprimée avec succés',
+                error: 'Erreur lors de la suppréssion.',
+            },
+        );
         await navigate(`/events/${mission.event_id}`);
     };
 
     // Handle Mission update
     const updateMission = useUpdateMission();
-    const updateField = async <K extends keyof UpdateMissionInput>(
-        fieldName: K,
-        newValue: UpdateMissionInput[K],
-    ) => {
+    const handleUpdateMission = async (data: MissionCreationFormValues) => {
         await toastMutation(
             updateMission.mutateAsync({
-                id: mission.id,
-                data: { [fieldName]: newValue },
+                eventId: mission.event_id,
+                missionId: mission.id,
+                data: data,
             }),
             {
                 loading: 'Chargement...',
@@ -47,12 +46,19 @@ export function useMissionDetails(mission: MissionDetailsDto) {
 
     // Handle Slot Creation
     const createSlot = useCreateSlot();
-    const handleSlotSubmit = async (data: SlotCreationOutputValues) => {
-        await toastMutation(createSlot.mutateAsync({ missionId: mission.id, slot: data }), {
-            loading: 'Chargement...',
-            success: 'Créneau créé avec succés',
-            error: 'Erreur lors de la création',
-        });
+    const handleSlotSubmit = async (data: SlotFormValues) => {
+        await toastMutation(
+            createSlot.mutateAsync({
+                eventId: mission.event_id,
+                missionId: mission.id,
+                slot: data,
+            }),
+            {
+                loading: 'Chargement...',
+                success: 'Créneau créé avec succés',
+                error: 'Erreur lors de la création',
+            },
+        );
     };
 
     return {
@@ -61,7 +67,7 @@ export function useMissionDetails(mission: MissionDetailsDto) {
         // Handlers
         handleDelete,
         handleSlotSubmit,
-        updateField,
+        handleUpdateMission,
         // States
         createSlot,
     };

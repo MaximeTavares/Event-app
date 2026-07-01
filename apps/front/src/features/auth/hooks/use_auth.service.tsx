@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AuthApi } from '../api/auth.api';
 import { useAuthStore } from '../store/auth.store';
 import { LoginRequestDto, SignupRequestDto } from '@app/contracts';
+import { queryKeys } from '@/shared/tanstack/QueryKeys';
 
 export function useSignin() {
     const { setAccessToken } = useAuthStore();
@@ -11,7 +12,7 @@ export function useSignin() {
         mutationFn: (payload: LoginRequestDto) => AuthApi.signin(payload),
         onSuccess: async (res) => {
             setAccessToken(res.accessToken);
-            await queryClient.invalidateQueries({ queryKey: ['me'] });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.me });
         },
     });
 }
@@ -21,10 +22,10 @@ export function useGoogleSignin() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: { idToken: string }) => AuthApi.googleSignin(payload.idToken),
+        mutationFn: (payload: { code: string }) => AuthApi.googleSignin(payload.code),
         onSuccess: async (res) => {
             setAccessToken(res.accessToken);
-            await queryClient.invalidateQueries({ queryKey: ['me'] });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.me });
         },
     });
 }
@@ -33,7 +34,7 @@ export function useMe() {
     const { accessToken, initialized } = useAuthStore();
 
     return useQuery({
-        queryKey: ['me'],
+        queryKey: queryKeys.me,
         queryFn: () => AuthApi.me(),
         retry: false,
         enabled: initialized && !!accessToken,
