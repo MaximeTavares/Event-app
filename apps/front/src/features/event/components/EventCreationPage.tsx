@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router';
 import { useCreateEvent } from '../hooks/use_event.service';
-import type { EventCreationFormValues } from '../validation/eventCreation.schema';
 import { Container } from '@/components/layout/container';
 import { toastMutation } from '@/shared/utils/useToastMutation';
 import { EventForm } from './EventForm';
+import { EventCreationFormValues } from '@app/contracts';
 
 export type ApiError = {
     message: string;

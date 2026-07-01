@@ -18,7 +18,7 @@ export function useGetSlot(id: number): UseQueryResult<SlotDetails, Error> {
 }
 
 export function useCreateSlot(): UseMutationResult<
-    SlotFormValues,
+    void,
     Error,
     { eventId: number; missionId: number; slot: SlotFormValues }
 > {
@@ -41,7 +41,7 @@ export function useCreateSlot(): UseMutationResult<
 }
 
 export function useUpdateSlot(): UseMutationResult<
-    SlotFormValues,
+    void,
     Error,
     { eventId: number; missionId: number; slotId: number; slot: SlotFormValues }
 > {
@@ -72,7 +72,6 @@ export function useDeleteSlot(): UseMutationResult<
     return useMutation({
         mutationFn: (variables) => SlotApi.deleteSlot(variables.slotId),
         onSuccess: async (_data, variables) => {
-            await queryClient.invalidateQueries({ queryKey: queryKeys.slot(variables.slotId) });
             queryClient.removeQueries({ queryKey: queryKeys.slot(variables.slotId) });
             await queryClient.invalidateQueries({
                 queryKey: queryKeys.mission(variables.missionId),

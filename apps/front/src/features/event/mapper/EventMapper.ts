@@ -1,11 +1,15 @@
-import { type EventApiResponse, type CreateEventInput, type BaseEvent } from '../types/event.type';
-import type { EventCreationFormValues } from '../validation/eventCreation.schema';
 import { format } from 'date-fns';
-import { EventDto } from '@app/contracts';
+import {
+    CreateEventInput,
+    EventApiResponse,
+    EventCreationFormValues,
+    EventDto,
+    EventWithAddress,
+} from '@app/contracts';
 
 export class EventMapper {
     // Conversion DTO API → objet interne avec dates typées
-    static toEvent(dto: EventApiResponse): BaseEvent {
+    static toEvent(dto: EventApiResponse): EventWithAddress {
         return {
             id: dto.id,
             title: dto.title,
@@ -63,18 +67,4 @@ export class EventMapper {
             address: data.address,
         };
     }
-
-    // Conversion valeurs du form → payload API update
-    // Maintenant que le form est unifié, on peut utiliser directement EventCreationFormValues
-    // static toUpdateEvent(data: EventCreationFormValues): UpdateEventInput {
-    //     return {
-    //         title: data.title,
-    //         description: data.description,
-    //         program: data.program,
-    //         start_date: data.start_date,
-    //         end_date: data.end_date,
-    //         status: data.status,
-    //         address: data.address,
-    //     };
-    // }
 }

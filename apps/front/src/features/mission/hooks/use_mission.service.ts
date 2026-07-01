@@ -57,14 +57,18 @@ export function useUpdateMission(): UseMutationResult<
     });
 }
 
-export function useDeleteMission(): UseMutationResult<void, Error, { id: number }> {
+export function useDeleteMission(): UseMutationResult<
+    void,
+    Error,
+    { eventId: number; missionId: number }
+> {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (variables) => MissionApi.deleteMission(variables.id),
+        mutationFn: (variables) => MissionApi.deleteMission(variables.missionId),
         onSuccess: async (_data, variables) => {
-            await queryClient.invalidateQueries({ queryKey: queryKeys.missions });
-            queryClient.removeQueries({ queryKey: queryKeys.mission(variables.id) });
+            queryClient.removeQueries({ queryKey: queryKeys.mission(variables.missionId) });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.event(variables.eventId) });
         },
         onError: (error) => {
             console.error('Échec de la suppression :', error.message);

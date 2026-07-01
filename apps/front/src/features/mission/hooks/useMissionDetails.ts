@@ -16,11 +16,14 @@ export function useMissionDetails(mission: MissionDetailsDto) {
     // Handle Mission delete
     const deleteMission = useDeleteMission();
     const handleDelete = async () => {
-        await toastMutation(deleteMission.mutateAsync({ id: mission.id }), {
-            loading: 'Chargement...',
-            success: 'Mission supprimée avec succés',
-            error: 'Erreur lors de la suppréssion.',
-        });
+        await toastMutation(
+            deleteMission.mutateAsync({ eventId: mission.event_id, missionId: mission.id }),
+            {
+                loading: 'Chargement...',
+                success: 'Mission supprimée avec succés',
+                error: 'Erreur lors de la suppréssion.',
+            },
+        );
         await navigate(`/events/${mission.event_id}`);
     };
 

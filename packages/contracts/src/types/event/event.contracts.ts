@@ -11,8 +11,8 @@ export const addressSchema = z.object({
 	address_line_2: z.string().optional(),
 	city: z.string().min(1, "La ville est requise"),
 	postal_code: z.string().min(1, "Le code postal est requis"),
-    country: z.string().min(1, "Le pays est requis"),
-    coordinates: coordinatesSchema.optional(),
+	country: z.string().min(1, "Le pays est requis"),
+	coordinates: coordinatesSchema.optional(),
 });
 
 export const eventCreationSchema = z
@@ -33,4 +33,5 @@ export const eventCreationSchema = z
 		path: ["end_date"],
 	});
 
+export type AddressDto = z.infer<typeof addressSchema>;
 export type EventCreationFormValues = z.infer<typeof eventCreationSchema>;

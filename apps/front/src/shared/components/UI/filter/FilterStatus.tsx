@@ -1,4 +1,3 @@
-import type { EventStatus } from '../../../../features/event/types/event.type';
 import { Field, FieldLabel } from '@/components/ui/field';
 import {
     Select,
@@ -7,6 +6,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { EventStatus } from '@app/contracts';
 
 export type FilterOption = {
     label: string;

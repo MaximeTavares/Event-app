@@ -1,13 +1,13 @@
 import { CardEventImage } from '@/components/card-event-image';
 import Pagination from '../../../shared/components/UI/Pagination';
-import type { BaseEvent } from '../types/event.type';
 import { Grid } from '@/components/layout/grid';
 import { UiMessage } from '@/shared/utils/map/mapUiMessages';
 import UiMessageAlert from '@/components/ui-message-alert';
+import { EventWithAddress } from '@app/contracts';
 
 type HomeEventsListProps = {
     listStatusMessage: UiMessage;
-    events: BaseEvent[];
+    events: EventWithAddress[];
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;

@@ -1,10 +1,9 @@
 // Voir src/docs/create-map-geoapify.md, section Donnees minimales nécessaires, pour l'explication detaillee des helpers de mapping carte.
-import type { ProfileDto } from '@app/contracts';
-import type { BaseEvent } from '../../../../features/event/types/event.type';
+import type { EventWithAddress, ProfileDto } from '@app/contracts';
 
 export type Coordinates = { lat: number; lon: number };
 export type UserOrigin = Coordinates;
-export type EventMapPoint = Pick<BaseEvent, 'id' | 'title'> & Coordinates;
+export type EventMapPoint = Pick<EventWithAddress, 'id' | 'title'> & Coordinates;
 
 export function toUserOrigin(profile: ProfileDto | null | undefined): UserOrigin | null {
     const coordinates = profile?.address?.coordinates;
@@ -17,13 +16,13 @@ export function toUserOrigin(profile: ProfileDto | null | undefined): UserOrigin
     };
 }
 
-export function toEventMapPoints(events: BaseEvent[]): EventMapPoint[] {
+export function toEventMapPoints(events: EventWithAddress[]): EventMapPoint[] {
     return events
         .filter(
             (
                 event,
-            ): event is BaseEvent & {
-                address: NonNullable<BaseEvent['address']> & {
+            ): event is EventWithAddress & {
+                address: NonNullable<EventWithAddress['address']> & {
                     coordinates: { lat: number; lon: number };
                 };
             } => !!event.address?.coordinates?.lat && !!event.address?.coordinates?.lon,

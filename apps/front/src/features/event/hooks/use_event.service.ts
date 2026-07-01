@@ -5,13 +5,16 @@ import {
     type UseMutationResult,
     type UseQueryResult,
 } from '@tanstack/react-query';
-import type { BaseEvent, PaginatedEvents, UpdateEventInput } from '../types/event.type';
 import { createEvent, deleteEvent, getEventById, getEvents, updateEvent } from '../api/event.api';
 import type { EventFilters } from '../../../shared/components/UI/filter/eventsFilters.interface';
 import { EventMapper } from '../mapper/EventMapper';
-import { EventDto } from '@app/contracts';
+import {
+    EventCreationFormValues,
+    EventDto,
+    EventWithAddress,
+    PaginatedEvents,
+} from '@app/contracts';
 import { queryKeys } from '../../../shared/tanstack/QueryKeys';
-import { EventCreationFormValues } from '../validation/eventCreation.schema';
 
 //Lecture
 export function useGetEvents(filters?: EventFilters): UseQueryResult<PaginatedEvents, Error> {
@@ -39,7 +42,11 @@ export function useGetEventById(id: number): UseQueryResult<EventDto, Error> {
 }
 
 //Ecriture
-export function useCreateEvent(): UseMutationResult<BaseEvent, Error, EventCreationFormValues> {
+export function useCreateEvent(): UseMutationResult<
+    EventWithAddress,
+    Error,
+    EventCreationFormValues
+> {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -54,9 +61,9 @@ export function useCreateEvent(): UseMutationResult<BaseEvent, Error, EventCreat
 }
 
 export function useUpdateEvent(): UseMutationResult<
-    BaseEvent,
+    EventWithAddress,
     Error,
-    { id: number; data: UpdateEventInput }
+    { id: number; data: EventCreationFormValues }
 > {
     const queryClient = useQueryClient();
 
@@ -77,8 +84,8 @@ export function useDeleteEvent(): UseMutationResult<void, Error, { id: number }>
     return useMutation({
         mutationFn: (variables) => deleteEvent(variables.id),
         onSuccess: async (_data, variables) => {
-            await queryClient.invalidateQueries({ queryKey: queryKeys.events });
             queryClient.removeQueries({ queryKey: queryKeys.event(variables.id) });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.events });
         },
         onError: (error) => {
             console.error('Échec de la suppression :', error.message);

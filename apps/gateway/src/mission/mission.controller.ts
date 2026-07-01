@@ -66,7 +66,7 @@ export class MissionController {
         @User('id') userId: string,
         @Param('id', ParseIntPipe) missionId: number,
         @Body() updateMissionDto: UpdateMissionDto,
-    ) {
+    ): Promise<MissionDto> {
         return this.missionService.update(userId, missionId, updateMissionDto);
     }
 

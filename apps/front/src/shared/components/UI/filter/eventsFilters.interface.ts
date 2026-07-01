@@ -1,4 +1,4 @@
-import type { EventStatus } from '../../../../features/event/types/event.type';
+import { EventStatus } from '@app/contracts';
 
 export interface EventFilters {
     statuses?: EventStatus[];

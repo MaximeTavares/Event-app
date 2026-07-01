@@ -44,7 +44,6 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
         isCreateMissionOpen,
         setIsCreateMissionOpen,
         createMissionMutation,
-        missionError,
         handleCreateMission,
         isDeleteOpen,
         setIsDeleteOpen,
@@ -183,7 +182,7 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
                     <MissionForm
                         onSubmit={handleCreateMission}
                         isSubmitting={createMissionMutation.isPending}
-                        error={missionError}
+                        error={createMissionMutation.isError}
                     />
                 </DialogContent>
             </Dialog>
@@ -200,12 +199,7 @@ export function EventDetailsCard({ event }: Readonly<EventDetailsProps>) {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDelete}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            Supprimer
-                        </AlertDialogAction>
+                        <AlertDialogAction onClick={handleDelete}>Supprimer</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

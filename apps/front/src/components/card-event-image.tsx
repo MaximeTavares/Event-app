@@ -9,14 +9,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { BaseEvent } from '@/features/event/types/event.type';
 import { formatDate } from '@/shared/utils/formatDate';
-import { eventStatusColor, eventStatusLabel } from '@app/contracts';
+import { eventStatusColor, eventStatusLabel, EventWithAddress } from '@app/contracts';
 import { GrMap, GrSchedule } from 'react-icons/gr';
 import { useNavigate } from 'react-router';
 
 interface CardEventImageProps {
-    eventData: BaseEvent;
+    eventData: EventWithAddress;
 }
 
 export function CardEventImage({ eventData }: Readonly<CardEventImageProps>) {

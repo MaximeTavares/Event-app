@@ -21,7 +21,7 @@ import {
 type MissionFormProps = {
     onSubmit: (data: MissionCreationFormValues) => Promise<void>;
     isSubmitting?: boolean;
-    error?: string | null;
+    error?: string | null | boolean;
     defaultValues?: Partial<MissionCreationFormValues>;
     mode?: 'create' | 'edit';
 };

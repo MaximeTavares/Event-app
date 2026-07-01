@@ -6,8 +6,6 @@ import { useMe } from '../../auth/hooks/use_auth.service';
 import { EventMapper } from '../mapper/EventMapper';
 import { toastMutation } from '../../../shared/utils/useToastMutation';
 import { EventDto, EventCreationFormValues, MissionCreationFormValues } from '@app/contracts';
-import type { AxiosError } from 'axios';
-import type { ApiError } from '../components/EventCreationPage';
 
 export function useEventDetails(event: EventDto) {
     const { data: user } = useMe();
@@ -39,26 +37,21 @@ export function useEventDetails(event: EventDto) {
     // --- Create mission ---
     const [isCreateMissionOpen, setIsCreateMissionOpen] = useState(false);
     const createMissionMutation = useCreateMission();
-    const [missionError, setMissionError] = useState<string | null>(null);
 
     const handleCreateMission = async (data: MissionCreationFormValues) => {
         setIsCreateMissionOpen(false);
-        try {
-            await toastMutation(
-                createMissionMutation.mutateAsync({
-                    eventId: event.id,
-                    mission: data,
-                }),
-                {
-                    loading: 'Chargement...',
-                    success: 'Mission créée avec succès.',
-                    error: 'Erreur lors de la création.',
-                },
-            );
-        } catch (err) {
-            const error = err as AxiosError<ApiError>;
-            setMissionError(error.response?.data.message ?? 'Erreur lors de la création.');
-        }
+
+        await toastMutation(
+            createMissionMutation.mutateAsync({
+                eventId: event.id,
+                mission: data,
+            }),
+            {
+                loading: 'Chargement...',
+                success: 'Mission créée avec succès.',
+                error: 'Erreur lors de la création.',
+            },
+        );
     };
 
     // --- Delete event ---
@@ -87,7 +80,6 @@ export function useEventDetails(event: EventDto) {
         isCreateMissionOpen,
         setIsCreateMissionOpen,
         createMissionMutation,
-        missionError,
         handleCreateMission,
         // Delete state
         isDeleteOpen,

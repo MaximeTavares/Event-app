@@ -14,7 +14,22 @@ export function toEventWithAddress(
         start_date: event.start_date,
         end_date: event.end_date,
         status: event.status,
-        address: event.Address,
+        // event.mapper.ts, ligne ~34
+        address: {
+            street_number: event.Address.street_number,
+            street_name: event.Address.street_name,
+            address_line_2: event.Address.address_line_2 ?? undefined,
+            city: event.Address.city,
+            postal_code: event.Address.postal_code,
+            country: event.Address.country,
+            coordinates:
+                event.Address.coordinates_lat && event.Address.coordinates_lon
+                    ? {
+                          lat: event.Address.coordinates_lat,
+                          lon: event.Address.coordinates_lon,
+                      }
+                    : undefined,
+        },
     };
 }
 
@@ -31,7 +46,22 @@ export function toEventDetails(
         start_date: event.start_date,
         end_date: event.end_date,
         status: event.status,
-        address: event.Address,
+        // event.mapper.ts, ligne ~34
+        address: {
+            street_number: event.Address.street_number,
+            street_name: event.Address.street_name,
+            address_line_2: event.Address.address_line_2 ?? undefined,
+            city: event.Address.city,
+            postal_code: event.Address.postal_code,
+            country: event.Address.country,
+            coordinates:
+                event.Address.coordinates_lat && event.Address.coordinates_lon
+                    ? {
+                          lat: event.Address.coordinates_lat,
+                          lon: event.Address.coordinates_lon,
+                      }
+                    : undefined,
+        },
 
         missions: event.Mission.map((m) => ({
             id: m.id,

@@ -1,6 +1,6 @@
-import { AddressDto } from "../address/address.types.js";
 import { MissionDetailsDto, MissionDto } from "../mission/mission.type.js";
 import { SlotDto } from "../slot/slot.types.js";
+import { AddressDto } from "@app/contracts";
 
 export const EVENT_STATUS = ["OPEN", "CANCELLED", "DRAFT", "CLOSED"] as const;
 export type EventStatus = (typeof EVENT_STATUS)[number];
@@ -56,3 +56,58 @@ export class PaginatedEventsDto {
 export interface EventMissionDto extends MissionDto {
 	slots: SlotDto[];
 }
+
+export interface CreateEventInput {
+	title: string;
+	description: string;
+	program: string;
+	start_date: string;
+	end_date: string;
+	address: AddressDto;
+	status: EventStatus;
+}
+
+export interface UpdateEventInput {
+	title?: string;
+	description?: string;
+	program?: string;
+	start_date?: string;
+	end_date?: string;
+	address?: AddressDto;
+	status?: EventStatus;
+}
+
+export interface EventApiResponse {
+	id: number;
+	title: string;
+	description: string;
+	program: string;
+	start_date: Date;
+	end_date: Date;
+	organizer_id: string;
+	address: {
+		street_name: string;
+		street_number: string;
+		address_line_2?: string;
+		city: string;
+		country: string;
+		postal_code: string;
+		coordinates_lat: number;
+		coordinates_lon: number;
+	};
+	status: EventStatus;
+}
+
+// Type pagination générique
+export interface Paginated<T> {
+	items: T[];
+	total: number;
+	page: number;
+	limit: number;
+}
+
+// Type attendu depuis le backend
+export type PaginatedEventsApiResponse = Paginated<EventApiResponse>;
+
+// type frontend paginé
+export type PaginatedEvents = Paginated<EventWithAddress>;

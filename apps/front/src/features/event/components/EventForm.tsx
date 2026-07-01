@@ -1,8 +1,4 @@
 import { useForm, Controller } from 'react-hook-form';
-import {
-    eventCreationSchema,
-    type EventCreationFormValues,
-} from '../validation/eventCreation.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -18,7 +14,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { eventStatusLabel, eventStatusOptions } from '@app/contracts';
+import {
+    EventCreationFormValues,
+    eventCreationSchema,
+    eventStatusLabel,
+    eventStatusOptions,
+} from '@app/contracts';
 
 type EventFormProps = {
     onSubmit: (data: EventCreationFormValues) => Promise<void>;

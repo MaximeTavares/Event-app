@@ -1,6 +1,5 @@
 import { SlotDetails, SlotFormValues } from '@app/contracts';
 import { api } from '../../../shared/utils/axios-client';
-import type { BaseSlot } from '../types/slot.type';
 
 export class SlotApi {
     static async getSlotById(slotId: number) {
@@ -9,12 +8,12 @@ export class SlotApi {
     }
 
     static async createSlot(missionId: number, slot: SlotFormValues) {
-        const { data } = await api.post<BaseSlot>(`/missions/${missionId}/slots`, slot);
+        const { data } = await api.post<void>(`/missions/${missionId}/slots`, slot);
         return data;
     }
 
     static async updateSlot(slotId: number, slot: SlotFormValues) {
-        const { data } = await api.patch<BaseSlot>(`/slots/${slotId}`, slot);
+        const { data } = await api.patch<void>(`/slots/${slotId}`, slot);
         return data;
     }
 
