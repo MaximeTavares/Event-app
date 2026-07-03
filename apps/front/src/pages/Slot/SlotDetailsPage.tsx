@@ -1,17 +1,17 @@
 import { useParams } from 'react-router';
 import { useGetSlot } from '../../features/mission_slot/hooks/use_slot.service';
 import { SlotDetailsComponent } from '../../features/mission_slot/components/SlotDetails';
-import { ErrorAlert } from '../../shared/components/UI/states/ErrorAlert';
-import { SkeletonLoading } from '../../shared/components/UI/states/SkeletonLoading';
+import { AlertColors } from '@/components/alert-colors';
+import { LoadingPage } from '@/components/loading-page';
 
 export function SlotDetailsPage() {
     const { slotId } = useParams<{ slotId: string }>();
 
     const { data: slot, isLoading, isError } = useGetSlot(Number(slotId));
 
-    if (isLoading) return <SkeletonLoading />;
+    if (isLoading) return <LoadingPage />;
 
-    if (isError) return <ErrorAlert message={"Cette ressource n'existe pas."} />;
+    if (isError || !slot) return <AlertColors />;
 
     if (slot) return <SlotDetailsComponent slot={slot} />;
 }

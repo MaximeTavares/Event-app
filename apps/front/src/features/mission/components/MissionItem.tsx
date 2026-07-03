@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Flex } from '@/components/layout/flex';
 import { ArrowRightIcon } from 'lucide-react';
+import { useIsConnected } from '@/features/auth/hooks/useIsConnected';
 
 type MissionItemProps = {
     mission: MissionDetailsDto;
@@ -13,6 +14,7 @@ type MissionItemProps = {
 
 export function MissionItem({ mission }: Readonly<MissionItemProps>) {
     const navigate = useNavigate();
+    const isConnected = useIsConnected();
 
     return (
         <Card className="group transition-shadow hover:shadow-sm">
@@ -25,15 +27,17 @@ export function MissionItem({ mission }: Readonly<MissionItemProps>) {
                         </Badge>
                     </Flex>
 
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-                        onClick={() => navigate(`/missions/${mission.id}`)}
-                        aria-label="Voir le détail de la mission"
-                    >
-                        <ArrowRightIcon className="h-4 w-4" />
-                    </Button>
+                    {isConnected && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                            onClick={() => navigate(`/missions/${mission.id}`)}
+                            aria-label="Voir le détail de la mission"
+                        >
+                            <ArrowRightIcon className="h-4 w-4" />
+                        </Button>
+                    )}
                 </Flex>
 
                 <p className="text-sm text-muted-foreground">{mission.description}</p>
