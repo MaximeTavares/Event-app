@@ -48,7 +48,9 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
             <Card>
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">Créer un compte</CardTitle>
-                    <CardDescription>Entez vos informations pour créer un compte</CardDescription>
+                    <CardDescription>
+                        Renseignez vos informations pour créer un compte
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)}>
