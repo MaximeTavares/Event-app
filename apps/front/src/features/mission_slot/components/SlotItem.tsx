@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Flex } from '@/components/layout/flex';
 import { UsersIcon, CalendarIcon } from 'lucide-react';
+import { useIsConnected } from '@/features/auth/hooks/useIsConnected';
 
 type SlotItemProps = {
     slot: SlotDto;
@@ -41,7 +42,13 @@ export function SlotItem({ slot, eventId, missionId }: Readonly<SlotItemProps>) 
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     const status = slot.participation_status ?? 'NONE';
-    const config = participationConfig[status];
+    const isFull = slot.status === 'FULL';
+    const config =
+        isFull && status === 'NONE'
+            ? { label: 'Complet', disabled: true }
+            : participationConfig[status];
+
+    const isConnected = useIsConnected();
 
     const participationMutation = useParticipateMutation(slot.id, eventId, missionId);
 
@@ -84,18 +91,21 @@ export function SlotItem({ slot, eventId, missionId }: Readonly<SlotItemProps>) 
                     </Flex>
 
                     {/* Actions */}
-                    <Flex justify="between" align="center" className="mt-1">
-                        <Button variant="ghost" size="sm" asChild>
-                            <Link to={`/slots/${slot.id}`}>Voir le détail</Link>
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={() => setIsConfirmOpen(true)}
-                            disabled={config.disabled}
-                        >
-                            {config.label}
-                        </Button>
-                    </Flex>
+
+                    {isConnected && (
+                        <Flex justify="between" align="center" className="mt-1">
+                            <Button variant="ghost" size="sm" asChild>
+                                <Link to={`/slots/${slot.id}`}>Voir le détail</Link>
+                            </Button>
+                            <Button
+                                size="sm"
+                                onClick={() => setIsConfirmOpen(true)}
+                                disabled={config.disabled}
+                            >
+                                {config.label}
+                            </Button>
+                        </Flex>
+                    )}
                 </CardContent>
             </Card>
 

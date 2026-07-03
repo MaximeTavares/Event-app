@@ -12,7 +12,7 @@ export function useSignin() {
         mutationFn: (payload: LoginRequestDto) => AuthApi.signin(payload),
         onSuccess: async (res) => {
             setAccessToken(res.accessToken);
-            await queryClient.invalidateQueries({ queryKey: queryKeys.me });
+            await queryClient.invalidateQueries();
         },
     });
 }
@@ -25,7 +25,7 @@ export function useGoogleSignin() {
         mutationFn: (payload: { code: string }) => AuthApi.googleSignin(payload.code),
         onSuccess: async (res) => {
             setAccessToken(res.accessToken);
-            await queryClient.invalidateQueries({ queryKey: queryKeys.me });
+            await queryClient.invalidateQueries();
         },
     });
 }
@@ -63,7 +63,7 @@ export function useSignout() {
             // Clear all cached data
             queryClient.clear();
             // 3. force UX clean state
-            globalThis.location.href = '/auth/signin';
+            globalThis.location.href = '/';
         },
     });
 }

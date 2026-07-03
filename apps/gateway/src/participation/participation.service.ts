@@ -353,7 +353,7 @@ export class ParticipationService {
         // une seule fonction qui vérifie À LA FOIS le rôle ET l'état de départ
         transition.guard(userId, participation);
 
-        return tx.participation.update({
+        const updated = await tx.participation.update({
             where: { id: participationId },
             data: {
                 status: transition.toStatus,
@@ -362,6 +362,12 @@ export class ParticipationService {
             },
             ...participationQuery,
         });
+
+        if (action === 'ACCEPT' || action === 'CANCEL') {
+            await this.syncSlotStatus(tx, participation.slotId);
+        }
+
+        return updated;
     }
 
     async findWithContextOrThrow(
@@ -373,6 +379,7 @@ export class ParticipationService {
             select: {
                 user_id: true,
                 status: true,
+                slot_id: true,
                 Slot: {
                     select: {
                         Mission: {
@@ -393,9 +400,33 @@ export class ParticipationService {
         return {
             userId: participation.user_id,
             status: participation.status,
+            slotId: participation.slot_id,
             event: {
                 organizerId: participation.Slot.Mission.Event.organizer_id,
             },
         };
+    }
+
+    private async syncSlotStatus(tx: Prisma.TransactionClient, slotId: number) {
+        const slot = await tx.slot.findUniqueOrThrow({
+            where: { id: slotId },
+            select: { max_participant: true, status: true },
+        });
+
+        if (slot.status === 'CLOSED' || slot.status === 'CANCELLED') return;
+
+        const acceptedCount = await tx.participation.count({
+            where: { slot_id: slotId, status: 'ACCEPTED' },
+        });
+
+        const shouldBeFull = acceptedCount >= slot.max_participant;
+        const newStatus = shouldBeFull ? 'FULL' : 'OPEN';
+
+        if (newStatus !== slot.status) {
+            await tx.slot.update({
+                where: { id: slotId },
+                data: { status: newStatus },
+            });
+        }
     }
 }
