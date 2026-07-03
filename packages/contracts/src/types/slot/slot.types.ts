@@ -12,7 +12,7 @@ export const slotStatusLabel: Record<SlotStatus, string> = {
 
 export const slotStatusColor: Record<SlotStatus, string> = {
 	OPEN: "bg-green-100 text-green-800 border-green-200",
-	FULL: "bg-blue-100 text-blue-800 border-blue-200",
+	FULL: "bg-zinc-100 text-zinc-800 border-zinc-200",
 	CANCELLED: "bg-red-100 text-red-800 border-red-200",
 	CLOSED: "bg-red-100 text-red-800 border-red-200",
 };
