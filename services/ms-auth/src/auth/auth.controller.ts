@@ -1,7 +1,6 @@
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserService } from 'src/users/user.service';
 import {
     AUTH_SUBJECTS,
     ChangePasswordDto,
@@ -13,10 +12,7 @@ import {
 
 @Controller()
 export class AuthController {
-    constructor(
-        private readonly authService: AuthService,
-        private readonly userService: UserService,
-    ) {}
+    constructor(private readonly authService: AuthService) {}
 
     @MessagePattern(AUTH_SUBJECTS.SIGNUP)
     signup(data: SignupRequestDto): Promise<{ success: true }> {

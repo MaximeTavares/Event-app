@@ -50,5 +50,11 @@ export default function createNestConfig(tsconfigRootDir) {
 				"@typescript-eslint/no-floating-promises": "warn",
 			},
 		},
+		{
+			files: ["**/*.spec.ts"],
+			rules: {
+				"@typescript-eslint/no-floating-promises": "off",
+			},
+		},
 	]);
 }
