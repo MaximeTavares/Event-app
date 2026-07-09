@@ -19,5 +19,5 @@ export * from "./types/mission/mission.type.js";
 export * from "./types/mission/mission.contracts.js";
 export * from "./types/event/event.types.js";
 export * from "./types/event/event.contracts.js";
-export * from "./types/address/address.types.js";
+// export * from "./types/address/address.types.js";
 export * from "./types/participation/participant.types.js";
