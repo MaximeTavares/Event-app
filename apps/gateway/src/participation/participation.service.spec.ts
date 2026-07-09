@@ -1,0 +1,435 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+import { prisma } from '@app/db';
+import { ParticipationService } from './participation.service';
+
+jest.mock('@app/db', () => ({
+    prisma: {
+        participation: {
+            findMany: jest.fn(),
+            findUnique: jest.fn(),
+            groupBy: jest.fn(),
+        },
+        $transaction: jest.fn(),
+    },
+}));
+
+describe('ParticipationService', () => {
+    let service: ParticipationService;
+    const mockPrisma = prisma as any;
+
+    beforeEach(() => {
+        service = new ParticipationService();
+        jest.clearAllMocks();
+    });
+
+    describe('findOne', () => {
+        it('should return the participation when found', async () => {
+            mockPrisma.participation.findUnique.mockResolvedValue({
+                id: 1,
+                status: 'PENDING',
+            } as any);
+
+            const result = await service.findOne(1);
+
+            expect(mockPrisma.participation.findUnique).toHaveBeenCalledWith({
+                where: { id: 1 },
+            });
+            expect(result).toEqual({ id: 1, status: 'PENDING' });
+        });
+
+        it('should throw NotFoundException when not found', async () => {
+            mockPrisma.participation.findUnique.mockResolvedValue(null);
+
+            await expect(service.findOne(999)).rejects.toThrow(
+                'Participation not found',
+            );
+        });
+    });
+
+    describe('findAll', () => {
+        it('should return all participations', async () => {
+            mockPrisma.participation.findMany.mockResolvedValue([
+                { id: 1 },
+                { id: 2 },
+            ] as any);
+
+            const result = await service.findAll();
+
+            expect(result).toEqual([{ id: 1 }, { id: 2 }]);
+        });
+    });
+
+    describe('getMyParticipations', () => {
+        it('should return participations for the user', async () => {
+            mockPrisma.participation.findMany.mockResolvedValue([
+                { id: 1, user_id: 'user1' },
+            ] as any);
+
+            const result = await service.getMyParticipations('user1');
+
+            expect(mockPrisma.participation.findMany).toHaveBeenCalledWith({
+                where: { user_id: 'user1' },
+            });
+            expect(result).toEqual([{ id: 1, user_id: 'user1' }]);
+        });
+
+        it('should throw NotFoundException when user has no participations', async () => {
+            mockPrisma.participation.findMany.mockResolvedValue([]);
+
+            await expect(service.getMyParticipations('user1')).rejects.toThrow(
+                "You don't have any participations",
+            );
+        });
+    });
+
+    describe('getMySlots', () => {
+        it('should return slots with computed participant counts', async () => {
+            mockPrisma.participation.findMany.mockResolvedValue([
+                {
+                    Slot: {
+                        id: 1,
+                        mission_id: 10,
+                        start_at: new Date('2026-01-01'),
+                        end_at: new Date('2026-01-02'),
+                        max_participant: 5,
+                        status: 'OPEN',
+                        Mission: { Event: { organizer_id: 'organizer1' } },
+                        Participation: [
+                            { user_id: 'user1', status: 'ACCEPTED' },
+                        ],
+                    },
+                },
+            ] as any);
+
+            mockPrisma.participation.groupBy.mockResolvedValue([
+                { slot_id: 1, _count: { slot_id: 3 } },
+            ] as any);
+
+            const result = await service.getMySlots('user1');
+
+            expect(mockPrisma.participation.groupBy).toHaveBeenCalledWith({
+                by: ['slot_id'],
+                where: { slot_id: { in: [1] }, status: 'ACCEPTED' },
+                _count: { slot_id: true },
+            });
+
+            expect(result).toEqual([
+                expect.objectContaining({
+                    id: 1,
+                    current_participants: 3,
+                    available_place: 2,
+                    is_participating: true,
+                }),
+            ]);
+        });
+
+        it('should throw NotFoundException when user has no slots', async () => {
+            mockPrisma.participation.findMany.mockResolvedValue([]);
+
+            await expect(service.getMySlots('user1')).rejects.toThrow(
+                'No participations found',
+            );
+        });
+    });
+
+    describe('getMyMissions', () => {
+        it('should return unique missions from participations', async () => {
+            mockPrisma.participation.findMany.mockResolvedValue([
+                {
+                    Slot: {
+                        Mission: {
+                            id: 1,
+                            event_id: 10,
+                            title: 'Mission A',
+                            description: 'desc',
+                            status: 'OPEN',
+                            Event: { organizer_id: 'organizer1' },
+                        },
+                    },
+                },
+                {
+                    Slot: {
+                        Mission: {
+                            id: 1,
+                            event_id: 10,
+                            title: 'Mission A',
+                            description: 'desc',
+                            status: 'OPEN',
+                            Event: { organizer_id: 'organizer1' },
+                        },
+                    },
+                },
+            ]);
+
+            const result = await service.getMyMissions('user1');
+
+            expect(result).toHaveLength(1);
+        });
+
+        it('should throw NotFoundException when user has no missions', async () => {
+            mockPrisma.participation.findMany.mockResolvedValue([]);
+
+            await expect(service.getMyMissions('user1')).rejects.toThrow(
+                "You don't have any participations",
+            );
+        });
+    });
+
+    describe('getMyEvents', () => {
+        it('should return unique events from participations', async () => {
+            mockPrisma.participation.findMany.mockResolvedValue([
+                {
+                    Slot: {
+                        Mission: {
+                            Event: { id: 1, title: 'Event A' },
+                        },
+                    },
+                },
+            ]);
+
+            const result = await service.getMyEvents('user1');
+
+            expect(result).toHaveLength(1);
+            expect(result[0]).toEqual(
+                expect.objectContaining({ id: 1, title: 'Event A' }),
+            );
+        });
+
+        it('should throw NotFoundException when user has no events', async () => {
+            mockPrisma.participation.findMany.mockResolvedValue([]);
+
+            await expect(service.getMyEvents('user1')).rejects.toThrow(
+                "You don't have any participations",
+            );
+        });
+    });
+
+    describe('create', () => {
+        let mockTx: any;
+
+        beforeEach(() => {
+            mockTx = {
+                slot: {
+                    findUnique: jest.fn(),
+                },
+                participation: {
+                    count: jest.fn(),
+                    findUnique: jest.fn(),
+                    update: jest.fn(),
+                    create: jest.fn(),
+                },
+            };
+
+            mockPrisma.$transaction.mockImplementation(
+                async (callback: any) => await callback(mockTx),
+            );
+        });
+
+        it('should create a new participation when slot exists and user can join', async () => {
+            mockTx.slot.findUnique.mockResolvedValue({
+                id: 1,
+                status: 'OPEN',
+                max_participant: 5,
+            });
+            mockTx.participation.count.mockResolvedValue(2);
+            mockTx.participation.findUnique.mockResolvedValue(null);
+            mockTx.participation.create.mockResolvedValue({
+                id: 1,
+                user_id: 'user1',
+                slot_id: 1,
+                status: 'PENDING',
+            });
+
+            const result = await service.create('user1', 1);
+
+            expect(mockTx.participation.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    data: { user_id: 'user1', slot_id: 1, status: 'PENDING' },
+                }),
+            );
+            expect(result).toEqual(
+                expect.objectContaining({ id: 1, status: 'PENDING' }),
+            );
+        });
+
+        it('should throw NotFoundException when slot does not exist', async () => {
+            mockTx.slot.findUnique.mockResolvedValue(null);
+
+            await expect(service.create('user1', 999)).rejects.toThrow(
+                'Slot not found',
+            );
+        });
+
+        it('should throw BadRequestException when slot is full', async () => {
+            mockTx.slot.findUnique.mockResolvedValue({
+                id: 1,
+                status: 'FULL',
+                max_participant: 5,
+            });
+            mockTx.participation.count.mockResolvedValue(5);
+            mockTx.participation.findUnique.mockResolvedValue(null);
+
+            await expect(service.create('user1', 1)).rejects.toThrow();
+
+            expect(mockTx.participation.create).not.toHaveBeenCalled();
+        });
+
+        it('should update (rejoin) when existing participation is CANCELLED', async () => {
+            mockTx.slot.findUnique.mockResolvedValue({
+                id: 1,
+                status: 'OPEN',
+                max_participant: 5,
+            });
+            mockTx.participation.count.mockResolvedValue(2);
+            mockTx.participation.findUnique.mockResolvedValue({
+                status: 'CANCELLED',
+            });
+            mockTx.participation.update.mockResolvedValue({
+                id: 1,
+                status: 'PENDING',
+            });
+
+            await service.create('user1', 1);
+
+            expect(mockTx.participation.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    data: expect.objectContaining({ status: 'PENDING' }),
+                }),
+            );
+            expect(mockTx.participation.create).not.toHaveBeenCalled();
+        });
+
+        it('should throw ConflictException when already registered (not cancelled)', async () => {
+            mockTx.slot.findUnique.mockResolvedValue({
+                id: 1,
+                status: 'OPEN',
+                max_participant: 5,
+            });
+            mockTx.participation.count.mockResolvedValue(2);
+            mockTx.participation.findUnique.mockResolvedValue({
+                status: 'PENDING',
+            });
+
+            await expect(service.create('user1', 1)).rejects.toThrow(
+                'Already registered',
+            );
+        });
+    });
+
+    describe('transition', () => {
+        let mockTx: any;
+
+        beforeEach(() => {
+            mockTx = {
+                participation: {
+                    findUnique: jest.fn(),
+                    update: jest.fn(),
+                    count: jest.fn(),
+                },
+                slot: {
+                    findUniqueOrThrow: jest.fn(),
+                    update: jest.fn(),
+                },
+            };
+
+            mockPrisma.$transaction.mockImplementation(
+                async (callback: any) => await callback(mockTx),
+            );
+        });
+
+        it('should accept a participation when organizer accepts a pending one', async () => {
+            mockTx.participation.findUnique.mockResolvedValue({
+                user_id: 'applicant1',
+                status: 'PENDING',
+                slot_id: 1,
+                Slot: { Mission: { Event: { organizer_id: 'organizer1' } } },
+            });
+            mockTx.participation.update.mockResolvedValue({
+                id: 1,
+                status: 'ACCEPTED',
+            });
+            mockTx.slot.findUniqueOrThrow.mockResolvedValue({
+                max_participant: 5,
+                status: 'OPEN',
+            });
+            mockTx.participation.count.mockResolvedValue(1);
+
+            const result = await service.transition('organizer1', 1, 'ACCEPT');
+
+            expect(mockTx.participation.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: { id: 1 },
+                    data: expect.objectContaining({ status: 'ACCEPTED' }),
+                }),
+            );
+            expect(result).toEqual(
+                expect.objectContaining({ id: 1, status: 'ACCEPTED' }),
+            );
+        });
+
+        it('should throw NotFoundException when participation does not exist', async () => {
+            mockTx.participation.findUnique.mockResolvedValue(null);
+
+            await expect(
+                service.transition('user1', 999, 'ACCEPT'),
+            ).rejects.toThrow('Participation not found');
+        });
+
+        it('should throw ForbiddenException when non-organizer tries to accept', async () => {
+            mockTx.participation.findUnique.mockResolvedValue({
+                user_id: 'applicant1',
+                status: 'PENDING',
+                slot_id: 1,
+                Slot: { Mission: { Event: { organizer_id: 'organizer1' } } },
+            });
+
+            await expect(
+                service.transition('someoneElse', 1, 'ACCEPT'),
+            ).rejects.toThrow();
+
+            expect(mockTx.participation.update).not.toHaveBeenCalled();
+        });
+
+        it('should sync slot status to FULL after accepting the last spot', async () => {
+            mockTx.participation.findUnique.mockResolvedValue({
+                user_id: 'applicant1',
+                status: 'PENDING',
+                slot_id: 1,
+                Slot: { Mission: { Event: { organizer_id: 'organizer1' } } },
+            });
+            mockTx.participation.update.mockResolvedValue({
+                id: 1,
+                status: 'ACCEPTED',
+            });
+            mockTx.slot.findUniqueOrThrow.mockResolvedValue({
+                max_participant: 1,
+                status: 'OPEN',
+            });
+            mockTx.participation.count.mockResolvedValue(1);
+
+            await service.transition('organizer1', 1, 'ACCEPT');
+
+            expect(mockTx.slot.update).toHaveBeenCalledWith({
+                where: { id: 1 },
+                data: { status: 'FULL' },
+            });
+        });
+
+        it('should not sync slot status for REJECT action', async () => {
+            mockTx.participation.findUnique.mockResolvedValue({
+                user_id: 'applicant1',
+                status: 'PENDING',
+                slot_id: 1,
+                Slot: { Mission: { Event: { organizer_id: 'organizer1' } } },
+            });
+            mockTx.participation.update.mockResolvedValue({
+                id: 1,
+                status: 'REJECTED',
+            });
+
+            await service.transition('organizer1', 1, 'REJECT');
+
+            expect(mockTx.slot.findUniqueOrThrow).not.toHaveBeenCalled();
+        });
+    });
+});
