@@ -18,7 +18,7 @@ export class User {
     @Prop()
     password?: string;
 
-    @Prop({ default: 'USER' })
+    @Prop({ type: String, default: 'USER' })
     role: Role;
 
     @Prop({

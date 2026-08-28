@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "isolatedModules": true,
     "outDir": "./dist",
-    "types": ["node"],
+    "types": ["node", "jest"],
     "baseUrl": ".",
     "rootDir": ".",
     "composite": true,
@@ -10,6 +11,6 @@
   },
   "references": [{ "path": "../../packages/contracts"}],
 
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "tsconfig.spec.json"],
   "exclude": ["dist", "node_modules"]
 }

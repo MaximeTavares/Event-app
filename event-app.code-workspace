@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+    ],
+    "settings": {
+        "js/ts.tsdk.path": "node_modules/typescript/lib",
+        "conventionalCommits.scopes": [
+            "Config",
+            "Front",
+            "Gateway",
+            "Contracts",
+            "Ms-auth",
+            "Infra"
+        ]
+    }
+}
