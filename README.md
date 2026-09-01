@@ -2,6 +2,8 @@
 
 Event and volunteer management platform. Organize events, break them down into missions and time slots, manage user availability, and let people register for slots.
 
+Part of the [H.E.L.P organization](https://github.com/help-platform-event) - see also [`ms-auth-java`](https://github.com/help-platform-event/ms-auth-java), a Java/Spring Boot rewrite of the auth service (private, local dev).
+
 Staging: https://staging-mt-event-app.duckdns.org/ - this staging instance is a V1 prototype and won't evolve further, due to the constraints of the current AWS server.
 
 ## Architecture
@@ -14,11 +16,7 @@ Monorepo (pnpm + Turborepo) with two NestJS microservices communicating over NAT
 | `ms-auth` | Auth (JWT, refresh tokens, Google OAuth) | MongoDB (Mongoose) | 3001 |
 | `frontend` | React + TypeScript SPA | - | 5173 |
 
-`gateway` and `ms-auth` currently communicate over NATS (request/reply). Shared TypeScript/Zod contracts live in `packages/contracts`.
-
-**In progress - `ms-auth` rewrite:** moving from NestJS/MongoDB to Java Spring Boot with MySQL (JPA/Hibernate), and switching the gateway ↔ ms-auth communication from NATS to Kafka. NATS is dropped for now, since that link is currently the only inter-service communication in the system. The existing Jest test suite is used as the behavioral spec for the rewrite.
-
-A Java Spring Boot service (notifications + PDF generation, GraalVM native image) is also in progress. It may end up merged into the new `ms-auth` rather than staying a separate service - still being decided.
+`gateway` and `ms-auth` communicate over NATS (request/reply). Shared TypeScript/Zod contracts live in `packages/contracts`.
 
 CI/CD: GitHub Actions, Docker images pushed to GHCR, atomic deploy on a single AWS EC2 instance.
 
@@ -63,10 +61,9 @@ docker compose down -v
 ## Stack
 
 - **Backend:** NestJS, TypeScript, Prisma, Mongoose, NATS
-- **Java:** Spring Boot, JPA/Hibernate, Kafka, GraalVM native image
 - **Frontend:** React, TypeScript, TanStack Query, shadcn/ui
 - **Infra:** Docker, GitHub Actions, AWS EC2
 
 ## Status
 
-Active development. Current focus: rewriting `ms-auth` in Java and deciding whether the notification system gets built into it. WebSocket chat is deprioritized for now.
+Active development. This repo (`event-app`) holds the stable NestJS/React stack currently deployed. Auth is being rewritten in Java/Spring Boot in a separate repo - see [`ms-auth-java`](https://github.com/help-platform-event/ms-auth-java).
